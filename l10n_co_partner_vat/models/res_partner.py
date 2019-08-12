@@ -13,15 +13,24 @@ class ResPartner(models.Model):
     document_type_id = fields.Many2one(
         string = 'Document Type',
         comodel_name = 'res.partner.document.type')
+    document_type_code = fields.Char(
+            related='document_type_id.code',
+            store=False)
+    check_digit = fields.Char(string='Verification Digit', size=1)
     identification_document = fields.Char('Identification Document')
 
-    @api.onchange('country_id', 'identification_document')
+    @api.onchange('country_id', 'identification_document', 'check_digit', 'document_type_id')
     def _onchange_vat(self):
         if self.country_id and self.identification_document:
             if self.country_id.code:
-                self.vat = self.country_id.code + self.identification_document
+                if self.check_digit and self.document_type_code == '31':
+                    self.vat = self.country_id.code + self.identification_document + self.check_digit
+                else:
+                    self.check_digit = False
+                    self.vat = self.country_id.code + self.identification_document
             else:
-                self.vat = self.identification_document
+                msg = _('The Country has No ISO Code.')
+                raise ValidationError(msg)
 
     @api.constrains('vat', 'document_type_id', 'country_id')
     def check_vat(self):
