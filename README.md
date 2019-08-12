@@ -6,6 +6,7 @@
 # Columbia localisation
 
 [//]: # (addons)
+
 Available addons
 ----------------
 addon | version | summary
@@ -14,6 +15,7 @@ addon | version | summary
 [l10n_co_partner_isic](l10n_co_partner_isic/) | 10.0.1.0.0 | ISIC Codes - Classification of Economic Activities ISIC.
 [l10n_co_partner_vat](l10n_co_partner_vat/) | 10.0.1.0.0 | Module for Type of Identification Document and Colombian NIT Checking.
 [partner_other_names](partner_other_names/) | 10.0.1.0.0 | Have split first and other names.
+
 [//]: # (end addons)
 
 Translation Status
