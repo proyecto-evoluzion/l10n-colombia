@@ -54,8 +54,7 @@ class ResPartner(models.Model):
         """Write the 'name' according to splitted data."""
         for partner in self:
             partner.name = self._get_computed_name(
-                partner.firstname, partner.othernames, partner.lastname, partner.lastname2
-            )
+                partner.firstname, partner.othernames, partner.lastname, partner.lastname2)
 
     @api.model
     def _names_order_default(self):

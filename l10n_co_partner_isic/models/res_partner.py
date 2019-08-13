@@ -14,5 +14,4 @@ class ResPartner(models.Model):
         comodel_name = 'res.partner.isic',
         domain = [('type', '!=', 'view')],
         help = 'Uniform international industrial code (ISIC)',
-        ondelete = 'cascade'
-    )
+        ondelete = 'cascade')

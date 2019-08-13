@@ -15,6 +15,5 @@ Credits
 Contributors
 ------------
 
-* Joan Marín <https://github.com/joanodoo>
-
+* Joan Marín <https://github.com/joanmarin>
 * Guillermo Montoya <https://github.com/guillermm>

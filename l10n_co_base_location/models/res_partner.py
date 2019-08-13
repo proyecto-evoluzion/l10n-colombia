@@ -9,6 +9,4 @@ from odoo import models, fields
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    country_code = fields.Char(
-        related='country_id.code',
-        store=False)
+    country_code = fields.Char(related='country_id.code', store=False)
