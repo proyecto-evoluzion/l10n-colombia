@@ -21,7 +21,7 @@
         "partner_second_lastname"
     ],
     "data": [
-        "views/res_user_views.xml",
+        "views/res_users_views.xml",
         "views/res_partner_views.xml",
     ],
     "installable": True,
