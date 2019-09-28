@@ -58,7 +58,9 @@ class ResPartner(models.Model):
 
             vat_country, vat_number = self._split_vat(partner.vat)
 
-            if partner.country_id:
+            if self.document_type_code == '43':
+                vat_country = 'co'
+            elif partner.country_id:
                 vat_country = partner.country_id.code.lower()
 
             if not hasattr(self, 'check_vat_' + vat_country):
