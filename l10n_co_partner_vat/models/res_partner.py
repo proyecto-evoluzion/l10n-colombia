@@ -25,6 +25,9 @@ class ResPartner(models.Model):
             if self.country_id.code:
                 if self.check_digit and self.document_type_code == '31':
                     self.vat = self.country_id.code + self.identification_document + self.check_digit
+                elif self.document_type_code == '43':
+                    self.check_digit = False
+                    self.vat = 'CO' + self.identification_document
                 else:
                     self.check_digit = False
                     self.vat = self.country_id.code + self.identification_document
