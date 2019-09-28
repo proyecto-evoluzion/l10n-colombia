@@ -31,6 +31,8 @@ class ResPartner(models.Model):
             else:
                 msg = _('The Country has No ISO Code.')
                 raise ValidationError(msg)
+        elif not self.identification_document and self.vat:
+            self.vat = False
 
     @api.constrains('vat', 'document_type_id', 'country_id')
     def check_vat(self):
@@ -65,7 +67,7 @@ class ResPartner(models.Model):
                 if not _checking_required(partner):
                     continue
 
-            if not check(vat_number):
+            if check and not check(vat_number):
                 raise ValidationError(msg)
 
         return True
