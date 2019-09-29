@@ -7,6 +7,8 @@
             <field name="arch" type="xml">
                 <field name="use_date_range" position="after">
                     <field name="use_dian_control"/>
+                    <field name="dian_type"
+                        attrs="{'invisible': [('use_dian_control', '!=', True)], 'required': [('use_dian_control', '=', True)]}"/>
                 </field>
 
                 <field name="implementation" position="attributes">
@@ -21,22 +23,17 @@
                     <attribute name="attrs">{'invisible': [('use_dian_control', '=', True)]}</attribute>
                 </field>
 
+                <field name="padding" position="attributes">
+                    <attribute name="attrs">{'invisible': [('use_dian_control', '=', True)]}</attribute>
+                </field>
+
                 <field name="number_increment" position="attributes">
                     <attribute name="attrs">{'invisible': [('use_dian_control', '=', True)]}</attribute>
                     <attribute name="widget">char</attribute>
                 </field>
 
-                <field name="padding" position="attributes">
-                    <attribute name="attrs">{'invisible': [('use_dian_control', '=', True)]}</attribute>
-                </field>
-
-                <field name="number_increment" position="after">
-                    <field name="dian_type"
-                        attrs="{'invisible': [('use_dian_control', '!=', True)], 'required': [('use_dian_control', '=', True)]}"/>
-                </field>
-
                 <xpath expr="//page/group/group[1]" position="after">
-                    <group string="Warn From:"
+                    <group string="Warn From"
                         attrs="{'invisible': [('use_dian_control', '!=', True)]}">
                         <field name="remaining_numbers"
                             widget="char"
@@ -49,9 +46,9 @@
 
                 <field name="date_from" position="before">
                     <field name="use_dian_control" invisible="1"/>
+                    <field name="prefix" readonly="1"/>
                     <field name="resolution_number"
                         attrs="{'required': [('use_dian_control', '=', True)]}"/>
-                    <field name="prefix" readonly="1"/>
                 </field>
 
                 <field name="date_to" position="after">
