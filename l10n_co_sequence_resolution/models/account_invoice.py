@@ -12,28 +12,38 @@ class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
     @api.one
-    def _get_warn_remaining(self):
+    def _get_warn_resolution(self):
         warn_remaining = False
+        warn_inactive_resolution = False
 
         if self.journal_id.sequence_id.use_dian_control:
             remaining_numbers = self.journal_id.sequence_id.remaining_numbers
             remaining_days = self.journal_id.sequence_id.remaining_days
-            active_resolution = self.env['ir.sequence.date_range'].search([
+            date_range = self.env['ir.sequence.date_range'].search([
                 ('sequence_id', '=', self.journal_id.sequence_id.id),
                 ('active_resolution', '=', True)])
             today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
 
-            if len(active_resolution) == 1:
-                active_resolution.ensure_one()
-                date_to = datetime.strptime(active_resolution.date_to, '%Y-%m-%d')
+            if date_range:
+                date_range.ensure_one()
+                date_to = datetime.strptime(date_range.date_to, '%Y-%m-%d')
                 days = (date_to - today).days
-                numbers = active_resolution.number_to - active_resolution.number_next_actual
+                numbers = date_range.number_to - date_range.number_next_actual
 
                 if numbers < remaining_numbers or days < remaining_days:
                     warn_remaining = True
+            else:
+                warn_inactive_resolution = True
 
-        return warn_remaining
+        self.warn_inactive_resolution = warn_inactive_resolution
+        self.warn_remaining = warn_remaining
 
     warn_remaining = fields.Boolean(
-        string="Warn Remaining",
-        compute="_get_warn_remaining")
+        string="Warn About Remainings?",
+        compute="_get_warn_resolution",
+        store=False)
+    
+    warn_inactive_resolution = fields.Boolean(
+        string="Warn About Inactive Resolution?",
+        compute="_get_warn_resolution",
+        store=False)

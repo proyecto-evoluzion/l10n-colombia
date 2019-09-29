@@ -4,6 +4,8 @@
 # Copyright 2019 Joan Marín <Github@joanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import pytz
+from dateutil import tz
 from datetime import datetime
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -13,8 +15,7 @@ class IrSequence(models.Model):
     _inherit = 'ir.sequence'
 
     use_dian_control = fields.Boolean(
-        string='Use DIAN Control Resolutions',
-        default=False)
+        string='Use DIAN Resolutions Control?')
     remaining_numbers = fields.Integer(
         string='Remaining Numbers',
         default=False)
@@ -74,7 +75,11 @@ class IrSequence(models.Model):
             if sequence_id.number_increment != 1:
                 sequence_id.number_increment = 1
 
-            current_date = datetime.now().strftime('%Y-%m-%d')
+            timezone = pytz.timezone(self.env.user.tz or 'America/Bogota')
+            from_zone = tz.gettz('UTC')
+            to_zone = tz.gettz(timezone.zone)
+            current_date = datetime.now().replace(tzinfo=from_zone)
+            current_date = current_date.astimezone(to_zone).strftime('%Y-%m-%d')
 
             for date_range_id in sequence_id.date_range_ids:
                 number_next_actual = date_range_id.number_next_actual
@@ -93,15 +98,6 @@ class IrSequence(models.Model):
 
                 if not date_range_id.prefix:
                     date_range_id.prefix = sequence_id.prefix
-
-        return True
-
-    @api.model
-    def check_active_resolution_cron(self):
-        use_dian_control_sequences_ids = self.search([('use_dian_control', '=', True)])
-
-        for sequence_id in use_dian_control_sequences_ids:
-            sequence_id.check_active_resolution()
 
         return True
 
@@ -156,3 +152,17 @@ class IrSequence(models.Model):
 
             if _active_resolution == 0:
                 raise ValidationError(msg6)
+
+    def _next(self):
+        msg = _('There is no active authorized invoicing resolution.')
+        date_ranges = self.date_range_ids.search([('active_resolution', '=', True)])
+
+        if self.use_dian_control and not date_ranges:
+            raise ValidationError(msg)
+
+        res = super(IrSequence, self)._next()
+
+        if self.use_dian_control:
+            self.check_active_resolution()
+
+        return res
