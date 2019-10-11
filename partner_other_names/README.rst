@@ -38,5 +38,5 @@ Original Authors
 Contributors
 ------------
 
-* Joan Marín <https://github.com/joanmarin>
+* Joan Marín <https://github.com/JoanMarin>
 * Guillermo Montoya <https://github.com/guillermm>

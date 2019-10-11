@@ -14,6 +14,6 @@ Credits
 Contributors
 ------------
 
-* Joan Marín <https://github.com/joanmarin>
+* Joan Marín <https://github.com/JoanMarin>
 * Dominic Krimmer <https://github.com/dkrimmer84>
 * Luis Alfredo da Silva <luis.adasilvaf@gmail.com>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016 Dominic Krimmer
 # Copyright 2016 Luis Alfredo da Silva (luis.adasilvaf@gmail.com)
-# Copyright 2019 Joan Marín <Github@joanMarin>
+# Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
@@ -11,7 +11,7 @@
     "license": "AGPL-3",
     "website": "https://www.exaap.com",
     "author": "EXA Auto Parts Github@exaap, "
-              "Joan Marín Github@joanmarin, "
+              "Joan Marín Github@JoanMarin, "
               "Luis Alfredo da Silva, "
               "Dominic Krimmer, "
               "Plastinorte S.A.S",
