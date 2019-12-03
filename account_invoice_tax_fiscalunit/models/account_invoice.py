@@ -130,18 +130,3 @@ class AccountInvoice(models.Model):
                     remove_tax_groups_ids.append(tax_group_id)
 
         return remove_tax_groups_ids
-
-    @api.onchange('invoice_line_ids')
-    def _onchange_invoice_line_ids(self):
-        for invoice in self:
-            invoice.invoice_line_ids._recompute_tax_id()
-
-        super(AccountInvoice, self)._onchange_invoice_line_ids()
-    
-    @api.onchange('fiscal_position_id')
-    def fiscal_position_change(self):
-        res = super(AccountInvoice, self)._onchange_invoice_line_ids()
-        for invoice in self:
-            invoice.invoice_line_ids._recompute_tax_id()
-
-        return res
