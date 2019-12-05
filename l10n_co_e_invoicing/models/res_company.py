@@ -2,7 +2,7 @@
 # Copyright 2019 Joan Marín <Github@joanmarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import validators
+from validators import url
 from odoo import api, models, fields
 from odoo.exceptions import ValidationError
 
@@ -14,7 +14,6 @@ class ResCompany(models.Model):
     out_invoice_sent = fields.Integer(string='out_invoice Sent')
     out_refund_sent = fields.Integer(string='out_refund Sent')
     in_refund_sent = fields.Integer(string='in_refund Sent')
-    invoices_sent = fields.Integer(string='Invoices Sent')
     profile_execution_id = fields.Selection(
         [('1', 'Production'), ('2', 'Test')],
         'Destination Environment of Document',
@@ -35,5 +34,5 @@ class ResCompany(models.Model):
 
     @api.onchange('signature_policy_url')
     def onchange_signature_policy_url(self):
-        if not validators.url(self.signature_policy_url):
+        if not url(self.signature_policy_url):
             raise ValidationError('Invalid URL.')

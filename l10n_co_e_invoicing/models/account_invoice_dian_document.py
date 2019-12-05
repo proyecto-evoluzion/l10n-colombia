@@ -60,22 +60,27 @@ class AccountInvoiceDianDocument(models.Model):
         # Ejemplo de la décima primera factura del Facturador Electrónico con
         # NIT 800197268 con software propio para el año 2019.
         # Regla: el consecutivo se iniciará en “00000001” cada primero de enero.
+        out_invoice_sent = self.invoice_id.company_id.out_invoice_sent
+        out_refund_sent = self.invoice_id.company_id.out_refund_sent
+        in_refund_sent = self.invoice_id.company_id.in_refund_sent
+        zip_sent = out_invoice_sent + out_refund_sent + in_refund_sent
+
         if self.invoice_id.type == 'out_invoice':
             xml_filename_prefix = 'fv'
-            dddddddd = str(self.invoice_id.company_id.out_invoice_sent + 1).zfill(8)
+            dddddddd = str(out_invoice_sent + 1).zfill(8)
         elif self.invoice_id.type == 'out_refund':
             xml_filename_prefix = 'nc'
-            dddddddd = str(self.invoice_id.company_id.out_refund_sent + 1).zfill(8)
+            dddddddd = str(out_refund_sent + 1).zfill(8)
         elif self.invoice_id.type == 'in_refund':
             xml_filename_prefix = 'nd'
-            dddddddd = str(self.invoice_id.company_id.in_refund_sent + 1).zfill(8)
+            dddddddd = str(in_refund_sent + 1).zfill(8)
         #pendiente
         #arnnnnnnnnnnpppaadddddddd.xml
         #adnnnnnnnnnnpppaadddddddd.xml
         else:
             raise ValidationError("ERROR: TODO")
 
-        zdddddddd = str(self.invoice_id.company_id.invoices_sent + 1).zfill(8)
+        zdddddddd = str(zip_sent + 1).zfill(8)
         nnnnnnnnnnpppaadddddddd = nnnnnnnnnn + ppp + aa + dddddddd
         znnnnnnnnnnpppaadddddddd = nnnnnnnnnn + ppp + aa + zdddddddd
 
@@ -187,7 +192,7 @@ class AccountInvoiceDianDocument(models.Model):
     def _get_xml_file(self):
         xml_without_signature = global_functions.get_template_xml(
             self._get_xml_values(),
-            'generic_invoice')
+            'Invoice')
         xml_with_signature = global_functions.get_xml_with_signature(
             xml_without_signature,
             self.invoice_id.company_id.signature_policy_url,
