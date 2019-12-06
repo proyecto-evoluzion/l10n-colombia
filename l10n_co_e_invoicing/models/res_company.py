@@ -3,7 +3,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from validators import url
-from odoo import api, models, fields
+from global_functions import get_pkcs12
+from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 
 
@@ -35,4 +36,11 @@ class ResCompany(models.Model):
     @api.onchange('signature_policy_url')
     def onchange_signature_policy_url(self):
         if not url(self.signature_policy_url):
-            raise ValidationError('Invalid URL.')
+            raise ValidationError(_('Invalid URL.'))
+
+    @api.multi
+    def write(self, vals):
+        rec = super(ResCompany, self).write(vals)
+        get_pkcs12(self.certificate_file, self.certificate_password)
+
+        return rec

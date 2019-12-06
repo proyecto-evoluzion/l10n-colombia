@@ -22,6 +22,13 @@
         "l10n_co_sequence_resolution",
         "base_iso3166",
     ],
+    'external_dependencies': {
+        'python': [
+            'validators',
+            'pyopenssl',
+            'xades',
+        ],
+    },
     "data": [
         'security/ir.model.access.csv',
         "views/account_invoice_views.xml",
