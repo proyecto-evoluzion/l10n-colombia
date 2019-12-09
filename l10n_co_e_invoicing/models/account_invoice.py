@@ -20,9 +20,12 @@ class AccountInvoice(models.Model):
 
         if self.company_id.einvoicing_enabled:
             dian_document_obj = self.env['account.invoice.dian.document']
-            dian_document = dian_document_obj.create({'invoice_id': self.id})
+            dian_document = dian_document_obj.create({
+                'invoice_id': self.id,
+                'company_id': self.company_id.id})
             dian_document.set_files()
-            #einv.action_post_validate()
+            dian_document.sent_zipped_file()
+            dian_document.GetStatusZip()
 
         return res
 

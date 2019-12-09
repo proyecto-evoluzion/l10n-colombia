@@ -175,7 +175,7 @@ def get_xml_with_signature(
 
     #https://www.decalage.info/en/python/lxml-c14n
     output = StringIO()
-    root.getroottree().write_c14n(output)
+    root.getroottree().write_c14n(output)#, exclusive=1, with_comments=0
     root = output.getvalue()
 
     return root
