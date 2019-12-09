@@ -22,7 +22,7 @@
                     <header>
                         <field name="state"
                             widget="statusbar"
-                            statusbar_visible="draft,sent,cancel"/>
+                            statusbar_visible="draft,sent,done,cancel"/>
                         <button name="set_files"
                             string="Set Files"
                             type="object"
@@ -36,13 +36,14 @@
                         <button name="GetStatusZip"
                             string="GetStatusZip"
                             type="object"
-                            states="draft"
+                            states="sent"
                             class="btn-primary"/>
                     </header>
                     <sheet>
                         <group>
                             <group string="Invoice">
-                                <field name="invoice_id" readonly="0"/>
+                                <field name="invoice_id" readonly="1"/>
+                                <field name="company_id" invisible="1"/>
                             </group>
                             <group string="Files">
                                 <field name="xml_filename" invisible="1"/>
@@ -62,6 +63,9 @@
                                 <field name="software_security_code_uncoded" readonly="1"/>
                                 <field name="software_security_code" readonly="1"/>
                                 <field name="zip_key" readonly="1"/>
+                            </group>
+                            <group string="GetStatusZip">
+                                <field name="get_status_zip_status_code" readonly="1"/>
                                 <field name="get_status_zip_response" readonly="1"/>
                             </group>
                         </group>
