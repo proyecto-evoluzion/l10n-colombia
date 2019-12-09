@@ -47,7 +47,12 @@ class AccountInvoiceDianDocument(models.Model):
     def _set_filenames(self):
         #nnnnnnnnnn: NIT del Facturador Electrónico sin DV, de diez (10) dígitos
         # alineados a la derecha y relleno con ceros a la izquierda.
-        nnnnnnnnnn = self.invoice_id.company_id.partner_id.identification_document.zfill(10)
+        if self.invoice_id.company_id.partner_id.identification_document:
+            nnnnnnnnnn = self.invoice_id.company_id.partner_id.identification_document.zfill(10)
+        else:
+            raise ValidationError("The company identification document is not "
+                                  "established in the partner.\n\nGo to Contacts>"
+                                  "[Your company name] to configure it.")
         #El Código “ppp” es 000 para Software Propio
         ppp = '000'
         #aa: Dos (2) últimos dígitos año calendario
