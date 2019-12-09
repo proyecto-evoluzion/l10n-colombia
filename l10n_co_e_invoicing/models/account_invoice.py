@@ -20,9 +20,12 @@ class AccountInvoice(models.Model):
 
 		if self.company_id.einvoicing_enabled:
 			dian_document_obj = self.env['account.invoice.dian.document']
-			dian_document = dian_document_obj.create({'invoice_id': self.id})
+			dian_document = dian_document_obj.create({
+				'invoice_id': self.id,
+				'company_id': self.company_id.id})
 			dian_document.set_files()
-			#einv.action_post_validate()
+			dian_document.sent_zipped_file()
+			dian_document.GetStatusZip()
 
 		return res
 
@@ -223,16 +226,15 @@ class AccountInvoice(models.Model):
 	def _get_invoice_lines(self):
 		invoice_lines = {}
 		count = 1
-		
-		
+
 		for invoice_line in self.invoice_line_ids:
 			disc_amount = 0
 			total_wo_disc = 0
 
-			if invoice_line.price_subtotal != 0 and invoice_line.discount != 0 :
+			if invoice_line.price_subtotal != 0 and invoice_line.discount != 0:
 				disc_amount = (invoice_line.price_subtotal * invoice_line.discount ) / 100
 
-			if invoice_line.price_unit != 0 and invoice_line.quantity != 0 :
+			if invoice_line.price_unit != 0 and invoice_line.quantity != 0:
 				total_wo_disc = invoice_line.price_unit * invoice_line.quantity
 
 			invoice_lines[count] = {}
