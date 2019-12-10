@@ -2,6 +2,9 @@
 # Copyright 2019 Joan Marín <Github@joanmarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import sys  
+reload(sys)  
+sys.setdefaultencoding('utf8')
 from StringIO import StringIO
 from datetime import datetime
 from base64 import b64encode, b64decode
@@ -306,8 +309,9 @@ class AccountInvoiceDianDocument(models.Model):
 
     def GetStatusZip(self):
         b = "http://schemas.datacontract.org/2004/07/DianResponse"
-        c = "http:/schemas.microsoft.com/2003/10/Serialization/Arrays"
-        strings = False
+        c = "http://schemas.microsoft.com/2003/10/Serialization/Arrays"
+        s = "http://www.w3.org/2003/05/soap-envelope"
+        strings = ''
         status_code = 'other'
         GetStatusZip_values = self._get_GetStatusZip_values()
         xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
@@ -324,7 +328,9 @@ class AccountInvoiceDianDocument(models.Model):
             data=etree.tostring(xml_soap_with_signature))
 
         if response.status_code == 200:
-            root = etree.fromstring(response.text)
+            #root = etree.fromstring(response.content)
+            #root = etree.tostring(root, encoding='utf-8')
+            root = etree.fromstring(response.content)
 
             for element in root.iter("{%s}StatusCode" % b):
                 if element.text in ('00', '66', '90', '99'):
@@ -339,18 +345,31 @@ class AccountInvoiceDianDocument(models.Model):
                             self.company_id.in_refund_sent += 1
 
                     status_code = element.text
-
-            for element in root.iter("{%s}String" % c):
-                if not strings:
+            if status_code == '00':
+                for element in root.iter("{%s}StatusMessage" % b):
                     strings = element.text
-                else:
-                    strings += '\n' + element.text
 
-            if not strings:
-                strings = etree.tostring(root, pretty_print=True)
+            for element in root.iter("{%s}string" % c):
+                if strings == '':
+                    strings = '- ' + element.text
+                else:
+                    strings += '\n\n- ' + element.text
+
+            if strings == '':
+                for element in root.iter("{%s}Body" % s):
+                    strings = etree.tostring(element, pretty_print=True)
+
+                if strings == '':
+                    strings = etree.tostring(root, pretty_print=True)
 
             self.write({
                 'get_status_zip_status_code': status_code,
                 'get_status_zip_response': strings})
         else:
             raise ValidationError(response.status_code)
+
+    def action_reprocess(self):
+        self.write({'xml_file': b64encode(self._get_xml_file())})
+        self.write({'zipped_file': b64encode(self._get_zipped_file())})
+        self.sent_zipped_file()
+        self.GetStatusZip()
