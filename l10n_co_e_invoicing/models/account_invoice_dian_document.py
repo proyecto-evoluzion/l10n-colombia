@@ -57,7 +57,7 @@ class AccountInvoiceDianDocument(models.Model):
          ('other', 'Other')],
         string='StatusCode',
         default=False)
-    get_status_zip_response = fields.Text(string='GetStatusZip Response')
+    get_status_zip_response = fields.Text(string='Response')
 
     def _set_filenames(self):
         #nnnnnnnnnn: NIT del Facturador Electrónico sin DV, de diez (10) dígitos
@@ -66,7 +66,7 @@ class AccountInvoiceDianDocument(models.Model):
             nnnnnnnnnn = self.company_id.partner_id.identification_document.zfill(10)
         else:
             raise ValidationError("The company identification document is not "
-                                  "established in the partner.\n\nGo to Contacts>"
+                                  "established in the partner.\n\nGo to Contacts > "
                                   "[Your company name] to configure it.")
         #El Código “ppp” es 000 para Software Propio
         ppp = '000'
@@ -129,10 +129,13 @@ class AccountInvoiceDianDocument(models.Model):
             SoftwarePIN = self.company_id.software_pin
 
         ValFac = self.invoice_id.amount_untaxed
-        ValImp1 = einvoicing_taxes['01']['total']
-        ValImp2 = einvoicing_taxes['04']['total']
-        ValImp3 = einvoicing_taxes['03']['total']
-        ValTot = ValFac + ValImp1 + ValImp2 + ValImp3
+        ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
+        ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
+        ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
+        TaxInclusiveAmount = ValFac + ValImp1 + ValImp2 + ValImp3
+        #El valor a pagar puede verse afectado, por anticipos, y descuentos y
+        #cargos a nivel de factura
+        PayableAmount = TaxInclusiveAmount
         cufe_cude = global_functions.get_cufe_cude(
             ID,
             IssueDate,
@@ -144,7 +147,7 @@ class AccountInvoiceDianDocument(models.Model):
             str('{:.2f}'.format(ValImp2)),
             '03',
             str('{:.2f}'.format(ValImp3)),
-            str('{:.2f}'.format(ValTot)),#invoice.amount_total
+            str('{:.2f}'.format(TaxInclusiveAmount)),#self.invoice_id.amount_total
             NitOFE,
             NitAdq,
             ClTec,
@@ -196,17 +199,12 @@ class AccountInvoiceDianDocument(models.Model):
             'PaymentMeansCode': '10',
             'PaymentDueDate': self.invoice_id.date_due,
             'PaymentID': 'Efectivo',
-            'TaxTotalIVA': einvoicing_taxes['01']['total'],
-            'TaxSubtotalIVA': einvoicing_taxes['01']['taxes'],
-            'TaxTotalICA': einvoicing_taxes['04']['total'],
-            'TaxSubtotalICA': einvoicing_taxes['04']['taxes'],
-            'TaxTotalINC': einvoicing_taxes['03']['total'],
-            'TaxSubtotalINC': einvoicing_taxes['03']['taxes'],
+            'TaxesTotal': einvoicing_taxes['TaxesTotal'],
+            'WithholdingTaxesTotal': einvoicing_taxes['WithholdingTaxesTotal'],
             'LineExtensionAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxExclusiveAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
-            'TaxInclusiveAmount': '{:.2f}'.format(ValTot),#self.invoice_id.amount_total
-            'PrepaidAmount': '{:.2f}'.format(0),
-            'PayableAmount': '{:.2f}'.format(ValTot),#self.invoice_id.amount_total
+            'TaxInclusiveAmount': '{:.2f}'.format(TaxInclusiveAmount),#ValTot
+            'PayableAmount': '{:.2f}'.format(PayableAmount),#self.invoice_id.amount_total
             'InvoiceLines': self.invoice_id._get_invoice_lines()}
 
     def _get_xml_file(self):

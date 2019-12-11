@@ -77,7 +77,7 @@ class AccountInvoice(models.Model):
 			'number_to': number_to,
 			'technical_key': technical_key}
 
-	def _get_einvoicing_taxes(self):
+	def _get_einvoicing_taxes2(self):
 		msg = _("Your tax '%s' has no e-invoicing tax group type, " +
 				"contact with your administrator.")
 		einvoicing_taxes = {}
@@ -135,6 +135,104 @@ class AccountInvoice(models.Model):
 
 		return einvoicing_taxes
 
+	def _get_einvoicing_taxes(self):
+		msg1 = _("Your tax: '%s', has no e-invoicing tax group type, " +
+				 "contact with your administrator.")
+		msg2 = _("Your withholding tax: '%s', has positive amount, the taxes " +
+		         "must have negative amount, contact with your administrator.")
+		msg3 = _("Your tax: '%s', has negative amount, the taxes must have " + 
+		         "positive amount, with your administrator.")
+		taxes = {}
+		withholding_taxes= {}
+
+		for tax in self.tax_line_ids:
+			if tax.tax_id.tax_group_id.is_einvoicing:
+				if not tax.tax_id.tax_group_id.tax_group_type_id:
+					raise UserError(msg1 % tax.name)
+
+				tax_code = tax.tax_id.tax_group_id.tax_group_type_id.code
+				tax_name = tax.tax_id.tax_group_id.tax_group_type_id.name
+				tax_type = tax.tax_id.tax_group_id.tax_group_type_id.type
+
+				if tax_type == 'withholding_tax':
+					if tax.tax_id.amount < 0:
+						tax_percent = '{:.2f}'.format(tax.tax_id.amount * (-1))
+					else:
+						raise UserError(msg2 % tax.name)
+
+					if tax_code not in withholding_taxes:
+						withholding_taxes[tax_code] = {}
+						withholding_taxes[tax_code]['total'] = 0
+						withholding_taxes[tax_code]['name'] = tax_name
+						withholding_taxes[tax_code]['taxes'] = {}
+
+					if tax_percent not in withholding_taxes[tax_code]['taxes']:
+						withholding_taxes[tax_code]['taxes'][tax_percent] = {}
+						withholding_taxes[tax_code]['taxes'][tax_percent]['base'] = 0
+						withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
+					
+					withholding_taxes[tax_code]['total'] += tax.amount * (-1)
+					withholding_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
+					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount * (-1)
+				else:
+					if tax.tax_id.amount > 0:
+						tax_percent = '{:.2f}'.format(tax.tax_id.amount)
+					else:
+						raise UserError(msg3 % tax.name)
+
+					if tax_code not in taxes:
+						taxes[tax_code] = {}
+						taxes[tax_code]['total'] = 0
+						taxes[tax_code]['name'] = tax_name
+						taxes[tax_code]['taxes'] = {}
+
+					if tax_percent not in taxes[tax_code]['taxes']:
+						taxes[tax_code]['taxes'][tax_percent] = {}
+						taxes[tax_code]['taxes'][tax_percent]['base'] = 0
+						taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
+
+					taxes[tax_code]['total'] += tax.amount
+					taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
+					taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount
+
+		if '01' not in taxes:
+			taxes['01'] = {}
+			taxes['01']['total'] = 0
+			taxes['01']['name'] = 'IVA'
+			taxes['01']['taxes'] = {}
+			taxes['01']['taxes']['0.00'] = {}
+			taxes['01']['taxes']['0.00']['base'] = 0
+			taxes['01']['taxes']['0.00']['amount'] = 0
+
+		if '04' not in taxes:
+			taxes['04'] = {}
+			taxes['04']['total'] = 0
+			taxes['04']['name'] = 'ICA'
+			taxes['04']['taxes'] = {}
+			taxes['04']['taxes']['0.00'] = {}
+			taxes['04']['taxes']['0.00']['base'] = 0
+			taxes['04']['taxes']['0.00']['amount'] = 0
+
+		if '03' not in taxes:
+			taxes['03'] = {}
+			taxes['03']['total'] = 0
+			taxes['03']['name'] = 'INC'
+			taxes['03']['taxes'] = {}
+			taxes['03']['taxes']['0.00'] = {}
+			taxes['03']['taxes']['0.00']['base'] = 0
+			taxes['03']['taxes']['0.00']['amount'] = 0
+
+		if '06' not in withholding_taxes:
+			withholding_taxes['06'] = {}
+			withholding_taxes['06']['total'] = 0
+			withholding_taxes['06']['name'] = 'ReteRenta'
+			withholding_taxes['06']['taxes'] = {}
+			withholding_taxes['06']['taxes']['0.00'] = {}
+			withholding_taxes['06']['taxes']['0.00']['base'] = 0
+			withholding_taxes['06']['taxes']['0.00']['amount'] = 0
+
+		return {'TaxesTotal': taxes, 'WithholdingTaxesTotal': withholding_taxes}
+
 	def _get_accounting_supplier_party_values(self):
 		msg1 = _("'%s' does not have a person type assigned")
 		msg2 = _("'%s' does not have a state assigned")
@@ -153,7 +251,6 @@ class AccountInvoice(models.Model):
 				raise UserError(msg2 % supplier.name)
 		else:
 			raise UserError(msg3 % supplier.name)
-
 
 		return {
 			'AdditionalAccountID': supplier.person_type,
@@ -224,6 +321,12 @@ class AccountInvoice(models.Model):
 			'ID': supplier.identification_document}
 
 	def _get_invoice_lines(self):
+		msg1 = _("Your tax: '%s', has no e-invoicing tax group type, " +
+				 "contact with your administrator.")
+		msg2 = _("Your withholding tax: '%s', has positive amount, the taxes " +
+		         "must have negative amount, contact with your administrator.")
+		msg3 = _("Your tax: '%s', has negative amount, the taxes must have " + 
+		         "positive amount, with your administrator.")
 		invoice_lines = {}
 		count = 1
 
@@ -249,6 +352,7 @@ class AccountInvoice(models.Model):
 			invoice_lines[count]['AllowanceChargeBaseAmount'] = '{:.2f}'.format(
 				total_wo_disc)
 			invoice_lines[count]['TaxesTotal'] = {}
+			invoice_lines[count]['WithholdingTaxesTotal'] = {}
 
 			for tax in invoice_line.invoice_line_tax_ids:
 				if tax.amount_type == 'group':
@@ -257,11 +361,66 @@ class AccountInvoice(models.Model):
 					tax_ids = tax
 
 				for tax_id in tax_ids:
-					if tax_id.tax_group_id.is_einvoicing and tax_id.amount != 0:
-						invoice_lines[count]['TaxesTotal'] = (
-							invoice_line._get_invoice_lines_taxes(
-								tax_id,
-								invoice_lines[count]['TaxesTotal']))
+					if tax_id.tax_group_id.is_einvoicing:
+						if not tax_id.tax_group_id.tax_group_type_id:
+							raise UserError(msg1 % tax.name)
+
+						tax_type = tax_id.tax_group_id.tax_group_type_id.type
+
+						if tax_type == 'withholding_tax':
+							if tax_id.amount < 0:
+								invoice_lines[count]['WithholdingTaxesTotal'] = (
+									invoice_line._get_invoice_lines_taxes(
+										tax_id,
+										tax_id.amount * (-1),
+										invoice_lines[count]['WithholdingTaxesTotal']))
+							else:
+								raise UserError(msg2 % tax_id.name)
+						else:
+							if tax_id.amount > 0:
+								invoice_lines[count]['TaxesTotal'] = (
+									invoice_line._get_invoice_lines_taxes(
+										tax_id,
+										tax_id.amount,
+										invoice_lines[count]['TaxesTotal']))
+							else:
+								raise UserError(msg3 % tax_id.name)
+
+			if '01' not in invoice_lines[count]['TaxesTotal']:
+				invoice_lines[count]['TaxesTotal']['01'] = {}
+				invoice_lines[count]['TaxesTotal']['01']['total'] = 0
+				invoice_lines[count]['TaxesTotal']['01']['name'] = 'IVA'
+				invoice_lines[count]['TaxesTotal']['01']['taxes'] = {}
+				invoice_lines[count]['TaxesTotal']['01']['taxes']['0.00'] = {}
+				invoice_lines[count]['TaxesTotal']['01']['taxes']['0.00']['base'] = invoice_line.price_subtotal
+				invoice_lines[count]['TaxesTotal']['01']['taxes']['0.00']['amount'] = 0
+			'''
+			if '04' not in invoice_lines[count]['TaxesTotal']:
+				invoice_lines[count]['TaxesTotal']['04'] = {}
+				invoice_lines[count]['TaxesTotal']['04']['total'] = 0
+				invoice_lines[count]['TaxesTotal']['04']['name'] = 'ICA'
+				invoice_lines[count]['TaxesTotal']['04']['taxes'] = {}
+				invoice_lines[count]['TaxesTotal']['04']['taxes']['0.00'] = {}
+				invoice_lines[count]['TaxesTotal']['04']['taxes']['0.00']['base'] = invoice_line.price_subtotal
+				invoice_lines[count]['TaxesTotal']['04']['taxes']['0.00']['amount'] = 0
+
+			if '03' not in invoice_lines[count]['TaxesTotal']:
+				invoice_lines[count]['TaxesTotal']['03'] = {}
+				invoice_lines[count]['TaxesTotal']['03']['total'] = 0
+				invoice_lines[count]['TaxesTotal']['03']['name'] = 'INC'
+				invoice_lines[count]['TaxesTotal']['03']['taxes'] = {}
+				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00'] = {}
+				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['base'] = invoice_line.price_subtotal
+				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['amount'] = 0
+			'''
+			if '06' not in invoice_lines[count]['WithholdingTaxesTotal']:
+				invoice_lines[count]['WithholdingTaxesTotal']['06'] = {}
+				invoice_lines[count]['WithholdingTaxesTotal']['06']['total'] = 0
+				invoice_lines[count]['WithholdingTaxesTotal']['06']['name'] = 'ReteRenta'
+				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes'] = {}
+				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00'] = {}
+				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00']['base'] = invoice_line.price_subtotal
+				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00']['amount'] = 0
 
 			invoice_lines[count]['ItemDescription'] = invoice_line.name
 			invoice_lines[count]['PriceAmount'] = '{:.2f}'.format(
