@@ -19,13 +19,14 @@ class AccountInvoice(models.Model):
 		res = super(AccountInvoice, self).invoice_validate()
 
 		if self.company_id.einvoicing_enabled:
-			dian_document_obj = self.env['account.invoice.dian.document']
-			dian_document = dian_document_obj.create({
-				'invoice_id': self.id,
-				'company_id': self.company_id.id})
-			dian_document.set_files()
-			dian_document.sent_zipped_file()
-			dian_document.GetStatusZip()
+			if self.type != "in_invoice":
+				dian_document_obj = self.env['account.invoice.dian.document']
+				dian_document = dian_document_obj.create({
+					'invoice_id': self.id,
+					'company_id': self.company_id.id})
+				dian_document.set_files()
+				dian_document.sent_zipped_file()
+				dian_document.GetStatusZip()
 
 		return res
 

@@ -208,9 +208,19 @@ class AccountInvoiceDianDocument(models.Model):
             'InvoiceLines': self.invoice_id._get_invoice_lines()}
 
     def _get_xml_file(self):
-        xml_without_signature = global_functions.get_template_xml(
-            self._get_xml_values(),
-            'Invoice')
+        if self.invoice_id.type == "out_invoice":
+            xml_without_signature = global_functions.get_template_xml(
+                self._get_xml_values(),
+                'Invoice')
+        elif self.invoice_id.type == "out_refund": 
+            # xml_without_signature = global_functions.get_template_xml(
+            #     self._get_xml_values(),
+            #     'CreditNote')
+            """
+            TODO: add new values for credit note -C
+            """
+            pass
+        
         xml_with_signature = global_functions.get_xml_with_signature(
             xml_without_signature,
             self.company_id.signature_policy_url,
