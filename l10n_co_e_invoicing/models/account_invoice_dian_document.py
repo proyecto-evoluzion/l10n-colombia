@@ -205,7 +205,12 @@ class AccountInvoiceDianDocument(models.Model):
             'TaxExclusiveAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxInclusiveAmount': '{:.2f}'.format(TaxInclusiveAmount),#ValTot
             'PayableAmount': '{:.2f}'.format(PayableAmount),#self.invoice_id.amount_total
-            'InvoiceLines': self.invoice_id._get_invoice_lines()}
+            'InvoiceLines': self.invoice_id._get_invoice_lines(),
+            'CreditNoteLines' : self.invoice_id._get_invoice_lines(),
+            'DiscrepancyResponseCode' : self.invoice_id.discrepancy_response_code_id.code,
+            'DiscrepancyDescription' : self.invoice_id.discrepancy_response_code_id.name,
+            'DiscrepancyRefId' : self.invoice_id.origin
+            }
 
     def _get_xml_file(self):
         if self.invoice_id.type == "out_invoice":
@@ -213,13 +218,9 @@ class AccountInvoiceDianDocument(models.Model):
                 self._get_xml_values(),
                 'Invoice')
         elif self.invoice_id.type == "out_refund": 
-            # xml_without_signature = global_functions.get_template_xml(
-            #     self._get_xml_values(),
-            #     'CreditNote')
-            """
-            TODO: add new values for credit note -C
-            """
-            pass
+            xml_without_signature = global_functions.get_template_xml(
+                self._get_xml_values(),
+                'CreditNote')
         
         xml_with_signature = global_functions.get_xml_with_signature(
             xml_without_signature,

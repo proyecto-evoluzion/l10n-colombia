@@ -140,9 +140,9 @@
       listID="ISO 4217 Alpha">{{DocumentCurrencyCode}}</cbc:DocumentCurrencyCode>
    <cbc:LineCountNumeric>{{LineCountNumeric}}</cbc:LineCountNumeric>
    <cac:DiscrepancyResponse>
-      <cbc:ReferenceID>{{discrepancyRefId}}</cbc:ReferenceID>
-      <cbc:ResponseCode>{{discrepancyResponseCode}}</cbc:ResponseCode>
-      <cbc:Description>{{discrepancyDescription}}</cbc:Description>
+      <cbc:ReferenceID>{{DiscrepancyRefId}}</cbc:ReferenceID>
+      <cbc:ResponseCode>{{DiscrepancyResponseCode}}</cbc:ResponseCode>
+      <cbc:Description>{{DiscrepancyDescription}}</cbc:Description>
    </cac:DiscrepancyResponse>
    <cac:OrderReference>
       <!--TODAS LAS FACTURAS DEBEN SER DEL MISMO ADQUIRIENTE-->
@@ -371,61 +371,49 @@
       <cbc:PaymentID>{{PaymentID}}</cbc:PaymentID>
    </cac:PaymentMeans>
    <cac:PaymentExchangeRate>
-      <cbc:SourceCurrencyCode>USD</cbc:SourceCurrencyCode>
+      <cbc:SourceCurrencyCode>COP</cbc:SourceCurrencyCode>
       <cbc:SourceCurrencyBaseRate>1.00</cbc:SourceCurrencyBaseRate>
       <cbc:TargetCurrencyCode>COP</cbc:TargetCurrencyCode>
       <cbc:TargetCurrencyBaseRate>1.00</cbc:TargetCurrencyBaseRate>
       <cbc:CalculationRate>3100</cbc:CalculationRate>
       <cbc:Date>2019-06-21</cbc:Date>
    </cac:PaymentExchangeRate>
-   <cac:TaxTotal>
-      <cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(TaxTotalIVA)}}</cbc:TaxAmount>
-      {% for percent, tax in TaxSubtotalIVA.items() -%}
-      <cac:TaxSubtotal>
-         <cbc:TaxableAmount currencyID="COP">{{'{:.2f}'.format(tax.base)}}</cbc:TaxableAmount>
-         <cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(tax.amount)}}</cbc:TaxAmount>
-         <cac:TaxCategory>
-            <cbc:Percent>{{percent}}</cbc:Percent>
-            <cac:TaxScheme>
-               <cbc:ID>01</cbc:ID>
-               <cbc:Name>IVA</cbc:Name>
-            </cac:TaxScheme>
-         </cac:TaxCategory>
-      </cac:TaxSubtotal>
-      {% endfor -%}
-   </cac:TaxTotal>
-   <cac:TaxTotal>
-      <cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(TaxTotalICA)}}</cbc:TaxAmount>
-      {% for percent, tax in TaxSubtotalICA.items() -%}
-      <cac:TaxSubtotal>
-         <cbc:TaxableAmount currencyID="COP">{{'{:.2f}'.format(tax.base)}}</cbc:TaxableAmount>
-         <cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(tax.amount)}}</cbc:TaxAmount>
-         <cac:TaxCategory>
-            <cbc:Percent>{{percent}}</cbc:Percent>
-            <cac:TaxScheme>
-               <cbc:ID>03</cbc:ID>
-               <cbc:Name>ICA</cbc:Name>
-            </cac:TaxScheme>
-         </cac:TaxCategory>
-      </cac:TaxSubtotal>
-      {% endfor -%}
-   </cac:TaxTotal>
-   <cac:TaxTotal>
-      <cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(TaxTotalINC)}}</cbc:TaxAmount>
-      {% for percent, tax in TaxSubtotalINC.items() -%}
-      <cac:TaxSubtotal>
-         <cbc:TaxableAmount currencyID="COP">{{'{:.2f}'.format(tax.base)}}</cbc:TaxableAmount>
-         <cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(tax.amount)}}</cbc:TaxAmount>
-         <cac:TaxCategory>
-            <cbc:Percent>{{percent}}</cbc:Percent>
-            <cac:TaxScheme>
-               <cbc:ID>04</cbc:ID>
-               <cbc:Name>INC</cbc:Name>
-            </cac:TaxScheme>
-         </cac:TaxCategory>
-      </cac:TaxSubtotal>
-      {% endfor -%}
-   </cac:TaxTotal>
+   {% for TaxTotalID, TaxTotal in TaxesTotal.items() -%}
+	<cac:TaxTotal>
+		<cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(TaxTotal.total)}}</cbc:TaxAmount>
+		{% for Percent, TaxSubtotal in TaxTotal.taxes.items() -%}
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="COP">{{'{:.2f}'.format(TaxSubtotal.base)}}</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(TaxSubtotal.amount)}}</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cbc:Percent>{{Percent}}</cbc:Percent>
+				<cac:TaxScheme>
+					<cbc:ID>{{TaxTotalID}}</cbc:ID>
+					<cbc:Name>{{TaxTotal.name}}</cbc:Name>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+		{% endfor -%}
+	</cac:TaxTotal>
+   {% endfor -%}
+   {% for WithholdingTaxTotalID, WithholdingTaxTotal in WithholdingTaxesTotal.items() -%}
+   <cac:WithholdingTaxTotal>
+		<cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(WithholdingTaxTotal.total)}}</cbc:TaxAmount>
+		{% for Percent, TaxSubtotal in WithholdingTaxTotal.taxes.items() -%}
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="COP">{{'{:.2f}'.format(TaxSubtotal.base)}}</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="COP">{{'{:.2f}'.format(TaxSubtotal.amount)}}</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cbc:Percent>{{Percent}}</cbc:Percent>
+				<cac:TaxScheme>
+					<cbc:ID>{{WithholdingTaxTotalID}}</cbc:ID>
+					<cbc:Name>{{WithholdingTaxTotal.name}}</cbc:Name>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+		{% endfor -%}
+	</cac:WithholdingTaxTotal>
+	{% endfor -%}
    <cac:LegalMonetaryTotal>
       <cbc:LineExtensionAmount currencyID="COP">{{LineExtensionAmount}}</cbc:LineExtensionAmount>
       <cbc:TaxExclusiveAmount currencyID="COP">{{TaxExclusiveAmount}}</cbc:TaxExclusiveAmount>
