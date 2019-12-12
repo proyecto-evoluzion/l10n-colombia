@@ -76,25 +76,6 @@ def get_template_xml(values, template_name):
 
     return xml.replace('&', '&amp;')
 
-def get_period_dates(base_date):
-    split_date = base_date.split('-')
-    current_year = int(split_date[0])
-    current_month = int(split_date[1])
-
-    if current_month == 12:
-        year = current_year + 1
-        month = 1
-    else:
-        year = current_year
-        month = current_month + 1
-
-    period_start_date = date(current_year, current_month, 1)
-    period_end_date = date(year, month, 1) - timedelta(days=1)
-
-    return {
-        'PeriodStartDate': period_start_date.strftime("%Y-%m-%d"),
-        'PeriodEndDate': period_end_date.strftime("%Y-%m-%d")}
-
 #https://github.com/etobella/python-xades
 def get_xml_with_signature(
         xml_without_signature,

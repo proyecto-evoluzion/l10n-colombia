@@ -39,6 +39,22 @@ class AccountInvoice(models.Model):
 				raise UserError('You cannot cancel a invoice sent to DIAN')
 
 		return res
+	
+	def _get_billing_reference(self):
+		billing_reference = {}
+
+		for origin_invoice in self.origin_invoice_ids:
+			if origin_invoice.state in ('open', 'paid'):
+				for dian_document in origin_invoice.dian_document_lines:
+					if dian_document.state == 'done':
+						billing_reference['ID'] = origin_invoice.number
+						billing_reference['UUID'] = dian_document.cufe_cude
+						billing_reference['IssueDate'] = origin_invoice.date_invoice
+
+		if not billing_reference:
+			raise UserError('Credit Note has not Billing Reference')
+		else:
+			return billing_reference
 
 	def _get_active_dian_resolution(self):
 		msg1 = _("Your active dian resolution has no technical key, " +
@@ -77,64 +93,6 @@ class AccountInvoice(models.Model):
 			'number_from': number_from,
 			'number_to': number_to,
 			'technical_key': technical_key}
-
-	def _get_einvoicing_taxes2(self):
-		msg = _("Your tax '%s' has no e-invoicing tax group type, " +
-				"contact with your administrator.")
-		einvoicing_taxes = {}
-
-		for tax in self.tax_line_ids:
-			if tax.tax_id.tax_group_id.is_einvoicing:
-				if not tax.tax_id.tax_group_id.tax_group_type_id:
-					raise UserError(msg % tax.name)
-
-				tax_code = tax.tax_id.tax_group_id.tax_group_type_id.code
-				tax_name = tax.tax_id.tax_group_id.tax_group_type_id.name
-				tax_percent = '{:.2f}'.format(tax.tax_id.amount or 0)
-
-				if tax_code not in einvoicing_taxes:
-					einvoicing_taxes[tax_code] = {}
-					einvoicing_taxes[tax_code]['total'] = 0
-					einvoicing_taxes[tax_code]['name'] = tax_name
-					einvoicing_taxes[tax_code]['taxes'] = {}
-
-				if tax_percent not in einvoicing_taxes[tax_code]['taxes']:
-					einvoicing_taxes[tax_code]['taxes'][tax_percent] = {}
-					einvoicing_taxes[tax_code]['taxes'][tax_percent]['base'] = 0
-					einvoicing_taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
-
-				einvoicing_taxes[tax_code]['total'] += tax.amount
-				einvoicing_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
-				einvoicing_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount
-
-		if '01' not in einvoicing_taxes:
-			einvoicing_taxes['01'] = {}
-			einvoicing_taxes['01']['total'] = 0
-			einvoicing_taxes['01']['name'] = 'IVA'
-			einvoicing_taxes['01']['taxes'] = {}
-			einvoicing_taxes['01']['taxes']['0.00'] = {}
-			einvoicing_taxes['01']['taxes']['0.00']['base'] = 0
-			einvoicing_taxes['01']['taxes']['0.00']['amount'] = 0
-
-		if '04' not in einvoicing_taxes:
-			einvoicing_taxes['04'] = {}
-			einvoicing_taxes['04']['total'] = 0
-			einvoicing_taxes['04']['name'] = 'ICA'
-			einvoicing_taxes['04']['taxes'] = {}
-			einvoicing_taxes['04']['taxes']['0.00'] = {}
-			einvoicing_taxes['04']['taxes']['0.00']['base'] = 0
-			einvoicing_taxes['04']['taxes']['0.00']['amount'] = 0
-
-		if '03' not in einvoicing_taxes:
-			einvoicing_taxes['03'] = {}
-			einvoicing_taxes['03']['total'] = 0
-			einvoicing_taxes['03']['name'] = 'INC'
-			einvoicing_taxes['03']['taxes'] = {}
-			einvoicing_taxes['03']['taxes']['0.00'] = {}
-			einvoicing_taxes['03']['taxes']['0.00']['base'] = 0
-			einvoicing_taxes['03']['taxes']['0.00']['amount'] = 0
-
-		return einvoicing_taxes
 
 	def _get_einvoicing_taxes(self):
 		msg1 = _("Your tax: '%s', has no e-invoicing tax group type, " +
@@ -277,7 +235,7 @@ class AccountInvoice(models.Model):
 		msg2 = _("'%s' does not have a state assigned")
 		msg3 = _("'%s' does not have a country assigned")
 
-		if self.type in ('in_invoice', 'in_refund'):
+		if self.type in ('in_refund'):
 			customer = self.company_id.partner_id
 		else:
 			customer = self.partner_id

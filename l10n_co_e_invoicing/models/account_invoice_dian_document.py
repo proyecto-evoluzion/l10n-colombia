@@ -17,8 +17,10 @@ from odoo import models, fields
 from odoo.exceptions import ValidationError
 
 
-DIAN = {'wsdl': 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc?wsdl'}
-
+DIAN = {'wsdl-hab': 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
+        'wsdl': 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
+        'catalogo-hab': 'https://catalogo-vpfe-hab.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}',
+        'catalogo': 'https://catalogo-vpfe.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}'}
 
 class AccountInvoiceDianDocument(models.Model):
     ''''''
@@ -127,6 +129,13 @@ class AccountInvoiceDianDocument(models.Model):
             ClTec = active_dian_resolution['technical_key']
         else:
             SoftwarePIN = self.company_id.software_pin
+        
+        TipoAmbie = self.company_id.profile_execution_id
+
+        if TipoAmbie == '1':
+            QRCodeURL = DIAN['catalogo']
+        else:
+            QRCodeURL = DIAN['catalogo-hab']
 
         ValFac = self.invoice_id.amount_untaxed
         ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
@@ -152,12 +161,14 @@ class AccountInvoiceDianDocument(models.Model):
             NitAdq,
             ClTec,
             SoftwarePIN,
-            self.company_id.profile_execution_id)
+            TipoAmbie)
         software_security_code = global_functions.get_software_security_code(
             IdSoftware,
             self.company_id.software_pin,
             ID)
-        period_dates = global_functions.get_period_dates(IssueDate)
+        partition_key = 'co|' + IssueDate.split('-')[2] + '|' + cufe_cude['CUFE/CUDE'][:2]
+        emission_date = IssueDate.replace('-', '')
+        QRCodeURL = QRCodeURL.format(cufe_cude['CUFE/CUDE'], partition_key, emission_date)
 
         self.write({
             'cufe_cude_uncoded': cufe_cude['CUFE/CUDEUncoded'],
@@ -180,18 +191,14 @@ class AccountInvoiceDianDocument(models.Model):
             'NitAdquiriente': NitAdq,
             'SoftwareID': IdSoftware,
             'SoftwareSecurityCode': software_security_code['SoftwareSecurityCode'],
-            'ProfileExecutionID': self.company_id.profile_execution_id,
+            'QRCodeURL': QRCodeURL,
+            'ProfileExecutionID': TipoAmbie,
             'ID': ID,
             'UUID': cufe_cude['CUFE/CUDE'],
-            'partitionKey': 'co|' + IssueDate.split('-')[2] + '|' + cufe_cude['CUFE/CUDE'][:2],
-            'emissionDate': IssueDate.replace('-', ''),
             'IssueDate': IssueDate,
             'IssueTime': IssueTime,
-            'InvoiceTypeCode': '01',
             'LineCountNumeric': len(self.invoice_id.invoice_line_ids),
             'DocumentCurrencyCode': self.invoice_id.currency_id.name,
-            'InvoicePeriodStartDate': period_dates['PeriodStartDate'],
-            'InvoicePeriodEndDate': period_dates['PeriodEndDate'],
             'AccountingSupplierParty': self.invoice_id._get_accounting_supplier_party_values(),
             'AccountingCustomerParty': self.invoice_id._get_accounting_customer_party_values(),
             'TaxRepresentativeParty': self.invoice_id._get_tax_representative_party_values(),
@@ -204,23 +211,80 @@ class AccountInvoiceDianDocument(models.Model):
             'LineExtensionAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxExclusiveAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxInclusiveAmount': '{:.2f}'.format(TaxInclusiveAmount),#ValTot
-            'PayableAmount': '{:.2f}'.format(PayableAmount),#self.invoice_id.amount_total
-            'InvoiceLines': self.invoice_id._get_invoice_lines(),
-            'CreditNoteLines' : self.invoice_id._get_invoice_lines(),
-            'DiscrepancyResponseCode' : self.invoice_id.discrepancy_response_code_id.code,
-            'DiscrepancyDescription' : self.invoice_id.discrepancy_response_code_id.name,
-            'DiscrepancyRefId' : self.invoice_id.origin
-            }
+            #self.invoice_id.amount_total
+            'PayableAmount': '{:.2f}'.format(PayableAmount)}
+
+    def _get_invoice_values(self):
+        xml_values = self._get_xml_values()
+        #Punto 14.1.5.1. del anexo tecnico version 1.8
+        #10 Estandar *
+        #09 AIU
+        #11 Mandatos
+        xml_values['CustomizationID'] = '10'
+        #Tipos de factura
+        #Punto 14.1.3 del anexo tecnico version 1.8
+        #01 Factura de Venta
+        #02 Factura de Exportación
+        #03 Factura por Contingencia Facturador
+        #04 Factura por Contingencia DIAN
+        xml_values['InvoiceTypeCode'] = '01'
+        xml_values['InvoiceLines'] = self.invoice_id._get_invoice_lines()
+
+        return xml_values
+    
+    def _get_credit_note_values(self):
+        xml_values = self._get_xml_values()
+        #Punto 14.1.5.2. del anexo tecnico version 1.8
+        #20 Nota Crédito que referencia una factura electrónica.
+        #22 Nota Crédito sin referencia a facturas*.
+        #23 Nota Crédito para facturación electrónica V1 (Decreto 2242).
+        xml_values['CustomizationID'] = '20'
+        #Exclusivo en referencias a documentos (elementos DocumentReference)
+        #Punto 14.1.3 del anexo tecnico version 1.8
+        #91 Nota Crédito
+        xml_values['CreditNoteTypeCode'] = '91'
+        billing_reference = self.invoice_id._get_billing_reference()
+        xml_values['BillingReference'] = billing_reference
+        xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
+        xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
+        xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
+        xml_values['CreditNoteLines'] = self.invoice_id._get_invoice_lines()
+
+        return xml_values
+    
+    def _get_debit_note_values(self):
+        xml_values = self._get_xml_values()
+        #Punto 14.1.5.3. del anexo tecnico version 1.8
+        #30 Nota Débito que referencia una factura electrónica.
+        #32 Nota Débito sin referencia a facturas*.
+        #33 Nota Débito para facturación electrónica V1 (Decreto 2242).
+        xml_values['CustomizationID'] = '30'
+        #Exclusivo en referencias a documentos (elementos DocumentReference)
+        #Punto 14.1.3 del anexo tecnico version 1.8
+        #92 Nota Débito 
+        xml_values['DebitNoteTypeCode'] = '92'
+        billing_reference = self.invoice_id._get_billing_reference()
+        xml_values['BillingReference'] = billing_reference
+        xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
+        xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
+        xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
+        xml_values['DebitNoteLines'] = self.invoice_id._get_invoice_lines()
+
+        return xml_values
 
     def _get_xml_file(self):
         if self.invoice_id.type == "out_invoice":
             xml_without_signature = global_functions.get_template_xml(
-                self._get_xml_values(),
+                self._get_invoice_values(),
                 'Invoice')
         elif self.invoice_id.type == "out_refund": 
             xml_without_signature = global_functions.get_template_xml(
-                self._get_xml_values(),
+                self._get_credit_note_values(),
                 'CreditNote')
+        elif self.invoice_id.type == "in_refund": 
+            xml_without_signature = global_functions.get_template_xml(
+                self._get_debit_note_values(),
+                'DebitNote')
         
         xml_with_signature = global_functions.get_xml_with_signature(
             xml_without_signature,
@@ -295,7 +359,7 @@ class AccountInvoiceDianDocument(models.Model):
                 self.company_id.certificate_password)
 
         response = post(
-            DIAN['wsdl'],
+            DIAN['wsdl-hab'],
             headers={'content-type': 'application/soap+xml;charset=utf-8'},
             data=etree.tostring(xml_soap_with_signature))
 
@@ -332,7 +396,7 @@ class AccountInvoiceDianDocument(models.Model):
             self.company_id.certificate_password)
 
         response = post(
-            DIAN['wsdl'],
+            DIAN['wsdl-hab'],
             headers={'content-type': 'application/soap+xml;charset=utf-8'},
             data=etree.tostring(xml_soap_with_signature))
 

@@ -1,0 +1,508 @@
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:sts="http://www.dian.gov.co/contratos/facturaelectronica/v1/Structures" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xades141="http://uri.etsi.org/01903/v1.4.1#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2    http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd">
+   <ext:UBLExtensions>
+      <ext:UBLExtension>
+         <ext:ExtensionContent>
+            <sts:DianExtensions>
+               <sts:InvoiceSource>
+                  <cbc:IdentificationCode listAgencyID="6" listAgencyName="United Nations Economic Commission for Europe" listSchemeURI="urn:oasis:names:specification:ubl:codelist:gc:CountryIdentificationCode-2.1">CO</cbc:IdentificationCode>
+               </sts:InvoiceSource>
+               <sts:SoftwareProvider>
+                  <sts:ProviderID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="1" schemeName="31">890942325</sts:ProviderID>
+                  <sts:SoftwareID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)">9ca662cd-5b7a-46ba-887e-815defda65f6</sts:SoftwareID>
+               </sts:SoftwareProvider>
+               <sts:SoftwareSecurityCode schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)">a06bc5ae2fed35b1a82e42d7a1b0d1d7bea0de4b24defba0ee0e45c92b832dbbd9b364933c55a22beb4ab811bb5d0434</sts:SoftwareSecurityCode>
+               <sts:AuthorizationProvider>
+                  <sts:AuthorizationProviderID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="4" schemeName="31">800197268</sts:AuthorizationProviderID>
+               </sts:AuthorizationProvider>
+               <sts:QRCode>NroFactura=NCV446
+               NitFacturador=890942325
+               NitAdquiriente=800077215
+               FechaFactura=2019-12-12
+               ValorTotalFactura=1157468.49
+               CUFE=df8a4732c936f99507e8f72705300f45f06c172e5013e36a21f80e5c3075a784ff0276cb0227901d0133b3223d93fc99
+               URL=https://catalogo-vpfe-hab.dian.gov.co/Document/FindDocument?documentKey=df8a4732c936f99507e8f72705300f45f06c172e5013e36a21f80e5c3075a784ff0276cb0227901d0133b3223d93fc99&amp;amp;partitionKey=co|12|df&amp;amp;emissionDate=20191212</sts:QRCode>
+            </sts:DianExtensions>
+         </ext:ExtensionContent>
+      </ext:UBLExtension>
+      <ext:UBLExtension>
+			<ext:ExtensionContent><ds:Signature Id="xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></ds:CanonicalizationMethod>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"></ds:SignatureMethod>
+<ds:Reference Id="xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608-ref0" URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"></ds:Transform>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod>
+<ds:DigestValue>jeG8/D3bDW1RsO1D5Wp9TkkEp+/jfoWGgeHQL4gCAwfQdOcGU9W4kUjcTO/QhYxa+2KToYDuFWvSvIronbv2mg==</ds:DigestValue>
+</ds:Reference>
+<ds:Reference URI="#xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608-keyinfo">
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod>
+<ds:DigestValue>xbyErS8X36pzFaIX4jXj0gYfsTQC+yR58ovOUomn1gH5rAI1pRDucCkJoMoYNoPua+nEoW9n4L2PJNV2R+tydg==</ds:DigestValue>
+</ds:Reference>
+<ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608-signedprops">
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod>
+<ds:DigestValue>GvEKEkH1vI7ye9H8sHCuEHB2Ga419Lkd1+Ls4GhCqDDwqj6VIZkAUFb6ZfQXeSiRGvPThkkc55PJ7NoMrTKLkQ==</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue Id="xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608-sigvalue">YL3RZDcRmeTZd+yun4z4VIyZ3X6VrcUE25kkxpYJgxlYqjpHIAmqle+RksjYbzpb
+EEcq5ccv71CCD/jOXfZVC5X9Qglm+AoF1Wt9Vq/ZvaLoj1Ty2egiIhcqdTs3Rg1+
+e6JQExZa3/XYSAsDeueywWN7ghi4pGmgQ1itumAQWaiFByex97l6Cti87TCS1/aC
+FQKOTw+JmFPMxJcK8lACz+PGi2h51sgl6kRPAZcIAOk/fp88pSQGswgaxbLXCk3p
+oAhUcqHmmSwcK3hIpaRR89NUx46UwXmis9JKhG9PszCyVRp+dL8T+aRheG+frwZH
+QUTojXqenT6/5dNvLRAE8Q==</ds:SignatureValue>
+<ds:KeyInfo Id="xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608-keyinfo">
+<ds:X509Data>
+<ds:X509Certificate>MIIGyjCCBbKgAwIBAgIQdOgnr5T+nLtddrkdq4hoeDANBgkqhkiG9w0BAQsFADCB
+qDEcMBoGA1UECQwTd3d3LmNlcnRpY2FtYXJhLmNvbTEPMA0GA1UEBwwGQk9HT1RB
+MRkwFwYDVQQIDBBESVNUUklUTyBDQVBJVEFMMQswCQYDVQQGEwJDTzEYMBYGA1UE
+CwwPTklUIDgzMDA4NDQzMy03MRgwFgYDVQQKDA9DRVJUSUNBTUFSQSBTLkExGzAZ
+BgNVBAMMEkFDIFNVQiBDRVJUSUNBTUFSQTAgFw0xOTA5MDkyMDQyMDVaGA8yMDIw
+MDcyNzIwNDIwNVowgd8xEjAQBgNVBAgMCUFOVElPUVVJQTEcMBoGA1UECwwTRkFD
+VFVSQSBFTEVDVFJPTklDQTEQMA4GA1UEBRMHMTA0MDU0NzEaMBgGCisGAQQBgbVj
+AgMTCjg5MDk0MjMyNTExHjAcBgNVBAoMFUVYQSBBVVRPIFBBUlRTICBTLkEuUzER
+MA8GA1UEBwwITUVERUxMSU4xHTAbBgkqhkiG9w0BCQEWDkpVQU5ARVhBQVAuQ09N
+MQswCQYDVQQGEwJDTzEeMBwGA1UEAwwVRVhBIEFVVE8gUEFSVFMgIFMuQS5TMIIB
+IDANBgkqhkiG9w0BAQEFAAOCAQ0AMIIBCAKCAQEAi8OYq0/Ts+vOqzHewxDofHvc
+DJQeqkDzwukbmgMFJEb+pfxLjmVuYVQgMh1gAqd1dXAj/A1iyaOA2ZmbghL68Xu1
+m4NfLeZt3Dvwz3n29bP6he7PbfGIdsy3LQ24mWrkirWms9+u1ufmGURUkcrcfBep
+FssRJPQZI6A6cKih/ky0QV22ZK3QYtmxCmHmfxrrBCnHFf70AgkMCk9+zgC6UpV9
+NMsNuftjp5iJJWQZ0ps9kJSoBxwqX4D4sGQLznVZZPb43TEpm/Wn/SkuGTGE7V0L
+yeyajhPdVYYGBWjxCuUgIvXVNwkPHTYvdrSgRy6CvBMrrfVv/W//sBN20F3doQIB
+A6OCArUwggKxMDYGCCsGAQUFBwEBBCowKDAmBggrBgEFBQcwAYYaaHR0cDovL29j
+c3AuY2VydGljYW1hcmEuY28wGQYDVR0RBBIwEIEOSlVBTkBFWEFBUC5DT00wgecG
+A1UdIASB3zCB3DCBmQYLKwYBBAGBtWMyAQgwgYkwKwYIKwYBBQUHAgEWH2h0dHA6
+Ly93d3cuY2VydGljYW1hcmEuY29tL2RwYy8wWgYIKwYBBQUHAgIwThpMTGltaXRh
+Y2lvbmVzIGRlIGdhcmFudO1hcyBkZSBlc3RlIGNlcnRpZmljYWRvIHNlIHB1ZWRl
+biBlbmNvbnRyYXIgZW4gbGEgRFBDLjA+BgsrBgEEAYG1YwoKATAvMC0GCCsGAQUF
+BwICMCEaH0Rpc3Bvc2l0aXZvIGRlIGhhcmR3YXJlIChUb2tlbikwDAYDVR0TAQH/
+BAIwADAOBgNVHQ8BAf8EBAMCA/gwJwYDVR0lBCAwHgYIKwYBBQUHAwEGCCsGAQUF
+BwMCBggrBgEFBQcDBDAdBgNVHQ4EFgQUAVqUrs1P9UrK+ii12ysfKXcRN0UwHwYD
+VR0jBBgwFoAUgHHMMpJYdfQDITqrvhzTj/IgFe0wEQYJYIZIAYb4QgEBBAQDAgWg
+MIHXBgNVHR8Egc8wgcwwgcmggcaggcOGXmh0dHA6Ly93d3cuY2VydGljYW1hcmEu
+Y29tL3JlcG9zaXRvcmlvcmV2b2NhY2lvbmVzL2FjX3N1Ym9yZGluYWRhX2NlcnRp
+Y2FtYXJhXzIwMTQuY3JsP2NybD1jcmyGYWh0dHA6Ly9taXJyb3IuY2VydGljYW1h
+cmEuY29tL3JlcG9zaXRvcmlvcmV2b2NhY2lvbmVzL2FjX3N1Ym9yZGluYWRhX2Nl
+cnRpY2FtYXJhXzIwMTQuY3JsP2NybD1jcmwwDQYJKoZIhvcNAQELBQADggEBAFXg
+n7YGIpX+rBEVxMtvZhy+BPIMI+2Szj0TMk/QtLITvl7d+DsLTaEByEODIRMhrMKz
+qQ+5cDH8N4wgTccv/cSD8eVb3miWDt0loKUkT/tLi5iTvjPpbT5u0jzRhdlXunrM
+fM1Y0SSSE5MEUt7U98PuQ7VnAM87ZRfOXpIj5OjIbCmg93woCh0K+2l8UIOogNRx
+2/6NKEZyFRVFzpEedjEFKyaQXDPPD2LOPa9nX6whFqKeLt72D4H+py5IvUPGlAJ2
+sM2I2Xi6oUDSEmuh/9k45Im/7cs86v5B2wcU4oB6JplfB9tykfHmbGuIq0DBeEoK
+Lx1zRssKQRUMGz+GZvY=</ds:X509Certificate>
+<ds:X509IssuerSerial>
+<ds:X509IssuerName>streetAddress=www.certicamara.com,L=BOGOTA,stateOrProvinceName=DISTRITO CAPITAL,C=CO,OU=NIT 830084433-7,O=CERTICAMARA S.A,CN=AC SUB CERTICAMARA</ds:X509IssuerName>
+<ds:X509SerialNumber>155395865307244892435254736213735139448</ds:X509SerialNumber>
+</ds:X509IssuerSerial>
+</ds:X509Data>
+<ds:KeyValue>
+<ds:RSAKeyValue>
+<ds:Modulus>i8OYq0/Ts+vOqzHewxDofHvcDJQeqkDzwukbmgMFJEb+pfxLjmVuYVQgMh1gAqd1
+dXAj/A1iyaOA2ZmbghL68Xu1m4NfLeZt3Dvwz3n29bP6he7PbfGIdsy3LQ24mWrk
+irWms9+u1ufmGURUkcrcfBepFssRJPQZI6A6cKih/ky0QV22ZK3QYtmxCmHmfxrr
+BCnHFf70AgkMCk9+zgC6UpV9NMsNuftjp5iJJWQZ0ps9kJSoBxwqX4D4sGQLznVZ
+ZPb43TEpm/Wn/SkuGTGE7V0LyeyajhPdVYYGBWjxCuUgIvXVNwkPHTYvdrSgRy6C
+vBMrrfVv/W//sBN20F3doQ==</ds:Modulus>
+<ds:Exponent>Aw==</ds:Exponent>
+</ds:RSAKeyValue>
+</ds:KeyValue>
+</ds:KeyInfo>
+<ds:Object><xades:QualifyingProperties Target="#xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608"><xades:SignedProperties Id="xmldsig-fcf15305-7651-4e8a-9fb1-6ada4e29c608-signedprops"><xades:SignedSignatureProperties><xades:SigningTime>2019-12-12T16:55:54+00:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod><ds:DigestValue>cfjiIAXxfQhtDezsh7I4Yh+n588NK2kCPSJiGw9vNeeauGWHulG+HjEitx/U+5dPMxJpSJPGqCEQhyMwRNOmvg==</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>streetAddress=www.certicamara.com,L=BOGOTA,stateOrProvinceName=DISTRITO CAPITAL,C=CO,OU=NIT 830084433-7,O=CERTICAMARA S.A,CN=AC SUB CERTICAMARA</ds:X509IssuerName><ds:X509SerialNumber>155395865307244892435254736213735139448</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate><xades:SignaturePolicyIdentifier><xades:SignaturePolicyId><xades:SigPolicyId><xades:Identifier>https://facturaelectronica.dian.gov.co/politicadefirma/v2/politicadefirmav2.pdf</xades:Identifier><xades:Description>Política de firma para facturas electrónicas de la República de Colombia.</xades:Description></xades:SigPolicyId><xades:SigPolicyHash><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod><ds:DigestValue>Zcjw1Z9nGQn2j6NyGx8kAaLbOfJGd/fJxRTCeirlqAg7zRG27piJkJOpflGu7XACpMj9hC6dVMcCyzqHxxPZeQ==</ds:DigestValue></xades:SigPolicyHash></xades:SignaturePolicyId></xades:SignaturePolicyIdentifier><xades:SignerRole><xades:ClaimedRoles><xades:ClaimedRole>supplier</xades:ClaimedRole></xades:ClaimedRoles></xades:SignerRole></xades:SignedSignatureProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></ext:ExtensionContent>
+		</ext:UBLExtension>
+   </ext:UBLExtensions>
+   <cbc:UBLVersionID>UBL 2.1</cbc:UBLVersionID>
+   <cbc:CustomizationID>11</cbc:CustomizationID>
+   <cbc:ProfileID>DIAN 2.1</cbc:ProfileID>
+   <cbc:ProfileExecutionID>2</cbc:ProfileExecutionID>
+   <cbc:ID>NCV446</cbc:ID>
+   <cbc:UUID schemeID="2" schemeName="CUFE-SHA384">df8a4732c936f99507e8f72705300f45f06c172e5013e36a21f80e5c3075a784ff0276cb0227901d0133b3223d93fc99</cbc:UUID>
+   <cbc:IssueDate>2019-12-12</cbc:IssueDate>
+   <cbc:IssueTime>10:46:06-05:00</cbc:IssueTime>
+   <cbc:CreditNoteTypeCode>91</cbc:CreditNoteTypeCode>
+   <cbc:Note></cbc:Note>
+   <cbc:DocumentCurrencyCode listAgencyID="6" listAgencyName="United Nations Economic Commission for Europe" listID="ISO 4217 Alpha">COP</cbc:DocumentCurrencyCode>
+   <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+   <cac:DiscrepancyResponse>
+      <cbc:ReferenceID>SETP990000005</cbc:ReferenceID>
+      <cbc:ResponseCode>2</cbc:ResponseCode>
+      <cbc:Description>Anulación de factura electrónica</cbc:Description>
+   </cac:DiscrepancyResponse>
+<!--TODO: Creo que esto para colocar el numero de la orden, en nuestro caso, seria la cotizacion>
+   <cac:OrderReference>
+      <cbc:ID></cbc:ID>
+      <cbc:IssueDate></cbc:IssueDate>
+   </cac:OrderReference-->
+<!--TODAS LAS FACTURAS DEBEN SER DEL MISMO ADQUIRIENTE-->
+   <cac:BillingReference>
+      <cac:InvoiceDocumentReference>
+         <cbc:ID>SETP990000005</cbc:ID>
+         <cbc:UUID schemeName="CUFE-SHA384">189e06b3364f44ae34c55c4a71e203da2147d26031cf811d77c34d263935f39825ab7d32eda5aeb8ba4e24ac960fcd55</cbc:UUID>
+         <cbc:IssueDate>2019-12-11</cbc:IssueDate>
+      </cac:InvoiceDocumentReference>
+   </cac:BillingReference>
+   <cac:DespatchDocumentReference>
+      <cbc:ID>8124167214 DA</cbc:ID>
+   </cac:DespatchDocumentReference>
+   <cac:ReceiptDocumentReference>
+      <cbc:ID>12314129 GR</cbc:ID>
+   </cac:ReceiptDocumentReference>
+   <cac:AccountingSupplierParty>
+      <cbc:AdditionalAccountID>1</cbc:AdditionalAccountID>
+      <cac:Party>
+         <cac:PartyName>
+            <cbc:Name>DIAGNOSTICENTRO ENVIGADO LTDA</cbc:Name>
+         </cac:PartyName>
+         <cac:PhysicalLocation>
+            <cac:Address>
+               <cbc:ID>05266</cbc:ID>
+               <cbc:CityName>ENVIGADO</cbc:CityName>
+               <cbc:PostalZone>055420</cbc:PostalZone>
+               <cbc:CountrySubentity>ANTIOQUIA</cbc:CountrySubentity>
+               <cbc:CountrySubentityCode>05</cbc:CountrySubentityCode>
+               <cac:AddressLine>
+                  <cbc:Line>CR 43A 29 SUR 115</cbc:Line>
+               </cac:AddressLine>
+               <cac:Country>
+                  <cbc:IdentificationCode>CO</cbc:IdentificationCode>
+                  <cbc:Name languageID="es">Colombia</cbc:Name>
+               </cac:Country>
+            </cac:Address>
+         </cac:PhysicalLocation>
+         <cac:PartyTaxScheme>
+            <cbc:RegistrationName>DIAGNOSTICENTRO ENVIGADO LTDA</cbc:RegistrationName>
+            <cbc:CompanyID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="1" schemeName="31">800077215</cbc:CompanyID>
+            <!--TODO, listName el anexo dice que eliminar o valor No aplica-->
+            <cbc:TaxLevelCode listName="48">O-47</cbc:TaxLevelCode>
+            <cac:RegistrationAddress>
+               <cbc:ID>05266</cbc:ID>
+               <cbc:CityName>ENVIGADO</cbc:CityName>
+               <cbc:PostalZone>055420</cbc:PostalZone>
+               <cbc:CountrySubentity>ANTIOQUIA</cbc:CountrySubentity>
+               <cbc:CountrySubentityCode>05</cbc:CountrySubentityCode>
+               <cac:AddressLine>
+                  <cbc:Line>CR 43A 29 SUR 115</cbc:Line>
+               </cac:AddressLine>
+               <cac:Country>
+                  <cbc:IdentificationCode>CO</cbc:IdentificationCode>
+                  <cbc:Name languageID="es">Colombia</cbc:Name>
+               </cac:Country>
+            </cac:RegistrationAddress>
+            <cac:TaxScheme>
+               <cbc:ID>01</cbc:ID>
+               <cbc:Name>IVA</cbc:Name>
+            </cac:TaxScheme>
+         </cac:PartyTaxScheme>
+         <cac:PartyLegalEntity>
+            <cbc:RegistrationName>DIAGNOSTICENTRO ENVIGADO LTDA</cbc:RegistrationName>
+            <cbc:CompanyID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="1" schemeName="31">800077215</cbc:CompanyID>
+            <cac:CorporateRegistrationScheme>
+               <cbc:Name>8000772151</cbc:Name>
+            </cac:CorporateRegistrationScheme>
+         </cac:PartyLegalEntity>
+         <cac:Contact>
+            <!--TODO-->
+            <cbc:Name>Diana Cruz</cbc:Name>
+            <cbc:Telephone>31031031089</cbc:Telephone>
+            <cbc:ElectronicMail>dcruz@empresa.org</cbc:ElectronicMail>
+         </cac:Contact>
+      </cac:Party>
+   </cac:AccountingSupplierParty>
+   <cac:AccountingCustomerParty>
+      <cbc:AdditionalAccountID>1</cbc:AdditionalAccountID>
+      <cac:Party>
+         <cac:PartyName>
+            <cbc:Name>DIAGNOSTICENTRO ENVIGADO LTDA</cbc:Name>
+         </cac:PartyName>
+         <cac:PhysicalLocation>
+            <cac:Address>
+               <cbc:ID>05266</cbc:ID>
+               <cbc:CityName>ENVIGADO</cbc:CityName>
+               <cbc:PostalZone>055420</cbc:PostalZone>
+               <cbc:CountrySubentity>ANTIOQUIA</cbc:CountrySubentity>
+               <cbc:CountrySubentityCode>05</cbc:CountrySubentityCode>
+               <cac:AddressLine>
+                  <cbc:Line>CR 43A 29 SUR 115</cbc:Line>
+               </cac:AddressLine>
+               <cac:Country>
+                  <cbc:IdentificationCode>CO</cbc:IdentificationCode>
+                  <cbc:Name languageID="es">Colombia</cbc:Name>
+               </cac:Country>
+            </cac:Address>
+         </cac:PhysicalLocation>
+         <cac:PartyTaxScheme>
+            <cbc:RegistrationName>DIAGNOSTICENTRO ENVIGADO LTDA</cbc:RegistrationName>
+            <cbc:CompanyID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="1" schemeName="31">800077215</cbc:CompanyID>
+            <!--TODO, listName el anexo dice que eliminar o valor No aplica-->
+            <cbc:TaxLevelCode listName="48">O-47</cbc:TaxLevelCode>
+            <cac:RegistrationAddress>
+               <cbc:ID>05266</cbc:ID>
+               <cbc:CityName>ENVIGADO</cbc:CityName>
+               <cbc:PostalZone>055420</cbc:PostalZone>
+               <cbc:CountrySubentity>ANTIOQUIA</cbc:CountrySubentity>
+               <cbc:CountrySubentityCode>05</cbc:CountrySubentityCode>
+               <cac:AddressLine>
+                  <cbc:Line>CR 43A 29 SUR 115</cbc:Line>
+               </cac:AddressLine>
+               <cac:Country>
+                  <cbc:IdentificationCode>CO</cbc:IdentificationCode>
+                  <cbc:Name languageID="es">Colombia</cbc:Name>
+               </cac:Country>
+            </cac:RegistrationAddress>
+            <cac:TaxScheme>
+               <cbc:ID>01</cbc:ID>
+               <cbc:Name>IVA</cbc:Name>
+            </cac:TaxScheme>
+         </cac:PartyTaxScheme>
+         <cac:PartyLegalEntity>
+            <cbc:RegistrationName>DIAGNOSTICENTRO ENVIGADO LTDA</cbc:RegistrationName>
+            <cbc:CompanyID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="1" schemeName="31">800077215</cbc:CompanyID>
+            <cac:CorporateRegistrationScheme>
+               <cbc:Name>8000772151</cbc:Name>
+            </cac:CorporateRegistrationScheme>
+         </cac:PartyLegalEntity>
+         <cac:Contact>
+            <!--TODO-->
+            <cbc:Name>Diana Cruz</cbc:Name>
+            <cbc:Telephone>31031031089</cbc:Telephone>
+            <cbc:ElectronicMail>dcruz@empresa.org</cbc:ElectronicMail>
+         </cac:Contact>
+      </cac:Party>
+   </cac:AccountingCustomerParty>
+   <cac:TaxRepresentativeParty>
+      <cac:PartyIdentification>
+         <cbc:ID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="4" schemeName="31">989123123</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+         <cbc:Name></cbc:Name>
+      </cac:PartyName>
+   </cac:TaxRepresentativeParty>
+   <cac:Delivery>
+      <cac:DeliveryAddress>
+         <cbc:ID>11001</cbc:ID>
+         <cbc:CityName>Bogotá, D.c. </cbc:CityName>
+         <cbc:CountrySubentity>Bogotá, D.c. 11</cbc:CountrySubentity>
+         <cbc:CountrySubentityCode>11</cbc:CountrySubentityCode>
+         <cac:AddressLine>
+            <cbc:Line>CARRERA 8 No 20-14/40</cbc:Line>
+         </cac:AddressLine>
+         <cac:Country>
+            <cbc:IdentificationCode>CO</cbc:IdentificationCode>
+            <cbc:Name languageID="es">Colombia</cbc:Name>
+         </cac:Country>
+      </cac:DeliveryAddress>
+      <cac:DeliveryParty>
+         <cac:PartyName>
+            <cbc:Name>Empresa de transporte</cbc:Name>
+         </cac:PartyName>
+         <cac:PhysicalLocation>
+            <cac:Address>
+               <cbc:ID>11001</cbc:ID>
+               <cbc:CityName>Bogotá, D.c. </cbc:CityName>
+               <cbc:CountrySubentity>Bogotá</cbc:CountrySubentity>
+               <cbc:CountrySubentityCode>11</cbc:CountrySubentityCode>
+               <cac:AddressLine>
+                  <cbc:Line>Av.  #17 - 193</cbc:Line>
+               </cac:AddressLine>
+               <cac:Country>
+                  <cbc:IdentificationCode>CO</cbc:IdentificationCode>
+                  <cbc:Name languageID="es">Colombia</cbc:Name>
+               </cac:Country>
+            </cac:Address>
+         </cac:PhysicalLocation>
+         <cac:PartyTaxScheme>
+            <cbc:RegistrationName>Empresa de transporte</cbc:RegistrationName>
+            <cbc:CompanyID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="1" schemeName="31">981223983</cbc:CompanyID>
+            <cbc:TaxLevelCode listName="04">O-99</cbc:TaxLevelCode>
+            <cac:TaxScheme>
+               <cbc:ID>01</cbc:ID>
+               <cbc:Name>IVA</cbc:Name>
+            </cac:TaxScheme>
+         </cac:PartyTaxScheme>
+         <cac:PartyLegalEntity>
+            <cbc:RegistrationName>Empresa de transporte</cbc:RegistrationName>
+            <cbc:CompanyID schemeAgencyID="195" schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)" schemeID="1" schemeName="31">981223983</cbc:CompanyID>
+            <cac:CorporateRegistrationScheme>
+               <cbc:Name>75433</cbc:Name>
+            </cac:CorporateRegistrationScheme>
+         </cac:PartyLegalEntity>
+         <cac:Contact>
+            <cbc:Name>Marcela Diaz</cbc:Name>
+            <cbc:Telephone>6789521</cbc:Telephone>
+            <cbc:ElectronicMail>marciaz@sistemas.net</cbc:ElectronicMail>
+         </cac:Contact>
+      </cac:DeliveryParty>
+   </cac:Delivery>
+   <cac:DeliveryTerms>
+      <cbc:SpecialTerms>Portes Pagados</cbc:SpecialTerms>
+      <cbc:LossRiskResponsibilityCode>CFR</cbc:LossRiskResponsibilityCode>
+      <cbc:LossRisk>Costo y Flete</cbc:LossRisk>
+   </cac:DeliveryTerms>
+   <cac:PaymentMeans>
+      <cbc:ID>1</cbc:ID>
+      <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
+      <cbc:PaymentDueDate>2020-01-10</cbc:PaymentDueDate>
+      <cbc:PaymentID>Efectivo</cbc:PaymentID>
+   </cac:PaymentMeans>
+   <cac:PaymentExchangeRate>
+      <cbc:SourceCurrencyCode>COP</cbc:SourceCurrencyCode>
+      <cbc:SourceCurrencyBaseRate>1.00</cbc:SourceCurrencyBaseRate>
+      <cbc:TargetCurrencyCode>COP</cbc:TargetCurrencyCode>
+      <cbc:TargetCurrencyBaseRate>1.00</cbc:TargetCurrencyBaseRate>
+      <cbc:CalculationRate>3100</cbc:CalculationRate>
+      <cbc:Date>2019-06-21</cbc:Date>
+   </cac:PaymentExchangeRate>
+   <cac:TaxTotal>
+		<cbc:TaxAmount currencyID="COP">0.00</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="COP">0.00</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="COP">0.00</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cbc:Percent>0.00</cbc:Percent>
+				<cac:TaxScheme>
+					<cbc:ID>03</cbc:ID>
+					<cbc:Name>INC</cbc:Name>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+		</cac:TaxTotal>
+   <cac:TaxTotal>
+		<cbc:TaxAmount currencyID="COP">184805.89</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="COP">972662.60</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="COP">184805.89</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cbc:Percent>19.00</cbc:Percent>
+				<cac:TaxScheme>
+					<cbc:ID>01</cbc:ID>
+					<cbc:Name>IVA</cbc:Name>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+		</cac:TaxTotal>
+   <cac:TaxTotal>
+		<cbc:TaxAmount currencyID="COP">0.00</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="COP">0.00</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="COP">0.00</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cbc:Percent>0.00</cbc:Percent>
+				<cac:TaxScheme>
+					<cbc:ID>04</cbc:ID>
+					<cbc:Name>ICA</cbc:Name>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+		</cac:TaxTotal>
+   <cac:WithholdingTaxTotal>
+		<cbc:TaxAmount currencyID="COP">24316.57</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="COP">972662.60</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="COP">24316.57</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cbc:Percent>2.50</cbc:Percent>
+				<cac:TaxScheme>
+					<cbc:ID>06</cbc:ID>
+					<cbc:Name>ReteRenta</cbc:Name>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+		</cac:WithholdingTaxTotal>
+	<cac:LegalMonetaryTotal>
+      <cbc:LineExtensionAmount currencyID="COP">972662.60</cbc:LineExtensionAmount>
+      <cbc:TaxExclusiveAmount currencyID="COP">972662.60</cbc:TaxExclusiveAmount>
+      <cbc:TaxInclusiveAmount currencyID="COP">1157468.49</cbc:TaxInclusiveAmount>
+      <cbc:PayableAmount currencyID="COP">1157468.49</cbc:PayableAmount>
+   </cac:LegalMonetaryTotal>
+   <cac:CreditNoteLine>
+      <cbc:ID>1</cbc:ID>
+      <cbc:CreditedQuantity unitCode="EA"></cbc:CreditedQuantity>
+      <cbc:LineExtensionAmount currencyID="COP">12600.06</cbc:LineExtensionAmount>
+      <cac:TaxTotal>
+         <cbc:TaxAmount currencyID="COP">2394.01</cbc:TaxAmount>
+         <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="COP">12600.06</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="COP">2394.01</cbc:TaxAmount>
+            <cac:TaxCategory>
+               <cbc:Percent>19.00</cbc:Percent>
+               <cac:TaxScheme>
+                  <cbc:ID>01</cbc:ID>
+                  <cbc:Name>IVA</cbc:Name>
+               </cac:TaxScheme>
+            </cac:TaxCategory>
+         </cac:TaxSubtotal>
+      </cac:TaxTotal>
+      <cac:AllowanceCharge>
+         <cbc:ID>1</cbc:ID>
+         <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+         <cbc:AllowanceChargeReason>Descuento por cliente frecuente</cbc:AllowanceChargeReason>
+         <cbc:MultiplierFactorNumeric>33.33</cbc:MultiplierFactorNumeric>
+         <cbc:Amount currencyID="COP">6299.94</cbc:Amount>
+         <cbc:BaseAmount currencyID="COP">18900.00</cbc:BaseAmount>
+      </cac:AllowanceCharge>
+      <cac:Item>
+         <cbc:Description>Articulo 1 Prueba</cbc:Description>
+         <cac:SellersItemIdentification>
+            <cbc:ID>AOHV84-225</cbc:ID>
+         </cac:SellersItemIdentification>
+         <cac:InformationContentProviderParty>
+            <cac:PowerOfAttorney>
+               <cac:AgentParty>
+                  <cac:PartyIdentification>
+                     <cbc:ID schemeAgencyID="195" schemeID="3" schemeName="31">900108281</cbc:ID>
+                  </cac:PartyIdentification>
+               </cac:AgentParty>
+            </cac:PowerOfAttorney>
+         </cac:InformationContentProviderParty>
+      </cac:Item>
+      <cac:Price>
+         <cbc:PriceAmount currencyID="COP">231842.00</cbc:PriceAmount>
+         <cbc:BaseQuantity unitCode="EA">5.00</cbc:BaseQuantity>
+      </cac:Price>
+   </cac:CreditNoteLine>
+   <cac:CreditNoteLine>
+      <cbc:ID>2</cbc:ID>
+      <cbc:CreditedQuantity unitCode="EA"></cbc:CreditedQuantity>
+      <cbc:LineExtensionAmount currencyID="COP">12600.06</cbc:LineExtensionAmount>
+      <cac:TaxTotal>
+         <cbc:TaxAmount currencyID="COP">2394.01</cbc:TaxAmount>
+         <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="COP">12600.06</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="COP">2394.01</cbc:TaxAmount>
+            <cac:TaxCategory>
+               <cbc:Percent>19.00</cbc:Percent>
+               <cac:TaxScheme>
+                  <cbc:ID>01</cbc:ID>
+                  <cbc:Name>IVA</cbc:Name>
+               </cac:TaxScheme>
+            </cac:TaxCategory>
+         </cac:TaxSubtotal>
+      </cac:TaxTotal>
+      <cac:AllowanceCharge>
+         <cbc:ID>1</cbc:ID>
+         <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+         <cbc:AllowanceChargeReason>Descuento por cliente frecuente</cbc:AllowanceChargeReason>
+         <cbc:MultiplierFactorNumeric>33.33</cbc:MultiplierFactorNumeric>
+         <cbc:Amount currencyID="COP">6299.94</cbc:Amount>
+         <cbc:BaseAmount currencyID="COP">18900.00</cbc:BaseAmount>
+      </cac:AllowanceCharge>
+      <cac:Item>
+         <cbc:Description>Articulo 1 Prueba</cbc:Description>
+         <cac:SellersItemIdentification>
+            <cbc:ID>AOHV84-225</cbc:ID>
+         </cac:SellersItemIdentification>
+         <cac:InformationContentProviderParty>
+            <cac:PowerOfAttorney>
+               <cac:AgentParty>
+                  <cac:PartyIdentification>
+                     <cbc:ID schemeAgencyID="195" schemeID="3" schemeName="31">900108281</cbc:ID>
+                  </cac:PartyIdentification>
+               </cac:AgentParty>
+            </cac:PowerOfAttorney>
+         </cac:InformationContentProviderParty>
+      </cac:Item>
+      <cac:Price>
+         <cbc:PriceAmount currencyID="COP">337194.00</cbc:PriceAmount>
+         <cbc:BaseQuantity unitCode="EA">1.00</cbc:BaseQuantity>
+      </cac:Price>
+   </cac:CreditNoteLine>
+   </CreditNote>
