@@ -533,7 +533,7 @@ Especifación de este grupo igual a la del documento Invoice>
 		<!--TODO, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor-->
 			<cac:SellersItemIdentification>
 				<cbc:ID>AOHV84-225</cbc:ID>
-				<cbc:ExtendedID>AOHV84-225</cbc:ID>
+				<cbc:ExtendedID>AOHV84-225</cbc:ExtendedID>
 			</cac:SellersItemIdentification>
 		<!--TODO, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
 			<cac:StandardItemIdentification>
