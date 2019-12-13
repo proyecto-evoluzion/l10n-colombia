@@ -300,7 +300,7 @@ class AccountInvoice(models.Model):
 				total_wo_disc = invoice_line.price_unit * invoice_line.quantity
 
 			invoice_lines[count] = {}
-			invoice_lines[count]['InvoicedQuantity'] = '{:.2f}'.format(
+			invoice_lines[count]['Quantity'] = '{:.2f}'.format(
 				invoice_line.quantity)
 			invoice_lines[count]['LineExtensionAmount'] = '{:.2f}'.format(
 				invoice_line.price_subtotal)

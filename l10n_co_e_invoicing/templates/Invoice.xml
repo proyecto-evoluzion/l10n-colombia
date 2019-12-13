@@ -62,7 +62,8 @@
 	</ext:UBLExtensions>
 	<cbc:UBLVersionID>UBL 2.1</cbc:UBLVersionID>
 	<cbc:CustomizationID>{{CustomizationID}}</cbc:CustomizationID>
-	<cbc:ProfileID>DDIAN 2.1: Factura Electrónica de Venta</cbc:ProfileID>
+<!--TODO: anexo tecnico dice que va ": Factura Electrónica de Venta"-->
+	<cbc:ProfileID>DIAN 2.1</cbc:ProfileID>
 	<cbc:ProfileExecutionID>{{ProfileExecutionID}}</cbc:ProfileExecutionID>
 	<cbc:ID>{{ID}}</cbc:ID>
 	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUFE-SHA384">{{UUID}}</cbc:UUID>
@@ -201,16 +202,16 @@ ajuste que se da mediante un Nota Débito>
 					<cbc:PartecipationPercent>10.00</cbc:PartecipationPercent>
                     <cac:Party>
                         <cac:PartyTaxScheme>
-                            <cbc:RegistrationName>{{ShareholderParty.Name}}</cbc:RegistrationName>
+                            <cbc:RegistrationName></cbc:RegistrationName>
                             <cbc:CompanyID schemeAgencyID="195"
                                 schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
-                                schemeID="{{ShareholderParty.CompanyIDschemeID}}"
-                                schemeName="{{ShareholderParty.CompanyIDschemeName}}">{{ShareholderParty.CompanyID}}</cbc:CompanyID>
+                                schemeID=""
+                                schemeName=""></cbc:CompanyID>
                         <TODO, listName el anexo dice que eliminar o valor No aplica>
-                            <cbc:TaxLevelCode listName="48">{{ShareholderParty.TaxLevelCode}}</cbc:TaxLevelCode>
+                            <cbc:TaxLevelCode listName="48"></cbc:TaxLevelCode>
                             <cac:TaxScheme>
-                                <cbc:ID>{{ShareholderParty.TaxSchemeID}}</cbc:ID>
-                                <cbc:Name>{{ShareholderParty.TaxSchemeName}}</cbc:Name>
+                                <cbc:ID></cbc:ID>
+                                <cbc:Name></cbc:Name>
                             </cac:TaxScheme>
                         </cac:PartyTaxScheme>
                     </cac:Party>
@@ -526,7 +527,7 @@ ajuste que se da mediante un Nota Débito>
 	servicios AIU por concepto de:” El contribuyente debe incluir el objeto del contrato facturado-->
 		<cbc:Note>Información Adicional: Texto libre para añadir información adicional al artículo.</cbc:Note>
 	<!--TODO: unitCode debe ser dinamico-->
-		<cbc:InvoicedQuantity unitCode="EA">{{InvoiceLine.InvoicedQuantity}}</cbc:InvoicedQuantity>
+		<cbc:InvoicedQuantity unitCode="EA">{{InvoiceLine.Quantity}}</cbc:InvoicedQuantity>
 		<cbc:LineExtensionAmount currencyID="COP">{{InvoiceLine.LineExtensionAmount}}</cbc:LineExtensionAmount>
 	<!--TODO, Obligatorio de informar si se trata de muestras comerciales.>
 		<cac:PricingReference>
@@ -633,7 +634,8 @@ ajuste que se da mediante un Nota Débito>
 		</cac:Item>
 		<cac:Price>
 			<cbc:PriceAmount currencyID="COP">{{InvoiceLine.PriceAmount}}</cbc:PriceAmount>
-			<cbc:BaseQuantity unitCode="EA">{{InvoiceLine.InvoicedQuantity}}</cbc:BaseQuantity>
+			<cbc:BaseQuantity unitCode="EA">{{InvoiceLine.Quantity}}</cbc:BaseQuantity>
 		</cac:Price>
+	</cac:InvoiceLine>
 	{% endfor -%}
 </Invoice>

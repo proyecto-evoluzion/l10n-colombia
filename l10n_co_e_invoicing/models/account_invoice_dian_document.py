@@ -40,6 +40,7 @@ class AccountInvoiceDianDocument(models.Model):
     company_id = fields.Many2one(
         'res.company',
         string='Company')
+    invoice_url = fields.Char(string='Invoice Url')
     cufe_cude_uncoded = fields.Char(string='CUFE/CUDE Uncoded')
     cufe_cude = fields.Char(string='CUFE/CUDE')
     software_security_code_uncoded = fields.Char(
@@ -171,6 +172,7 @@ class AccountInvoiceDianDocument(models.Model):
         QRCodeURL = QRCodeURL.format(cufe_cude['CUFE/CUDE'], partition_key, emission_date)
 
         self.write({
+            'invoice_url': QRCodeURL,
             'cufe_cude_uncoded': cufe_cude['CUFE/CUDEUncoded'],
             'cufe_cude': cufe_cude['CUFE/CUDE'],
             'software_security_code_uncoded':
@@ -258,14 +260,20 @@ class AccountInvoiceDianDocument(models.Model):
         #30 Nota Débito que referencia una factura electrónica.
         #32 Nota Débito sin referencia a facturas*.
         #33 Nota Débito para facturación electrónica V1 (Decreto 2242).
-        xml_values['CustomizationID'] = '30'
+        xml_values['CustomizationID'] = '32'
         #Exclusivo en referencias a documentos (elementos DocumentReference)
         #Punto 14.1.3 del anexo tecnico version 1.8
         #92 Nota Débito 
-        xml_values['DebitNoteTypeCode'] = '92'
-        billing_reference = self.invoice_id._get_billing_reference()
-        xml_values['BillingReference'] = billing_reference
-        xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
+        #TODO: Parece que este valor se informa solo en la factura de venta
+        #parece que en exportaciones
+        #xml_values['DebitNoteTypeCode'] = '92'
+        #TODO: Es raro que tengamos el cufe de la factura de proveedor,
+        #en odoo no se puede hacer notas debito a facturas de venta
+        #desarrollo adicional para soportar esto
+        #billing_reference = self.invoice_id._get_billing_reference()
+        #xml_values['BillingReference'] = billing_reference
+        #xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
+        xml_values['DiscrepancyReferenceID'] = self.invoice_id.origin
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['DebitNoteLines'] = self.invoice_id._get_invoice_lines()
