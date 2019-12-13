@@ -50,10 +50,10 @@
 	</ext:UBLExtensions>
 	<cbc:UBLVersionID>UBL 2.1</cbc:UBLVersionID>
 	<cbc:CustomizationID>{{CustomizationID}}</cbc:CustomizationID>
-	<cbc:ProfileID>DIAN 2.1: Nota Crédito de Factura Electrónica de Venta</cbc:ProfileID>
+	<cbc:ProfileID>DIAN 2.1</cbc:ProfileID>
 	<cbc:ProfileExecutionID>{{ProfileExecutionID}}</cbc:ProfileExecutionID>
 	<cbc:ID>{{ID}}</cbc:ID>
-	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUFE-SHA384">{{UUID}}</cbc:UUID>
+	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUDE-SHA384">{{UUID}}</cbc:UUID>
 	<cbc:IssueDate>{{IssueDate}}</cbc:IssueDate>
 	<cbc:IssueTime>{{IssueTime}}</cbc:IssueTime>
 	<cbc:CreditNoteTypeCode>{{CreditNoteTypeCode}}</cbc:CreditNoteTypeCode>
@@ -191,14 +191,14 @@ Especifación de este grupo igual a la del documento Invoice>
                     </cac:Party>
 				</cac:ShareholderParty-->
 			</cac:PartyLegalEntity>
-        <!--TODO: opcional, Grupo de detalles con información de contacto del consorcio>
+        <!-- TODO: opcional, Grupo de detalles con información de contacto del consorcio -->
 			<cac:Contact>
 				<cbc:Name>Diana Cruz</cbc:Name>
 				<cbc:Telephone>31031031089</cbc:Telephone>
                 <cbc:Telefax>31031031089</cbc:Telefax>
-				<cbc:ElectronicMail>dcruz@empresa.org</cbc:ElectronicMail>
+				<cbc:ElectronicMail>dcruz@empresa.org</cbc:ElectronicMail>  <!-- REQUERIDO-->
                 <cbc:Note>dcruz@empresa.org</cbc:Note>
-			</cac:Contact-->
+			</cac:Contact>
 		</cac:Party>
 	</cac:AccountingSupplierParty>
 	<cac:AccountingCustomerParty>
@@ -266,21 +266,21 @@ Especifación de este grupo igual a la del documento Invoice>
 					<cbc:Name>{{AccountingCustomerParty.CorporateRegistrationSchemeName}}</cbc:Name>
 				</cac:CorporateRegistrationScheme>
 			</cac:PartyLegalEntity>
-		<!--TODO: opcional, Grupo de detalles con información de contacto del receptor>
+		<!-- TODO: opcional, Grupo de detalles con información de contacto del receptor> -->
 			<cac:Contact>
-				<cbc:Name>Diana Cruz</cbc:Name>
-				<cbc:Telephone>31031031089</cbc:Telephone>
-                <cbc:Telefax>31031031089</cbc:Telefax>
-				<cbc:ElectronicMail>dcruz@empresa.org</cbc:ElectronicMail>
-                <cbc:Note>dcruz@empresa.org</cbc:Note>
-			</cac:Contact-->
-        <!--TODO: Para informarse si AdditionalAccountID = 2 >
+				<cbc:Name>{{ReceiverName}}</cbc:Name>
+				<cbc:Telephone>{{ReceiverPhone}}</cbc:Telephone>
+                <cbc:Telefax>{{ReceiverFax}}</cbc:Telefax>
+				<cbc:ElectronicMail>eric.vanboxsom@gosocket.net</cbc:ElectronicMail>  <!--REQUERIDO-->
+                <cbc:Note>{{ReceiverNote}}</cbc:Note>
+			</cac:Contact>
+        <!-- TODO: Para informarse si AdditionalAccountID = 2  -->
 			<cac:Person>
-				<cbc:ID>{{AccountingCustomerParty.AdditionalAccountID}}</cbc:ID>
+				<!-- <cbc:ID>{{AccountingCustomerParty.AdditionalAccountID}}</cbc:ID>
 				<cbc:FirstName>“consumidor” o “usuario”</cbc:FirstName>
                 <cbc:FamilyName>“final”</cbc:FamilyName>
-				<cbc:MiddleName>dcruz@empresa.org</cbc:MiddleName>
-			<TODO: solo informar informacion de la residencia>
+				<cbc:MiddleName>dcruz@empresa.org</cbc:MiddleName> -->
+		<!-- TODO: solo informar informacion de la residencia -->
                 <cac:ResidenceAddress>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
 					<cbc:CityName>{{AccountingCustomerParty.AddressCityName}}</cbc:CityName>
@@ -291,7 +291,7 @@ Especifación de este grupo igual a la del documento Invoice>
 						<cbc:Line>{{AccountingCustomerParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
 				</cac:ResidenceAddress>
-			</cac:Person-->
+			</cac:Person>
 		</cac:Party>
 	</cac:AccountingCustomerParty>
 	<cac:TaxRepresentativeParty>
