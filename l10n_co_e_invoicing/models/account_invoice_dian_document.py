@@ -112,7 +112,6 @@ class AccountInvoiceDianDocument(models.Model):
             'zipped_filename': 'z' + znnnnnnnnnnpppaadddddddd + '.zip'})
 
     def _get_xml_values(self):
-        active_dian_resolution = self.invoice_id._get_active_dian_resolution()
         einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
         create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         create_date = create_date.replace(tzinfo=timezone('UTC'))
@@ -127,7 +126,8 @@ class AccountInvoiceDianDocument(models.Model):
         IdSoftware = self.company_id.software_id
 
         if self.invoice_id.type == 'out_invoice':
-            ClTec = active_dian_resolution['technical_key']
+            for date_range_id in self.invoice_id.journal_id.sequence_id.date_range_ids:
+                ClTec = date_range_id.technical_key
         else:
             SoftwarePIN = self.company_id.software_pin
         
@@ -181,12 +181,6 @@ class AccountInvoiceDianDocument(models.Model):
                 software_security_code['SoftwareSecurityCode']})
 
         return {
-            'InvoiceAuthorization': active_dian_resolution['resolution_number'],
-            'StartDate': active_dian_resolution['date_from'],
-            'EndDate': active_dian_resolution['date_to'],
-            'Prefix': active_dian_resolution['prefix'],
-            'From': active_dian_resolution['number_from'],
-            'To': active_dian_resolution['number_to'],
             'ProviderIDschemeID': self.company_id.partner_id.check_digit,
             'ProviderIDschemeName': self.company_id.partner_id.document_type_id.code,
             'ProviderID': NitOFE,
@@ -201,8 +195,6 @@ class AccountInvoiceDianDocument(models.Model):
             'IssueTime': IssueTime,
             'LineCountNumeric': len(self.invoice_id.invoice_line_ids),
             'DocumentCurrencyCode': self.invoice_id.currency_id.name,
-            'AccountingSupplierParty': self.invoice_id._get_accounting_supplier_party_values(),
-            'AccountingCustomerParty': self.invoice_id._get_accounting_customer_party_values(),
             'TaxRepresentativeParty': self.invoice_id._get_tax_representative_party_values(),
             'PaymentMeansID': self.invoice_id.payment_mean_id.code,
             'PaymentMeansCode': '10',
@@ -218,6 +210,7 @@ class AccountInvoiceDianDocument(models.Model):
 
     def _get_invoice_values(self):
         xml_values = self._get_xml_values()
+        active_dian_resolution = self.invoice_id._get_active_dian_resolution()
         #Punto 14.1.5.1. del anexo tecnico version 1.8
         #10 Estandar *
         #09 AIU
@@ -230,12 +223,21 @@ class AccountInvoiceDianDocument(models.Model):
         #03 Factura por Contingencia Facturador
         #04 Factura por Contingencia DIAN
         xml_values['InvoiceTypeCode'] = '01'
+        xml_values['InvoiceAuthorization'] = active_dian_resolution['resolution_number']
+        xml_values['StartDate'] = active_dian_resolution['date_from']
+        xml_values['EndDate'] = active_dian_resolution['date_to']
+        xml_values['Prefix'] = active_dian_resolution['prefix']
+        xml_values['From'] = active_dian_resolution['number_from']
+        xml_values['To'] = active_dian_resolution['number_to']
         xml_values['InvoiceLines'] = self.invoice_id._get_invoice_lines()
+        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_supplier_party_values()
+        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_customer_party_values()
 
         return xml_values
     
     def _get_credit_note_values(self):
         xml_values = self._get_xml_values()
+        active_dian_resolution = self.invoice_id._get_active_dian_resolution()
         #Punto 14.1.5.2. del anexo tecnico version 1.8
         #20 Nota Crédito que referencia una factura electrónica.
         #22 Nota Crédito sin referencia a facturas*.
@@ -246,11 +248,19 @@ class AccountInvoiceDianDocument(models.Model):
         #91 Nota Crédito
         xml_values['CreditNoteTypeCode'] = '91'
         billing_reference = self.invoice_id._get_billing_reference()
+        xml_values['InvoiceAuthorization'] = active_dian_resolution['resolution_number']
+        xml_values['StartDate'] = active_dian_resolution['date_from']
+        xml_values['EndDate'] = active_dian_resolution['date_to']
+        xml_values['Prefix'] = active_dian_resolution['prefix']
+        xml_values['From'] = active_dian_resolution['number_from']
+        xml_values['To'] = active_dian_resolution['number_to']
         xml_values['BillingReference'] = billing_reference
         xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['CreditNoteLines'] = self.invoice_id._get_invoice_lines()
+        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_supplier_party_values()
+        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_customer_party_values()
 
         return xml_values
     
@@ -277,6 +287,10 @@ class AccountInvoiceDianDocument(models.Model):
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['DebitNoteLines'] = self.invoice_id._get_invoice_lines()
+        #datos invertidos de customer party y supplier party debido a que en
+        #nota debito se ocupa el rol de cliente y no de proveedor
+        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_customer_party_values()
+        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_supplier_party_values()
 
         return xml_values
 
@@ -454,3 +468,4 @@ class AccountInvoiceDianDocument(models.Model):
         self.write({'zipped_file': b64encode(self._get_zipped_file())})
         self.sent_zipped_file()
         self.GetStatusZip()
+

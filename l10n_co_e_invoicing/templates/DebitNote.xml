@@ -44,9 +44,9 @@
 				</sts:DianExtensions>
 			</ext:ExtensionContent>
 		</ext:UBLExtension>
-	 <ext:UBLExtension>
-		  </ext:ExtensionContent>
-	 </ext:UBLExtension>
+		<ext:UBLExtension>
+			<ext:ExtensionContent/>
+		</ext:UBLExtension>
 	</ext:UBLExtensions>
 	<cbc:UBLVersionID>UBL 2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>{{CustomizationID}}</cbc:CustomizationID>
@@ -77,9 +77,9 @@ referencia la factura por ejemplo en servicios públicos>
 <!--Si CreditNoteTypeCode igual a 20 es obligatorio>
     <cac:BillingReference>
         <cac:InvoiceDocumentReference>
-            <cbc:ID>{{BillingReference.ID}}</cbc:ID>
-            <cbc:UUID schemeName="CUFE-SHA384">{{BillingReference.UUID}}</cbc:UUID>
-            <cbc:IssueDate>{{BillingReference.IssueDate}}</cbc:IssueDate>
+            <cbc:ID>{{BrID}}</cbc:ID>
+            <cbc:UUID schemeName="CUFE-SHA384">{{BrUUID}}</cbc:UUID>
+            <cbc:IssueDate>{{BrIssueDate}}</cbc:IssueDate>
         </cac:InvoiceDocumentReference>
     </cac:BillingReference-->
 <!--TODO: Creo que esto para colocar el numero de la orden, en nuestro caso, seria la cotizacion>
@@ -507,11 +507,11 @@ Especifación de este grupo igual a la del documento Invoice>
         <cac:Item>
 		    <cbc:Description>{{DebitNoteLine.ItemDescription}}</cbc:Description>
 		<!--TODO, Cantidad de unidad de este artículo por empaque>
-			<cbc:PackSizeNumeric>{{CreditNoteLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
+			<cbc:PackSizeNumeric>{{DebitNoteLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
 		<!--TODO, Marca: Marca del artículo>
-			<cbc:BrandName>{{CreditNoteLine.BrandName}}</cbc:BrandName-->
+			<cbc:BrandName>{{DebitNoteLine.BrandName}}</cbc:BrandName-->
 		<!--TODO, Modelo: Modelo del artículo>
-			<cbc:ModelName>{{CreditNoteLine.BrandName}}</cbc:ModelName-->
+			<cbc:ModelName>{{DebitNoteLine.BrandName}}</cbc:ModelName-->
 		<!--TODO, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor-->
 			<cac:SellersItemIdentification>
 				<cbc:ID>AOHV84-225</cbc:ID>
