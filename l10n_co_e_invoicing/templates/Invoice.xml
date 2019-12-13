@@ -202,16 +202,16 @@ ajuste que se da mediante un Nota Débito>
 					<cbc:PartecipationPercent>10.00</cbc:PartecipationPercent>
                     <cac:Party>
                         <cac:PartyTaxScheme>
-                            <cbc:RegistrationName>{{ShareholderParty.Name}}</cbc:RegistrationName>
+                            <cbc:RegistrationName></cbc:RegistrationName>
                             <cbc:CompanyID schemeAgencyID="195"
                                 schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
-                                schemeID="{{ShareholderParty.CompanyIDschemeID}}"
-                                schemeName="{{ShareholderParty.CompanyIDschemeName}}">{{ShareholderParty.CompanyID}}</cbc:CompanyID>
+                                schemeID=""
+                                schemeName=""></cbc:CompanyID>
                         <TODO, listName el anexo dice que eliminar o valor No aplica>
-                            <cbc:TaxLevelCode listName="48">{{ShareholderParty.TaxLevelCode}}</cbc:TaxLevelCode>
+                            <cbc:TaxLevelCode listName="48"></cbc:TaxLevelCode>
                             <cac:TaxScheme>
-                                <cbc:ID>{{ShareholderParty.TaxSchemeID}}</cbc:ID>
-                                <cbc:Name>{{ShareholderParty.TaxSchemeName}}</cbc:Name>
+                                <cbc:ID></cbc:ID>
+                                <cbc:Name></cbc:Name>
                             </cac:TaxScheme>
                         </cac:PartyTaxScheme>
                     </cac:Party>
@@ -634,7 +634,8 @@ ajuste que se da mediante un Nota Débito>
 		</cac:Item>
 		<cac:Price>
 			<cbc:PriceAmount currencyID="COP">{{InvoiceLine.PriceAmount}}</cbc:PriceAmount>
-			<cbc:BaseQuantity unitCode="EA">{{InvoiceLine.InvoicedQuantity}}</cbc:BaseQuantity>
+			<cbc:BaseQuantity unitCode="EA">{{InvoiceLine.Quantity}}</cbc:BaseQuantity>
 		</cac:Price>
+	</cac:InvoiceLine>
 	{% endfor -%}
 </Invoice>

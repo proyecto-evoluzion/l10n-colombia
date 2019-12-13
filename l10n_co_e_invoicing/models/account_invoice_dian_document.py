@@ -40,6 +40,7 @@ class AccountInvoiceDianDocument(models.Model):
     company_id = fields.Many2one(
         'res.company',
         string='Company')
+    invoice_url = fields.Char(string='Invoice Url')
     cufe_cude_uncoded = fields.Char(string='CUFE/CUDE Uncoded')
     cufe_cude = fields.Char(string='CUFE/CUDE')
     software_security_code_uncoded = fields.Char(
@@ -171,6 +172,7 @@ class AccountInvoiceDianDocument(models.Model):
         QRCodeURL = QRCodeURL.format(cufe_cude['CUFE/CUDE'], partition_key, emission_date)
 
         self.write({
+            'invoice_url': QRCodeURL,
             'cufe_cude_uncoded': cufe_cude['CUFE/CUDEUncoded'],
             'cufe_cude': cufe_cude['CUFE/CUDE'],
             'software_security_code_uncoded':

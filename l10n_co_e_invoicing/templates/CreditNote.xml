@@ -54,7 +54,7 @@
 	<cbc:ProfileID>DIAN 2.1</cbc:ProfileID>
 	<cbc:ProfileExecutionID>{{ProfileExecutionID}}</cbc:ProfileExecutionID>
 	<cbc:ID>{{ID}}</cbc:ID>
-	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUFE-SHA384">{{UUID}}</cbc:UUID>
+	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUDE-SHA384">{{UUID}}</cbc:UUID>
 	<cbc:IssueDate>{{IssueDate}}</cbc:IssueDate>
 	<cbc:IssueTime>{{IssueTime}}</cbc:IssueTime>
 	<cbc:CreditNoteTypeCode>{{CreditNoteTypeCode}}</cbc:CreditNoteTypeCode>
@@ -552,7 +552,7 @@ Especifación de este grupo igual a la del documento Invoice>
 		</cac:Item>
 		<cac:Price>
 			<cbc:PriceAmount currencyID="COP">{{CreditNoteLine.PriceAmount}}</cbc:PriceAmount>
-			<cbc:BaseQuantity unitCode="EA">{{CreditNoteLine.InvoicedQuantity}}</cbc:BaseQuantity>
+			<cbc:BaseQuantity unitCode="EA">{{CreditNoteLine.Quantity}}</cbc:BaseQuantity>
 		</cac:Price>
 	</cac:CreditNoteLine>
 	{% endfor -%}
