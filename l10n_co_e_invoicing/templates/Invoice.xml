@@ -62,7 +62,8 @@
 	</ext:UBLExtensions>
 	<cbc:UBLVersionID>UBL 2.1</cbc:UBLVersionID>
 	<cbc:CustomizationID>{{CustomizationID}}</cbc:CustomizationID>
-	<cbc:ProfileID>DDIAN 2.1: Factura Electrónica de Venta</cbc:ProfileID>
+<!--TODO: anexo tecnico dice que va ": Factura Electrónica de Venta"-->
+	<cbc:ProfileID>DIAN 2.1</cbc:ProfileID>
 	<cbc:ProfileExecutionID>{{ProfileExecutionID}}</cbc:ProfileExecutionID>
 	<cbc:ID>{{ID}}</cbc:ID>
 	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUFE-SHA384">{{UUID}}</cbc:UUID>
@@ -526,7 +527,7 @@ ajuste que se da mediante un Nota Débito>
 	servicios AIU por concepto de:” El contribuyente debe incluir el objeto del contrato facturado-->
 		<cbc:Note>Información Adicional: Texto libre para añadir información adicional al artículo.</cbc:Note>
 	<!--TODO: unitCode debe ser dinamico-->
-		<cbc:InvoicedQuantity unitCode="EA">{{InvoiceLine.InvoicedQuantity}}</cbc:InvoicedQuantity>
+		<cbc:InvoicedQuantity unitCode="EA">{{InvoiceLine.Quantity}}</cbc:InvoicedQuantity>
 		<cbc:LineExtensionAmount currencyID="COP">{{InvoiceLine.LineExtensionAmount}}</cbc:LineExtensionAmount>
 	<!--TODO, Obligatorio de informar si se trata de muestras comerciales.>
 		<cac:PricingReference>
