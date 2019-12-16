@@ -111,7 +111,7 @@ class AccountInvoiceDianDocument(models.Model):
             'xml_filename': xml_filename_prefix + nnnnnnnnnnpppaadddddddd + '.xml',
             'zipped_filename': 'z' + znnnnnnnnnnpppaadddddddd + '.zip'})
 
-    def _get_xml_values(self):
+    def _get_xml_values(self, ClTec):
         einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
         create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         create_date = create_date.replace(tzinfo=timezone('UTC'))
@@ -121,17 +121,12 @@ class AccountInvoiceDianDocument(models.Model):
             timezone('America/Bogota')).strftime('%H:%M:%S-05:00')
         NitOFE = self.company_id.partner_id.identification_document
         NitAdq = self.invoice_id.partner_id.identification_document
-        ClTec = False
         SoftwarePIN = False
         IdSoftware = self.company_id.software_id
-
-        if self.invoice_id.type == 'out_invoice':
-            for date_range_id in self.invoice_id.journal_id.sequence_id.date_range_ids:
-                ClTec = date_range_id.technical_key
-        else:
-            SoftwarePIN = self.company_id.software_pin
-        
         TipoAmbie = self.company_id.profile_execution_id
+
+        if not ClTec:
+            SoftwarePIN = self.company_id.software_pin
 
         if TipoAmbie == '1':
             QRCodeURL = DIAN['catalogo']
@@ -209,8 +204,8 @@ class AccountInvoiceDianDocument(models.Model):
             'PayableAmount': '{:.2f}'.format(PayableAmount)}
 
     def _get_invoice_values(self):
-        xml_values = self._get_xml_values()
         active_dian_resolution = self.invoice_id._get_active_dian_resolution()
+        xml_values = self._get_xml_values(active_dian_resolution['technical_key'])
         #Punto 14.1.5.1. del anexo tecnico version 1.8
         #10 Estandar *
         #09 AIU
@@ -236,7 +231,7 @@ class AccountInvoiceDianDocument(models.Model):
         return xml_values
     
     def _get_credit_note_values(self):
-        xml_values = self._get_xml_values()
+        xml_values = self._get_xml_values(False)
         active_dian_resolution = self.invoice_id._get_active_dian_resolution()
         #Punto 14.1.5.2. del anexo tecnico version 1.8
         #20 Nota Crédito que referencia una factura electrónica.
@@ -265,7 +260,7 @@ class AccountInvoiceDianDocument(models.Model):
         return xml_values
     
     def _get_debit_note_values(self):
-        xml_values = self._get_xml_values()
+        xml_values = self._get_xml_values(False)
         #Punto 14.1.5.3. del anexo tecnico version 1.8
         #30 Nota Débito que referencia una factura electrónica.
         #32 Nota Débito sin referencia a facturas*.
@@ -307,7 +302,7 @@ class AccountInvoiceDianDocument(models.Model):
             xml_without_signature = global_functions.get_template_xml(
                 self._get_debit_note_values(),
                 'DebitNote')
-        
+
         xml_with_signature = global_functions.get_xml_with_signature(
             xml_without_signature,
             self.company_id.signature_policy_url,
@@ -380,8 +375,13 @@ class AccountInvoiceDianDocument(models.Model):
                 self.company_id.certificate_file,
                 self.company_id.certificate_password)
 
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+        else:
+            wsdl = DIAN['wsdl-hab']
+
         response = post(
-            DIAN['wsdl-hab'],
+            wsdl,
             headers={'content-type': 'application/soap+xml;charset=utf-8'},
             data=etree.tostring(xml_soap_with_signature))
 
@@ -417,8 +417,13 @@ class AccountInvoiceDianDocument(models.Model):
             self.company_id.certificate_file,
             self.company_id.certificate_password)
 
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+        else:
+            wsdl = DIAN['wsdl-hab']
+
         response = post(
-            DIAN['wsdl-hab'],
+            wsdl,
             headers={'content-type': 'application/soap+xml;charset=utf-8'},
             data=etree.tostring(xml_soap_with_signature))
 
@@ -468,4 +473,3 @@ class AccountInvoiceDianDocument(models.Model):
         self.write({'zipped_file': b64encode(self._get_zipped_file())})
         self.sent_zipped_file()
         self.GetStatusZip()
-

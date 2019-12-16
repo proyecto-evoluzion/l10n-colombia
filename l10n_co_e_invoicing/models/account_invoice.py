@@ -129,7 +129,7 @@ class AccountInvoice(models.Model):
 						withholding_taxes[tax_code]['taxes'][tax_percent] = {}
 						withholding_taxes[tax_code]['taxes'][tax_percent]['base'] = 0
 						withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
-					
+
 					withholding_taxes[tax_code]['total'] += tax.amount * (-1)
 					withholding_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
 					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount * (-1)
