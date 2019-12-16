@@ -192,82 +192,6 @@ class AccountInvoice(models.Model):
 
 		return {'TaxesTotal': taxes, 'WithholdingTaxesTotal': withholding_taxes}
 
-	def _get_accounting_supplier_party_values(self):
-		msg1 = _("'%s' does not have a person type assigned")
-		msg2 = _("'%s' does not have a state assigned")
-		msg3 = _("'%s' does not have a country assigned")
-
-		if self.type in ('out_invoice', 'out_refund'):
-			supplier = self.company_id.partner_id
-		else:
-			supplier = self.partner_id
-		
-		if not supplier.person_type:
-			raise UserError(msg1 % supplier.name)
-		
-		if supplier.country_id:
-			if supplier.country_id.code == 'CO' and not supplier.state_id:
-				raise UserError(msg2 % supplier.name)
-		else:
-			raise UserError(msg3 % supplier.name)
-
-		return {
-			'AdditionalAccountID': supplier.person_type,
-			'Name': supplier.name,
-			'AddressID': supplier.zip_id.code or '',
-			'AddressCityName': supplier.zip_id.city or '',
-			'AddressPostalZone': supplier.zip_id.name or '',
-			'AddressCountrySubentity': supplier.state_id.name or '',
-			'AddressCountrySubentityCode': supplier.state_id.code,
-			'AddressLine': supplier.street or '',
-			'CompanyIDschemeID': supplier.check_digit,
-			'CompanyIDschemeName': supplier.document_type_id.code,
-			'CompanyID': supplier.identification_document,
-			'TaxLevelCode': supplier.property_account_position_id.tax_level_code_id.code,
-			'TaxSchemeID': supplier.property_account_position_id.tax_scheme_id.code,
-			'TaxSchemeName': supplier.property_account_position_id.tax_scheme_id.name,
-			'CorporateRegistrationSchemeName': supplier.ref,
-			'CountryIdentificationCode': supplier.country_id.code,
-			'CountryName': supplier.country_id.name}
-
-	def _get_accounting_customer_party_values(self):
-		msg1 = _("'%s' does not have a person type assigned")
-		msg2 = _("'%s' does not have a state assigned")
-		msg3 = _("'%s' does not have a country assigned")
-
-		if self.type in ('in_refund'):
-			customer = self.company_id.partner_id
-		else:
-			customer = self.partner_id
-
-		if not customer.person_type:
-			raise UserError(msg1 % customer.name)
-
-		if customer.country_id:
-			if customer.country_id.code == 'CO' and not customer.state_id:
-				raise UserError(msg2 % customer.name)
-		else:
-			raise UserError(msg3 % customer.name)
-
-		return {
-			'AdditionalAccountID': customer.person_type,
-			'Name': customer.name,
-			'AddressID': customer.zip_id.code or '',
-			'AddressCityName': customer.zip_id.city or '',
-			'AddressPostalZone': customer.zip_id.name or '',
-			'AddressCountrySubentity': customer.state_id.name or '',
-			'AddressCountrySubentityCode': customer.state_id.code,
-			'AddressLine': customer.street  or '',
-			'CompanyIDschemeID': customer.check_digit,
-			'CompanyIDschemeName': customer.document_type_id.code,
-			'CompanyID': customer.identification_document,
-			'TaxLevelCode': customer.property_account_position_id.tax_level_code_id.code,
-			'TaxSchemeID': customer.property_account_position_id.tax_scheme_id.code,
-			'TaxSchemeName': customer.property_account_position_id.tax_scheme_id.name,
-			'CorporateRegistrationSchemeName': customer.ref,
-			'CountryIdentificationCode': customer.country_id.code,
-			'CountryName': customer.country_id.name}
-
 	def _get_tax_representative_party_values(self):
 		if self.type in ('out_invoice', 'out_refund'):
 			supplier = self.company_id.partner_id
@@ -282,10 +206,10 @@ class AccountInvoice(models.Model):
 	def _get_invoice_lines(self):
 		msg1 = _("Your tax: '%s', has no e-invoicing tax group type, " +
 				 "contact with your administrator.")
-		msg2 = _("Your withholding tax: '%s', has positive amount, the taxes " +
-		         "must have negative amount, contact with your administrator.")
+		msg2 = _("Your withholding tax: '%s', has positive amount, the withholding " +
+				 "taxes must have negative amount, contact with your administrator.")
 		msg3 = _("Your tax: '%s', has negative amount, the taxes must have " + 
-		         "positive amount, with your administrator.")
+		         "positive amount, contact with your administrator.")
 		invoice_lines = {}
 		count = 1
 

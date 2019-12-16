@@ -119,8 +119,10 @@ class AccountInvoiceDianDocument(models.Model):
         IssueDate = self.invoice_id.date_invoice
         IssueTime = create_date.astimezone(
             timezone('America/Bogota')).strftime('%H:%M:%S-05:00')
-        NitOFE = self.company_id.partner_id.identification_document
-        NitAdq = self.invoice_id.partner_id.identification_document
+        supplier = self.company_id.partner_id
+        customer = self.invoice_id.partner_id
+        NitOFE = supplier.identification_document
+        NitAdq = customer.identification_document
         SoftwarePIN = False
         IdSoftware = self.company_id.software_id
         TipoAmbie = self.company_id.profile_execution_id
@@ -140,6 +142,7 @@ class AccountInvoiceDianDocument(models.Model):
         TaxInclusiveAmount = ValFac + ValImp1 + ValImp2 + ValImp3
         #El valor a pagar puede verse afectado, por anticipos, y descuentos y
         #cargos a nivel de factura
+        #self.invoice_id.amount_total
         PayableAmount = TaxInclusiveAmount
         cufe_cude = global_functions.get_cufe_cude(
             ID,
@@ -176,8 +179,8 @@ class AccountInvoiceDianDocument(models.Model):
                 software_security_code['SoftwareSecurityCode']})
 
         return {
-            'ProviderIDschemeID': self.company_id.partner_id.check_digit,
-            'ProviderIDschemeName': self.company_id.partner_id.document_type_id.code,
+            'ProviderIDschemeID': supplier.check_digit,
+            'ProviderIDschemeName': supplier.document_type_id.code,
             'ProviderID': NitOFE,
             'NitAdquiriente': NitAdq,
             'SoftwareID': IdSoftware,
@@ -190,7 +193,10 @@ class AccountInvoiceDianDocument(models.Model):
             'IssueTime': IssueTime,
             'LineCountNumeric': len(self.invoice_id.invoice_line_ids),
             'DocumentCurrencyCode': self.invoice_id.currency_id.name,
-            'TaxRepresentativeParty': self.invoice_id._get_tax_representative_party_values(),
+            'AccountingSupplierParty': supplier._get_accounting_partner_party_values(),
+            'AccountingCustomerParty': customer._get_accounting_partner_party_values(),
+            #TODO: No esta completamente calro los datos de que tercero son
+            'TaxRepresentativeParty': supplier._get_tax_representative_party_values(),
             'PaymentMeansID': self.invoice_id.payment_mean_id.code,
             'PaymentMeansCode': '10',
             'PaymentDueDate': self.invoice_id.date_due,
@@ -200,7 +206,6 @@ class AccountInvoiceDianDocument(models.Model):
             'LineExtensionAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxExclusiveAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxInclusiveAmount': '{:.2f}'.format(TaxInclusiveAmount),#ValTot
-            #self.invoice_id.amount_total
             'PayableAmount': '{:.2f}'.format(PayableAmount)}
 
     def _get_invoice_values(self):
@@ -225,8 +230,6 @@ class AccountInvoiceDianDocument(models.Model):
         xml_values['From'] = active_dian_resolution['number_from']
         xml_values['To'] = active_dian_resolution['number_to']
         xml_values['InvoiceLines'] = self.invoice_id._get_invoice_lines()
-        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_supplier_party_values()
-        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_customer_party_values()
 
         return xml_values
     
@@ -254,8 +257,6 @@ class AccountInvoiceDianDocument(models.Model):
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['CreditNoteLines'] = self.invoice_id._get_invoice_lines()
-        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_supplier_party_values()
-        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_customer_party_values()
 
         return xml_values
     
@@ -282,10 +283,6 @@ class AccountInvoiceDianDocument(models.Model):
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['DebitNoteLines'] = self.invoice_id._get_invoice_lines()
-        #datos invertidos de customer party y supplier party debido a que en
-        #nota debito se ocupa el rol de cliente y no de proveedor
-        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_customer_party_values()
-        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_supplier_party_values()
 
         return xml_values
 
