@@ -13,14 +13,15 @@ import global_functions
 from pytz import timezone
 from requests import post
 from lxml import etree
-from odoo import models, fields
-from odoo.exceptions import ValidationError
+from odoo import models, fields, _
+from odoo.exceptions import ValidationError, UserError
 
 
-DIAN = {'wsdl-hab': 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
-        'wsdl': 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
-        'catalogo-hab': 'https://catalogo-vpfe-hab.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}',
-        'catalogo': 'https://catalogo-vpfe.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}'}
+DIAN = {
+    'wsdl-hab': 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
+    'wsdl': 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
+    'catalogo-hab': 'https://catalogo-vpfe-hab.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}',
+    'catalogo': 'https://catalogo-vpfe.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}'}
 
 class AccountInvoiceDianDocument(models.Model):
     ''''''
@@ -63,14 +64,13 @@ class AccountInvoiceDianDocument(models.Model):
     get_status_zip_response = fields.Text(string='Response')
 
     def _set_filenames(self):
+        msg = _("'%s' does not have a identification document established.")
+
+        if not self.company_id.partner_id.identification_document:
+            raise UserError(msg)
         #nnnnnnnnnn: NIT del Facturador Electrónico sin DV, de diez (10) dígitos
         # alineados a la derecha y relleno con ceros a la izquierda.
-        if self.company_id.partner_id.identification_document:
-            nnnnnnnnnn = self.company_id.partner_id.identification_document.zfill(10)
-        else:
-            raise ValidationError("The company identification document is not "
-                                  "established in the partner.\n\nGo to Contacts > "
-                                  "[Your company name] to configure it.")
+        nnnnnnnnnn = self.company_id.partner_id.identification_document.zfill(10)
         #El Código “ppp” es 000 para Software Propio
         ppp = '000'
         #aa: Dos (2) últimos dígitos año calendario
@@ -319,7 +319,7 @@ class AccountInvoiceDianDocument(models.Model):
 
         return output.getvalue()
 
-    def set_files(self):
+    def _set_files(self):
         if not self.xml_filename or not self.zipped_filename:
             self._set_filenames()
 

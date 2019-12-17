@@ -24,7 +24,7 @@ class AccountInvoice(models.Model):
 				dian_document = dian_document_obj.create({
 					'invoice_id': self.id,
 					'company_id': self.company_id.id})
-				dian_document.set_files()
+				dian_document._set_files()
 				dian_document.sent_zipped_file()
 				dian_document.GetStatusZip()
 
@@ -37,6 +37,8 @@ class AccountInvoice(models.Model):
 		for dian_document in self.dian_document_lines:
 			if dian_document.state == 'done':
 				raise UserError('You cannot cancel a invoice sent to DIAN')
+			else:
+				dian_document
 
 		return res
 	
@@ -191,17 +193,6 @@ class AccountInvoice(models.Model):
 			withholding_taxes['06']['taxes']['0.00']['amount'] = 0
 
 		return {'TaxesTotal': taxes, 'WithholdingTaxesTotal': withholding_taxes}
-
-	def _get_tax_representative_party_values(self):
-		if self.type in ('out_invoice', 'out_refund'):
-			supplier = self.company_id.partner_id
-		else:
-			supplier = self.partner_id
-
-		return {
-			'IDschemeID': supplier.check_digit,
-			'IDschemeName': supplier.document_type_id.code,
-			'ID': supplier.identification_document}
 
 	def _get_invoice_lines(self):
 		msg1 = _("Your tax: '%s', has no e-invoicing tax group type, " +
