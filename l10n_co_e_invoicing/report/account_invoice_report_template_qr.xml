@@ -7,11 +7,13 @@
         <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
         <div class="page" style="font-size:12px">
             <div class="qrcode">
-                        <t t-set="qr_string" t-value="o.partner_id.lang+'\n'+o.number"/>
-			    		<t t-if="i &lt; len(docs)">
-				  			<img t-att-src="'/report/barcode/QR/%s' % qr_string" 
-                                style="width:100px;height:100px;margin-bottom:5px;"/>
-						</t>									
+			    		<t t-foreach="o.dian_document_lines" t-as="ddl">
+                            <t t-if="ddl.state == 'done'">
+                                <div style="width:100px;height:100px;float:left;">
+                                    <img t-att-src="'/report/barcode/QR/%s' % ddl.qr_information" style="width:100px;height:100px;margin-bottom:5px"/>
+                                </div>
+                            </t>
+                        </t>									
 	       	</div>
             <div class="row">
                 <table width="100%" style="border:1px solid gray;">

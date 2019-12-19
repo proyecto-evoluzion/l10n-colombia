@@ -13,8 +13,10 @@ import global_functions
 from pytz import timezone
 from requests import post
 from lxml import etree
-from odoo import models, fields, _
+from odoo import models, api, fields, _
 from odoo.exceptions import ValidationError, UserError
+import logging
+logger = logging.getLogger(__name__)
 
 
 DIAN = {
@@ -62,7 +64,7 @@ class AccountInvoiceDianDocument(models.Model):
         string='StatusCode',
         default=False)
     get_status_zip_response = fields.Text(string='Response')
-    qr_information = fields.Char(compute="_generate_qr_code", string="QR Information")
+    qr_information = fields.Char(string="QR Information", compute='_generate_qr_code', store=True)
 
     def _set_filenames(self):
         msg = _("'%s' does not have a identification document established.")
@@ -473,16 +475,20 @@ class AccountInvoiceDianDocument(models.Model):
         self.GetStatusZip()
 
     def _generate_qr_code(self):
-        qr_data = "NumFac: " + self.invoice_id.number + "\n"
-        qr_data += "FecFac: " + self.invoice_id.date_invoice + "\n"
-        qr_data += "HorFac: " + self.create_date.astimezone(
-                                    timezone('America/Bogota')).strftime('%H:%M:%S-05:00') + "\n"
-        qr_data += "NitFac: " + self.company_id.partner_id.identification_document + "\n"
-        qr_data += "NitAdq: " + self.invoice_id.partner_id.identification_document + "\n"
-        qr_data += "ValFac: " + self.invoice_id.amount_untaxed + "\n"
-        qr_data += "ValIva: " + 0.00 + "\n"
-        qr_data += "ValOtroIm: " + 0.00 + "\n"
-        qr_data += "ValTolFac: " + 0.00 + "\n"
-        qr_data += "CUFE: " + self.cufe_cude + "\n"
-        qr_data += "https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey="+ self.QRCodeURL
-        return qr_data
+        #create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
+        #create_date = create_date.replace(tzinfo=timezone('UTC'))
+
+        #qr_data = "NumFac: " + self.invoice_id.number + "\n"
+        # qr_data += "FecFac: " + self.invoice_id.date_invoice + "\n"
+        # qr_data += "HorFac: " + create_date.astimezone(
+        #                             timezone('America/Bogota')).strftime('%H:%M:%S-05:00') + "\n"
+        # qr_data += "NitFac: " + self.company_id.partner_id.identification_document + "\n"
+        # qr_data += "NitAdq: " + self.invoice_id.partner_id.identification_document + "\n"
+        # qr_data += "ValFac: " + str(self.invoice_id.amount_untaxed) + "\n"
+        # qr_data += "ValIva: " + str(0.00) + "\n"
+        # qr_data += "ValOtroIm: " + str(0.00) + "\n"
+        # qr_data += "ValTolFac: " + str(0.00) + "\n"
+        # qr_data += "CUFE: " + self.cufe_cude + "\n"
+        # qr_data +=  self.invoice_url
+
+        return "qr_code"

@@ -18,7 +18,7 @@
                         <t t-foreach="o.dian_document_lines" t-as="ddl">
                             <t t-if="ddl.state == 'done'">
                                 <div style="width:100px;height:100px;float:left;">
-                                    <img t-att-src="'/report/barcode/QR/%s' % o.qr_information" style="width:100px;height:100px;margin-bottom:5px;white-space:pre-wrap;"/>
+                                    <img t-att-src="'/report/barcode/QR/%s' % ddl.qr_information" style="width:100px;height:100px;margin-bottom:5px"/>
                                 </div>
                             </t>
                         </t>
