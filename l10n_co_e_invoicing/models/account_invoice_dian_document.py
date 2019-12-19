@@ -13,14 +13,15 @@ import global_functions
 from pytz import timezone
 from requests import post
 from lxml import etree
-from odoo import models, fields
-from odoo.exceptions import ValidationError
+from odoo import models, fields, _
+from odoo.exceptions import ValidationError, UserError
 
 
-DIAN = {'wsdl-hab': 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
-        'wsdl': 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
-        'catalogo-hab': 'https://catalogo-vpfe-hab.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}',
-        'catalogo': 'https://catalogo-vpfe.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}'}
+DIAN = {
+    'wsdl-hab': 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
+    'wsdl': 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc?wsdl',
+    'catalogo-hab': 'https://catalogo-vpfe-hab.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}',
+    'catalogo': 'https://catalogo-vpfe.dian.gov.co/Document/FindDocument?documentKey={}&partitionKey={}&emissionDate={}'}
 
 class AccountInvoiceDianDocument(models.Model):
     ''''''
@@ -64,14 +65,13 @@ class AccountInvoiceDianDocument(models.Model):
     qr_information = fields.Char(compute="_generate_qr_code", string="QR Information")
 
     def _set_filenames(self):
+        msg = _("'%s' does not have a identification document established.")
+
+        if not self.company_id.partner_id.identification_document:
+            raise UserError(msg)
         #nnnnnnnnnn: NIT del Facturador Electrónico sin DV, de diez (10) dígitos
         # alineados a la derecha y relleno con ceros a la izquierda.
-        if self.company_id.partner_id.identification_document:
-            nnnnnnnnnn = self.company_id.partner_id.identification_document.zfill(10)
-        else:
-            raise ValidationError("The company identification document is not "
-                                  "established in the partner.\n\nGo to Contacts > "
-                                  "[Your company name] to configure it.")
+        nnnnnnnnnn = self.company_id.partner_id.identification_document.zfill(10)
         #El Código “ppp” es 000 para Software Propio
         ppp = '000'
         #aa: Dos (2) últimos dígitos año calendario
@@ -120,8 +120,10 @@ class AccountInvoiceDianDocument(models.Model):
         IssueDate = self.invoice_id.date_invoice
         IssueTime = create_date.astimezone(
             timezone('America/Bogota')).strftime('%H:%M:%S-05:00')
-        NitOFE = self.company_id.partner_id.identification_document
-        NitAdq = self.invoice_id.partner_id.identification_document
+        supplier = self.company_id.partner_id
+        customer = self.invoice_id.partner_id
+        NitOFE = supplier.identification_document
+        NitAdq = customer.identification_document
         SoftwarePIN = False
         IdSoftware = self.company_id.software_id
         TipoAmbie = self.company_id.profile_execution_id
@@ -141,6 +143,7 @@ class AccountInvoiceDianDocument(models.Model):
         TaxInclusiveAmount = ValFac + ValImp1 + ValImp2 + ValImp3
         #El valor a pagar puede verse afectado, por anticipos, y descuentos y
         #cargos a nivel de factura
+        #self.invoice_id.amount_total
         PayableAmount = TaxInclusiveAmount
         cufe_cude = global_functions.get_cufe_cude(
             ID,
@@ -177,8 +180,8 @@ class AccountInvoiceDianDocument(models.Model):
                 software_security_code['SoftwareSecurityCode']})
 
         return {
-            'ProviderIDschemeID': self.company_id.partner_id.check_digit,
-            'ProviderIDschemeName': self.company_id.partner_id.document_type_id.code,
+            'ProviderIDschemeID': supplier.check_digit,
+            'ProviderIDschemeName': supplier.document_type_id.code,
             'ProviderID': NitOFE,
             'NitAdquiriente': NitAdq,
             'SoftwareID': IdSoftware,
@@ -191,7 +194,10 @@ class AccountInvoiceDianDocument(models.Model):
             'IssueTime': IssueTime,
             'LineCountNumeric': len(self.invoice_id.invoice_line_ids),
             'DocumentCurrencyCode': self.invoice_id.currency_id.name,
-            'TaxRepresentativeParty': self.invoice_id._get_tax_representative_party_values(),
+            'AccountingSupplierParty': supplier._get_accounting_partner_party_values(),
+            'AccountingCustomerParty': customer._get_accounting_partner_party_values(),
+            #TODO: No esta completamente calro los datos de que tercero son
+            'TaxRepresentativeParty': supplier._get_tax_representative_party_values(),
             'PaymentMeansID': self.invoice_id.payment_mean_id.code,
             'PaymentMeansCode': '10',
             'PaymentDueDate': self.invoice_id.date_due,
@@ -201,7 +207,6 @@ class AccountInvoiceDianDocument(models.Model):
             'LineExtensionAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxExclusiveAmount': '{:.2f}'.format(self.invoice_id.amount_untaxed),
             'TaxInclusiveAmount': '{:.2f}'.format(TaxInclusiveAmount),#ValTot
-            #self.invoice_id.amount_total
             'PayableAmount': '{:.2f}'.format(PayableAmount)}
 
     def _get_invoice_values(self):
@@ -226,8 +231,6 @@ class AccountInvoiceDianDocument(models.Model):
         xml_values['From'] = active_dian_resolution['number_from']
         xml_values['To'] = active_dian_resolution['number_to']
         xml_values['InvoiceLines'] = self.invoice_id._get_invoice_lines()
-        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_supplier_party_values()
-        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_customer_party_values()
 
         return xml_values
     
@@ -255,8 +258,6 @@ class AccountInvoiceDianDocument(models.Model):
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['CreditNoteLines'] = self.invoice_id._get_invoice_lines()
-        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_supplier_party_values()
-        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_customer_party_values()
 
         return xml_values
     
@@ -283,10 +284,6 @@ class AccountInvoiceDianDocument(models.Model):
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['DebitNoteLines'] = self.invoice_id._get_invoice_lines()
-        #datos invertidos de customer party y supplier party debido a que en
-        #nota debito se ocupa el rol de cliente y no de proveedor
-        xml_values['AccountingSupplierParty'] = self.invoice_id._get_accounting_customer_party_values()
-        xml_values['AccountingCustomerParty'] = self.invoice_id._get_accounting_supplier_party_values()
 
         return xml_values
 
@@ -323,7 +320,7 @@ class AccountInvoiceDianDocument(models.Model):
 
         return output.getvalue()
 
-    def set_files(self):
+    def _set_files(self):
         if not self.xml_filename or not self.zipped_filename:
             self._set_filenames()
 
