@@ -61,6 +61,7 @@ class AccountInvoiceDianDocument(models.Model):
         string='StatusCode',
         default=False)
     get_status_zip_response = fields.Text(string='Response')
+    qr_information = fields.Char(compute="_generate_qr_code", string="QR Information")
 
     def _set_filenames(self):
         #nnnnnnnnnn: NIT del Facturador Electrónico sin DV, de diez (10) dígitos
@@ -473,3 +474,18 @@ class AccountInvoiceDianDocument(models.Model):
         self.write({'zipped_file': b64encode(self._get_zipped_file())})
         self.sent_zipped_file()
         self.GetStatusZip()
+
+    def _generate_qr_code(self):
+        qr_data = "NumFac: " + self.invoice_id.number + "\n"
+        qr_data += "FecFac: " + self.invoice_id.date_invoice + "\n"
+        qr_data += "HorFac: " + self.create_date.astimezone(
+                                    timezone('America/Bogota')).strftime('%H:%M:%S-05:00') + "\n"
+        qr_data += "NitFac: " + self.company_id.partner_id.identification_document + "\n"
+        qr_data += "NitAdq: " + self.invoice_id.partner_id.identification_document + "\n"
+        qr_data += "ValFac: " + self.invoice_id.amount_untaxed + "\n"
+        qr_data += "ValIva: " + 0.00 + "\n"
+        qr_data += "ValOtroIm: " + 0.00 + "\n"
+        qr_data += "ValTolFac: " + 0.00 + "\n"
+        qr_data += "CUFE: " + self.cufe_cude + "\n"
+        qr_data += "https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey="+ self.QRCodeURL
+        return qr_data
