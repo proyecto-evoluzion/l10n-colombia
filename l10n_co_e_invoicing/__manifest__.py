@@ -23,6 +23,7 @@
         "l10n_co_sequence_resolution",
         "account_invoice_refund_link",
         "base_iso3166",
+        "ehcs_qr_code_base",
     ],
     'external_dependencies': {
         'python': [
