@@ -38,7 +38,6 @@
         "views/ir_sequence_views.xml",
         "views/res_company_views.xml",
         "views/account_tax_group_views.xml",
-        "report/account_invoice_report_template_qr.xml",
         "report/account_invoice_report_template.xml",
     ],
     "installable": True,
