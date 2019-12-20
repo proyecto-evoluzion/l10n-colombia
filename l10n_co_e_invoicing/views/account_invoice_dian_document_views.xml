@@ -5,6 +5,8 @@
             <field name="model">account.invoice.dian.document</field>
             <field name="arch" type="xml">
                 <search string="Search" name='search'>
+                    <filter string="Not Done" domain="['|',('state', '=', 'draft'),('state', '=', 'sent')]"/>
+                    <filter string="Done" domain="[('state', '=', 'done')]"/>
                     <group expand="0" string="Group By" name='group_by'>
                         <filter string="State" context="{'group_by':'state'}"/>
                     </group>

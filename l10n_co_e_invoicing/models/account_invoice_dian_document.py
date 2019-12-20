@@ -486,7 +486,10 @@ class AccountInvoiceDianDocument(models.Model):
         self.sent_zipped_file()
         self.GetStatusZip()
 
+    @api.multi
     def _generate_qr_code(self):
+        for dian_document in self:
+            dian_document.qr_information = "qr_data"
         #create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         #create_date = create_date.replace(tzinfo=timezone('UTC'))
         
@@ -502,5 +505,14 @@ class AccountInvoiceDianDocument(models.Model):
         # qr_data += "ValTolFac: " + str(0.00) + "\n"
         # qr_data += "CUFE: " + self.cufe_cude + "\n"
         # qr_data +=  self.invoice_url
-
-        self.qr_information = "qr_data"
+    
+    def go_to_dian_document(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Dian Document', 
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': self._name,
+            'res_id': self.id,
+            'target': 'current',
+        }

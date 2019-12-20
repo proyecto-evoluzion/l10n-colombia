@@ -8,6 +8,7 @@
                 <page name="einvoicing" string="E-Invoicing">
                     <field name="dian_document_lines" mode="tree" readonly="1">
                         <tree string="DIAN Documents">
+                            <button type="object" name="go_to_dian_document" string="Dian Document"/>
                             <field name="cufe_cude"/>
                             <field name="create_date"/>
                             <field name="xml_filename"/>
