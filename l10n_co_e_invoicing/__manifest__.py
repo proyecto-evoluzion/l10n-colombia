@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2019 Joan Marín <Github@joanmarin>
+# Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
@@ -7,8 +7,8 @@
     "category": "Financial",
     "version": "10.0.1.0.0",
     "author": "EXA Auto Parts Github@exaap, "
-              "Joan Marín Github@joanmarin",
-    "website": "http://www.exaap.com",
+              "Joan Marín Github@JoanMarin",
+    "website": "https://github.com/odooloco/l10n-colombia",
     "license": "AGPL-3",
     "summary": "Colombian E-Invoicing",
     "depends": [
@@ -38,7 +38,6 @@
         "views/ir_sequence_views.xml",
         "views/res_company_views.xml",
         "views/account_tax_group_views.xml",
-        "report/account_invoice_report_template_qr.xml",
         "report/account_invoice_report_template.xml",
     ],
     "installable": True,

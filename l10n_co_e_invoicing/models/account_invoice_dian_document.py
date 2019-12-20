@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2019 Joan Marín <Github@joanmarin>
+# Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import sys  
@@ -486,10 +486,13 @@ class AccountInvoiceDianDocument(models.Model):
         self.sent_zipped_file()
         self.GetStatusZip()
 
+    @api.multi
     def _generate_qr_code(self):
+        for dian_document in self:
+            dian_document.qr_information = "qr_data"
         #create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         #create_date = create_date.replace(tzinfo=timezone('UTC'))
-
+        
         #qr_data = "NumFac: " + self.invoice_id.number + "\n"
         # qr_data += "FecFac: " + self.invoice_id.date_invoice + "\n"
         # qr_data += "HorFac: " + create_date.astimezone(
@@ -502,5 +505,14 @@ class AccountInvoiceDianDocument(models.Model):
         # qr_data += "ValTolFac: " + str(0.00) + "\n"
         # qr_data += "CUFE: " + self.cufe_cude + "\n"
         # qr_data +=  self.invoice_url
-
-        return "qr_code"
+    
+    def go_to_dian_document(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Dian Document', 
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': self._name,
+            'res_id': self.id,
+            'target': 'current',
+        }
