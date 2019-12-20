@@ -9,6 +9,7 @@
                     <field name="dian_document_lines" mode="tree" readonly="1">
                         <tree string="DIAN Documents">
                             <field name="cufe_cude"/>
+                            <field name="create_date"/>
                             <field name="xml_filename"/>
                             <field name="state"/>
                         </tree>

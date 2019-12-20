@@ -477,7 +477,7 @@ class AccountInvoiceDianDocument(models.Model):
     def _generate_qr_code(self):
         #create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         #create_date = create_date.replace(tzinfo=timezone('UTC'))
-
+        
         #qr_data = "NumFac: " + self.invoice_id.number + "\n"
         # qr_data += "FecFac: " + self.invoice_id.date_invoice + "\n"
         # qr_data += "HorFac: " + create_date.astimezone(
@@ -491,4 +491,4 @@ class AccountInvoiceDianDocument(models.Model):
         # qr_data += "CUFE: " + self.cufe_cude + "\n"
         # qr_data +=  self.invoice_url
 
-        return "qr_code"
+        self.qr_information = "qr_data"
