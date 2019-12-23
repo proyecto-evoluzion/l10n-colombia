@@ -17,9 +17,7 @@
                 <t t-if="o.company_id.einvoicing_enabled == True">
                         <t t-foreach="o.dian_document_lines" t-as="ddl">
                             <t t-if="ddl.state == 'done'">
-                                <div style="width:100px;height:100px;float:left;">
-                                    <img t-att-src="'/report/barcode/QR/%s' % ddl.qr_image" style="width:100px;height:100px;margin-bottom:5px"/>
-                                </div>
+                                <img class="image" t-att-src="'data:image/png;base64,%s' % ddl.qr_image" style="width:100px;height:100px;margin-bottom:5px;"/>
                             </t>
                         </t>
                 </t>
