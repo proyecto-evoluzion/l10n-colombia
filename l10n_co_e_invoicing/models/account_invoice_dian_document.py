@@ -98,19 +98,20 @@ class AccountInvoiceDianDocument(models.Model):
         # NIT 800197268 con software propio para el año 2019.
         # Regla: el consecutivo se iniciará en “00000001” cada primero de enero.
         out_invoice_sent = self.company_id.out_invoice_sent
-        out_refund_sent = self.company_id.out_refund_sent
-        in_refund_sent = self.company_id.in_refund_sent
-        zip_sent = out_invoice_sent + out_refund_sent + in_refund_sent
+        out_refund_credit_sent = self.company_id.out_refund_credit_sent
+        out_refund_debit_sent = self.company_id.out_refund_debit_sent
+        zip_sent = out_invoice_sent + out_refund_credit_sent + out_refund_debit_sent
 
         if self.invoice_id.type == 'out_invoice':
             xml_filename_prefix = 'fv'
             dddddddd = str(out_invoice_sent + 1).zfill(8)
-        elif self.invoice_id.type == 'out_refund':
+        elif self.invoice_id.type == 'out_refund' and self.invoice_id.refund_type == 'credit':
             xml_filename_prefix = 'nc'
-            dddddddd = str(out_refund_sent + 1).zfill(8)
-        elif self.invoice_id.type == 'in_refund':
+            dddddddd = str(out_refund_credit_sent + 1).zfill(8)
+        elif self.invoice_id.type == 'out_refund' and self.invoice_id.refund_type == 'debit':
             xml_filename_prefix = 'nd'
-            dddddddd = str(in_refund_sent + 1).zfill(8)
+            dddddddd = str(out_refund_debit_sent + 1).zfill(8)
+
         #pendiente
         #arnnnnnnnnnnpppaadddddddd.xml
         #adnnnnnnnnnnpppaadddddddd.xml
@@ -308,11 +309,11 @@ class AccountInvoiceDianDocument(models.Model):
             xml_without_signature = global_functions.get_template_xml(
                 self._get_invoice_values(),
                 'Invoice')
-        elif self.invoice_id.type == "out_refund": 
+        elif self.invoice_id.type == "out_refund" and self.invoice_id.refund_type == "credit": 
             xml_without_signature = global_functions.get_template_xml(
                 self._get_credit_note_values(),
                 'CreditNote')
-        elif self.invoice_id.type == "in_refund": 
+        elif self.invoice_id.type == "out_refund" and self.invoice_id.refund_type == "debit": 
             xml_without_signature = global_functions.get_template_xml(
                 self._get_debit_note_values(),
                 'DebitNote')
@@ -451,14 +452,17 @@ class AccountInvoiceDianDocument(models.Model):
                     if element.text == '00':
                         self.write({'state': 'done'})
 
-                        if self.invoice_id.type == 'out_invoice':
+                        if self.invoice_id.type == "out_invoice":
                             self.company_id.out_invoice_sent += 1
-                        elif self.invoice_id.type == 'out_refund':
-                            self.company_id.out_refund_sent += 1
-                        elif self.invoice_id.type == 'in_refund':
-                            self.company_id.in_refund_sent += 1
+                        elif (self.invoice_id.type == "out_refund"
+                                and self.invoice_id.refund_type == "credit"):
+                            self.company_id.out_refund_credit_sent += 1
+                        elif (self.invoice_id.type == "out_refund"
+                                and self.invoice_id.refund_type == "debit"):
+                            self.company_id.out_refund_debit_sent += 1
 
                     status_code = element.text
+
             if status_code == '00':
                 for element in root.iter("{%s}StatusMessage" % b):
                     strings = element.text

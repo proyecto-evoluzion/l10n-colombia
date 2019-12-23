@@ -12,9 +12,9 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     einvoicing_enabled = fields.Boolean(string='E-Invoicing Enabled')
-    out_invoice_sent = fields.Integer(string='out_invoice Sent')
-    out_refund_sent = fields.Integer(string='out_refund Sent')
-    in_refund_sent = fields.Integer(string='in_refund Sent')
+    out_invoice_sent = fields.Integer(string='Invoices Sent')
+    out_refund_credit_sent = fields.Integer(string='Credit Notes Sent')
+    out_refund_debit_sent = fields.Integer(string='Debit Notes Sent')
     profile_execution_id = fields.Selection(
         [('1', 'Production'), ('2', 'Test')],
         'Destination Environment of Document',
