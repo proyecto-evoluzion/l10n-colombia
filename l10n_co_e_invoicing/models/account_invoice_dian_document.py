@@ -17,6 +17,8 @@ from odoo import models, api, fields, _
 from odoo.exceptions import ValidationError, UserError
 import logging
 logger = logging.getLogger(__name__)
+from odoo.http import request
+from odoo.addons.ehcs_qr_code_base.models.qr_code_base import generate_qr_code
 
 
 DIAN = {
@@ -64,7 +66,7 @@ class AccountInvoiceDianDocument(models.Model):
         string='StatusCode',
         default=False)
     get_status_zip_response = fields.Text(string='Response')
-    qr_information = fields.Char(string="QR Information", compute='_generate_qr_code', store=True)
+    qr_image = fields.Binary("QR Code", compute='_generate_qr_code')
 
     def _set_filenames(self):
         msg1 = _("The document type of '%s' is not NIT")
@@ -489,26 +491,6 @@ class AccountInvoiceDianDocument(models.Model):
         self.write({'zipped_file': b64encode(self._get_zipped_file())})
         self.sent_zipped_file()
         self.GetStatusZip()
-
-    @api.multi
-    def _generate_qr_code(self):
-        for dian_document in self:
-            dian_document.qr_information = "qr_data"
-        #create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
-        #create_date = create_date.replace(tzinfo=timezone('UTC'))
-        
-        #qr_data = "NumFac: " + self.invoice_id.number + "\n"
-        # qr_data += "FecFac: " + self.invoice_id.date_invoice + "\n"
-        # qr_data += "HorFac: " + create_date.astimezone(
-        #                             timezone('America/Bogota')).strftime('%H:%M:%S-05:00') + "\n"
-        # qr_data += "NitFac: " + self.company_id.partner_id.identification_document + "\n"
-        # qr_data += "NitAdq: " + self.invoice_id.partner_id.identification_document + "\n"
-        # qr_data += "ValFac: " + str(self.invoice_id.amount_untaxed) + "\n"
-        # qr_data += "ValIva: " + str(0.00) + "\n"
-        # qr_data += "ValOtroIm: " + str(0.00) + "\n"
-        # qr_data += "ValTolFac: " + str(0.00) + "\n"
-        # qr_data += "CUFE: " + self.cufe_cude + "\n"
-        # qr_data +=  self.invoice_url
     
     def go_to_dian_document(self):
         return {
@@ -520,3 +502,31 @@ class AccountInvoiceDianDocument(models.Model):
             'res_id': self.id,
             'target': 'current',
         }
+    
+    @api.one
+    def _generate_qr_code(self):
+        einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
+        ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
+        ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
+        ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
+        ValFac = self.invoice_id.amount_untaxed
+        create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
+        create_date = create_date.replace(tzinfo=timezone('UTC'))
+        nit_fac = self.company_id.partner_id.identification_document
+        nit_adq = self.invoice_id.partner_id.identification_document
+        cufe = self.cufe_cude
+        number = self.invoice_id.number
+
+        qr_data = "NumFac: " + number if number else 'NO VALIDADA'
+        qr_data += "\nFecFac: " + self.invoice_id.date_invoice
+        qr_data += "\nHorFac: " + create_date.astimezone(timezone('America/Bogota')).strftime('%H:%M:%S-05:00')
+        qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
+        qr_data += "\nNitAdq: " + nit_adq if nit_adq else ''
+        qr_data += "\nValFac: " + str(ValFac)
+        qr_data += "\nValIva: " + str(ValImp1)
+        qr_data += "\nValOtroIm: " + str(ValImp2 + ValImp3)
+        qr_data += "\nValTolFac: " + str(self.invoice_id.amount_total)
+        qr_data += "\nCUFE: " + cufe if cufe else ''
+        qr_data += "\n\n" + self.invoice_url
+        
+        self.qr_image = generate_qr_code(qr_data)
