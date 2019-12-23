@@ -78,16 +78,17 @@ class AccountInvoice(models.Model):
 	def _get_billing_reference(self):
 		billing_reference = {}
 
-		for origin_invoice in self.origin_invoice_ids:
-			if origin_invoice.state in ('open', 'paid'):
-				for dian_document in origin_invoice.dian_document_lines:
+		if self.refund_invoice_id and self.refund_invoice_id.state in ('open', 'paid'):
+				for dian_document in self.refund_invoice_id.dian_document_lines:
 					if dian_document.state == 'done':
-						billing_reference['ID'] = origin_invoice.number
+						billing_reference['ID'] = self.refund_invoice_id.number
 						billing_reference['UUID'] = dian_document.cufe_cude
-						billing_reference['IssueDate'] = origin_invoice.date_invoice
+						billing_reference['IssueDate'] = self.refund_invoice_id.date_invoice
 
-		if not billing_reference:
+		if not billing_reference and self.refund_type == 'credit':
 			raise UserError('Credit Note has not Billing Reference')
+		elif not billing_reference and self.refund_type == 'debit':
+			raise UserError('Debit Note has not Billing Reference')
 		else:
 			return billing_reference
 
