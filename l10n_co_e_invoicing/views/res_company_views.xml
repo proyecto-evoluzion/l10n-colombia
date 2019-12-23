@@ -10,8 +10,8 @@
                         <group>
                             <field name="einvoicing_enabled"/>
                             <field name="out_invoice_sent"/>
-                            <field name="out_refund_sent"/>
-                            <field name="in_refund_sent"/>
+                            <field name="out_refund_credit_sent"/>
+                            <field name="out_refund_debit_sent"/>
                             <field name="profile_execution_id"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="test_set_id"
