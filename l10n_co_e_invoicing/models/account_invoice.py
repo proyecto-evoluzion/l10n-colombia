@@ -19,7 +19,7 @@ class AccountInvoice(models.Model):
 		res = super(AccountInvoice, self).invoice_validate()
 
 		if self.company_id.einvoicing_enabled:
-			if self.type != "in_invoice":
+			if self.type in ("out_invoice", "out_refund"):
 				dian_document_obj = self.env['account.invoice.dian.document']
 				dian_document = dian_document_obj.create({
 					'invoice_id': self.id,

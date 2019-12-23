@@ -83,7 +83,7 @@ msgstr "Crear una nota débito borrador"
 #: model:ir.model.fields,field_description:l10n_co_account_invoice_discrepancy_response.field_account_invoice_debit_note_create_uid
 #: model:ir.model.fields,field_description:l10n_co_account_invoice_discrepancy_response.field_account_invoice_discrepancy_response_code_create_uid
 msgid "Created by"
-msgstr "Creado po"
+msgstr "Creado por"
 
 #. module: l10n_co_account_invoice_discrepancy_response
 #: model:ir.model.fields,field_description:l10n_co_account_invoice_discrepancy_response.field_account_invoice_debit_note_create_date
