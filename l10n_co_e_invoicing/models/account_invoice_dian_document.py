@@ -524,5 +524,9 @@ class AccountInvoiceDianDocument(models.Model):
         qr_data += "\nValTolFac: " + str(self.invoice_id.amount_total)
         qr_data += "\nCUFE: " + cufe if cufe else ''
         qr_data += "\n\n" + self.invoice_url
-        
+
         self.qr_image = generate_qr_code(qr_data)
+
+    def send_mail(self):
+        template_id=self.env.ref('email_template_for_einvoice').id
+        self.env['mail.template'].browse(template_id).send_mail(self.id, force_send=True)
