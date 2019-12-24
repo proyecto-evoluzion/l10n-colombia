@@ -9,6 +9,16 @@ from odoo.exceptions import UserError
 class AccountInvoice(models.Model):
 	_inherit = "account.invoice"
 
+	operation_type = fields.Selection(
+        [('10', 'Estandar *'), ('11', 'Mandatos')],
+        string='Operation Type',
+        default='10')
+	invoice_type_code = fields.Selection(
+        [('01', 'Factura de Venta'),
+         ('03', 'Factura por Contingencia Facturador'),
+         ('04', 'Factura por Contingencia DIAN')],
+        string='Invoice Type',
+        default='01')
 	dian_document_lines = fields.One2many(
 		comodel_name='account.invoice.dian.document',
 		inverse_name='invoice_id',
@@ -38,7 +48,7 @@ class AccountInvoice(models.Model):
 			if dian_document.state == 'done':
 				raise UserError('You cannot cancel a invoice sent to DIAN')
 			else:
-				dian_document
+				dian_document.state == 'cancel'
 
 		return res
 

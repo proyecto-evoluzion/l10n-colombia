@@ -12,9 +12,11 @@
     "license": "AGPL-3",
     "summary": "Colombian E-Invoicing",
     "depends": [
+        "l10n_co_account_fiscal_position_listname",
         "l10n_co_account_fiscal_position_party_tax_scheme",
         "l10n_co_account_invoice_discrepancy_response",
         "l10n_co_account_invoice_payment_mean",
+        "l10n_co_account_mandate",
         "l10n_co_account_tax_group_type",
         "l10n_co_base_location",
         "l10n_co_partner_isic",

@@ -6,16 +6,36 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
                 <page name="einvoicing" string="E-Invoicing">
-                    <field name="dian_document_lines" mode="tree" readonly="1">
-                        <tree string="DIAN Documents">
-                            <button type="object" name="go_to_dian_document" string="Dian Document"/>
-                            <field name="cufe_cude"/>
-                            <field name="create_date"/>
-                            <field name="xml_filename"/>
-                            <field name="state"/>
-                        </tree>
-                    </field>
+                    <group name="service_order">
+                        <group>
+                            <field name="operation_type"
+                                required="1"
+                                attrs="{'invisible': [('type', '!=', 'out_invoice')]}"/>
+                            <field name="invoice_type_code"
+                                required="1"
+                                attrs="{'invisible': [('type', '!=', 'out_invoice')]}"/>
+                        </group>
+                        <field name="dian_document_lines" mode="tree" readonly="1">
+                            <tree string="DIAN Documents">
+                                <button type="object" name="go_to_dian_document" string="Dian Document"/>
+                                <field name="cufe_cude"/>
+                                <field name="create_date"/>
+                                <field name="xml_filename"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </group>
                 </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="invoice_form" model="ir.ui.view">
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="l10n_co_account_mandate.invoice_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='mandante_partner_id']" position="attributes">
+                <attribute name="attrs">{'required': [('operation_type', '=', '11')]}</attribute>
             </xpath>
         </field>
     </record>
