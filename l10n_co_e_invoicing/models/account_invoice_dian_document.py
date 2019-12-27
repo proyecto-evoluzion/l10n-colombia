@@ -77,9 +77,9 @@ class AccountInvoiceDianDocument(models.Model):
 
         if self.company_id.partner_id.document_type_id:
 			if self.company_id.partner_id.document_type_id.code != '31':
-				raise UserError(msg1 % self.name)
+				raise UserError(msg1 % self.company_id.partner_id.name)
         else:
-			raise UserError(msg2 % self.name)
+			raise UserError(msg2 % self.company_id.partner_id.name)
 
         if not self.company_id.partner_id.identification_document:
             raise UserError(msg3)
