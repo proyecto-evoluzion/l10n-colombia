@@ -15,6 +15,8 @@ from xades import XAdESContext, template
 from xades.policy import GenericPolicyId
 from pytz import timezone
 from jinja2 import Environment, FileSystemLoader
+from qrcode import QRCode, constants
+from cStringIO import StringIO
 from odoo import _
 from odoo.exceptions import ValidationError
 #from mock import patch
@@ -234,3 +236,18 @@ def get_xml_soap_with_signature(
     ctx.verify(signature)
 
     return root
+
+def get_qr_code(data):
+    qr = QRCode(
+        version=1,
+        error_correction=constants.ERROR_CORRECT_L,
+        box_size=20,
+        border=4)
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image()
+    temp = StringIO()
+    img.save(temp, format="PNG")
+    qr_img = b64encode(temp.getvalue())
+
+    return qr_img

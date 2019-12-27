@@ -88,9 +88,44 @@ class ResPartner(models.Model):
 			'FamilyName': family_name,
 			'MiddleName': middle_name}
 
+	def _get_delivery_values(self):
+		msg1 = _("'%s' does not have a city established.")
+		msg2 = _("'%s' does not have a state established.")
+		msg3 = _("'%s' does not have a country established.")
+
+		if self.country_id:
+			if self.country_id.code == 'CO' and not self.zip_id:
+				raise UserError(msg1 % self.name)
+			elif self.country_id.code == 'CO' and not self.state_id:
+				raise UserError(msg2 % self.name)
+		else:
+			raise UserError(msg3 % self.name)
+
+		return {
+			'AddressID': self.zip_id.code,
+			'AddressCityName': self.zip_id.city,
+			'AddressPostalZone': self.zip_id.name,
+			'AddressCountrySubentity': self.state_id.name,
+			'AddressCountrySubentityCode': self.state_id.code,
+			'AddressLine': self.street or '',
+			'CountryIdentificationCode': self.country_id.code,
+			'CountryName': self.country_id.name}
+
 	def _get_tax_representative_party_values(self):
+		msg1 = _("'%s' does not have a verification digit established.")
+		msg2 = _("'%s' does not have a document type established.")
+		msg3 = _("'%s' does not have a identification document established.")
+
+		if self.document_type_id:
+			if self.document_type_id.code == '31' and not self.check_digit:
+				raise UserError(msg1 % self.name)
+		else:
+			raise UserError(msg2 % self.name)
+
+		if not self.identification_document:
+			raise UserError(msg3 % self.name)
+
 		return {
 			'IDschemeID': self.check_digit,
 			'IDschemeName': self.document_type_id.code,
 			'ID': self.identification_document}
-	

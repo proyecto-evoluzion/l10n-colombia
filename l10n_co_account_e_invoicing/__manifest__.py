@@ -16,7 +16,6 @@
         "l10n_co_account_fiscal_position_party_tax_scheme",
         "l10n_co_account_invoice_discrepancy_response",
         "l10n_co_account_invoice_payment_mean",
-        "l10n_co_account_mandate",
         "l10n_co_account_tax_group_type",
         "l10n_co_base_location",
         "l10n_co_partner_isic",
@@ -26,8 +25,6 @@
         "l10n_co_sequence_resolution",
         "account_invoice_refund_link",
         "partner_other_names",
-        "base_iso3166",
-        "ehcs_qr_code_base",
     ],
     'external_dependencies': {
         'python': [
