@@ -46,6 +46,8 @@ class AccountInvoiceDianDocument(models.Model):
         'res.company',
         string='Company')
     invoice_url = fields.Char(string='Invoice Url')
+    operation_type = fields.Selection(related='invoice_id.operation_type', store=False)
+    invoice_type_code = fields.Selection(related='invoice_id.invoice_type_code', store=False)
     cufe_cude_uncoded = fields.Char(string='CUFE/CUDE Uncoded')
     cufe_cude = fields.Char(string='CUFE/CUDE')
     software_security_code_uncoded = fields.Char(
@@ -232,28 +234,38 @@ class AccountInvoiceDianDocument(models.Model):
             'PayableAmount': '{:.2f}'.format(PayableAmount)}
 
     def _get_invoice_values(self):
+        msg1 = _("Your journal: %s, has no a invoice sequence")
+
+        if not self.invoice_id.journal_id.sequence_id:
+            raise UserError(msg1 % self.invoice_id.journal_id.name)
+
         active_dian_resolution = self.invoice_id._get_active_dian_resolution()
         xml_values = self._get_xml_values(active_dian_resolution['technical_key'])
         xml_values['InvoiceControl'] = active_dian_resolution
+        #Tipos de operacion
         #Punto 14.1.5.1. del anexo tecnico version 1.8
         #10 Estandar *
         #09 AIU
         #11 Mandatos
-        xml_values['CustomizationID'] = '10'
+        xml_values['CustomizationID'] = self.invoice_id.operation_type
         #Tipos de factura
         #Punto 14.1.3 del anexo tecnico version 1.8
         #01 Factura de Venta
         #02 Factura de Exportación
         #03 Factura por Contingencia Facturador
         #04 Factura por Contingencia DIAN
-        xml_values['InvoiceTypeCode'] = '01'
+        xml_values['InvoiceTypeCode'] = self.invoice_id.invoice_type_code
         xml_values['InvoiceLines'] = self.invoice_id._get_invoice_lines()
 
         return xml_values
 
     def _get_credit_note_values(self):
+        msg1 = _("Your journal: %s, has no a credit note sequence")
+
+        if not self.invoice_id.journal_id.refund_sequence_id:
+            raise UserError(msg1 % self.invoice_id.journal_id.name)
+
         xml_values = self._get_xml_values(False)
-        active_dian_resolution = self.invoice_id._get_active_dian_resolution()
         #Punto 14.1.5.2. del anexo tecnico version 1.8
         #20 Nota Crédito que referencia una factura electrónica.
         #22 Nota Crédito sin referencia a facturas*.
@@ -264,12 +276,6 @@ class AccountInvoiceDianDocument(models.Model):
         #91 Nota Crédito
         xml_values['CreditNoteTypeCode'] = '91'
         billing_reference = self.invoice_id._get_billing_reference()
-        xml_values['InvoiceAuthorization'] = active_dian_resolution['resolution_number']
-        xml_values['StartDate'] = active_dian_resolution['date_from']
-        xml_values['EndDate'] = active_dian_resolution['date_to']
-        xml_values['Prefix'] = active_dian_resolution['prefix']
-        xml_values['From'] = active_dian_resolution['number_from']
-        xml_values['To'] = active_dian_resolution['number_to']
         xml_values['BillingReference'] = billing_reference
         xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
@@ -279,25 +285,26 @@ class AccountInvoiceDianDocument(models.Model):
         return xml_values
 
     def _get_debit_note_values(self):
+        msg1 = _("Your journal: %s, has no a credit note sequence")
+
+        if not self.invoice_id.journal_id.refund_sequence_id:
+            raise UserError(msg1 % self.invoice_id.journal_id.name)
+
         xml_values = self._get_xml_values(False)
         #Punto 14.1.5.3. del anexo tecnico version 1.8
         #30 Nota Débito que referencia una factura electrónica.
         #32 Nota Débito sin referencia a facturas*.
         #33 Nota Débito para facturación electrónica V1 (Decreto 2242).
-        xml_values['CustomizationID'] = '32'
+        xml_values['CustomizationID'] = '30'
         #Exclusivo en referencias a documentos (elementos DocumentReference)
         #Punto 14.1.3 del anexo tecnico version 1.8
         #92 Nota Débito 
         #TODO: Parece que este valor se informa solo en la factura de venta
         #parece que en exportaciones
         #xml_values['DebitNoteTypeCode'] = '92'
-        #TODO: Es raro que tengamos el cufe de la factura de proveedor,
-        #en odoo no se puede hacer notas debito a facturas de venta
-        #desarrollo adicional para soportar esto
-        #billing_reference = self.invoice_id._get_billing_reference()
-        #xml_values['BillingReference'] = billing_reference
-        #xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
-        xml_values['DiscrepancyReferenceID'] = self.invoice_id.origin
+        billing_reference = self.invoice_id._get_billing_reference()
+        xml_values['BillingReference'] = billing_reference
+        xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
         xml_values['DiscrepancyDescription'] = self.invoice_id.discrepancy_response_code_id.name
         xml_values['DebitNoteLines'] = self.invoice_id._get_invoice_lines()
@@ -374,18 +381,14 @@ class AccountInvoiceDianDocument(models.Model):
         if self.company_id.profile_execution_id == '1':
             SendBillAsync_values = self._get_SendBillAsync_values()
             xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
-                global_functions.get_template_xml(
-                    SendBillAsync_values,
-                    'SendBillAsync'),
+                global_functions.get_template_xml(SendBillAsync_values, 'SendBillAsync'),
                 SendBillAsync_values['Id'],
                 self.company_id.certificate_file,
                 self.company_id.certificate_password)
         elif self.company_id.profile_execution_id == '2':
             SendTestSetAsync_values = self._get_SendTestSetAsync_values()
             xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
-                global_functions.get_template_xml(
-                    SendTestSetAsync_values,
-                    'SendTestSetAsync'),
+                global_functions.get_template_xml(SendTestSetAsync_values, 'SendTestSetAsync'),
                 SendTestSetAsync_values['Id'],
                 self.company_id.certificate_file,
                 self.company_id.certificate_password)
@@ -425,9 +428,7 @@ class AccountInvoiceDianDocument(models.Model):
         status_code = 'other'
         GetStatusZip_values = self._get_GetStatusZip_values()
         xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
-            global_functions.get_template_xml(
-                GetStatusZip_values,
-                'GetStatusZip'),
+            global_functions.get_template_xml(GetStatusZip_values, 'GetStatusZip'),
             GetStatusZip_values['Id'],
             self.company_id.certificate_file,
             self.company_id.certificate_password)
@@ -448,7 +449,7 @@ class AccountInvoiceDianDocument(models.Model):
             root = etree.fromstring(response.content)
 
             for element in root.iter("{%s}StatusCode" % b):
-                if element.text in ('00', '66', '90', '99'):
+                if element.text in ('0', '00', '66', '90', '99'):
                     if element.text == '00':
                         self.write({'state': 'done'})
 
@@ -462,6 +463,10 @@ class AccountInvoiceDianDocument(models.Model):
                             self.company_id.out_refund_debit_sent += 1
 
                     status_code = element.text
+            
+            if status_code == '0':
+                self.GetStatusZip()
+                return True
 
             if status_code == '00':
                 for element in root.iter("{%s}StatusMessage" % b):

@@ -42,7 +42,8 @@ class ResPartner(models.Model):
 
 		if self.property_account_position_id:
 			if (not self.property_account_position_id.tax_level_code_id
-					or not self.property_account_position_id.tax_scheme_id):
+					or not self.property_account_position_id.tax_scheme_id
+					or not self.property_account_position_id.listname):
 				raise UserError(msg8 % self.name)
 		else:
 			raise UserError(msg9 % self.name)
