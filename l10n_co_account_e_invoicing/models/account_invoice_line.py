@@ -31,4 +31,10 @@ class AccountInvoiceLine(models.Model):
         invoice_line_taxes_total[tax_code]['taxes'][tax_percent]['amount'] += (
             self.price_subtotal * tax_amount / 100)
 
-        return invoice_line_taxes_total		
+        return invoice_line_taxes_total
+
+    def _get_information_content_provider_party_values(self):
+		return {
+			'IDschemeID': False,
+			'IDschemeName': False,
+			'ID': False}

@@ -10,7 +10,7 @@ class AccountInvoice(models.Model):
 	_inherit = "account.invoice"
 
 	operation_type = fields.Selection(
-        [('10', 'Estandar *'), ('11', 'Mandatos')],
+        [('10', 'Estandar *')],
         string='Operation Type',
         default='10')
 	invoice_type_code = fields.Selection(
@@ -19,6 +19,12 @@ class AccountInvoice(models.Model):
          ('04', 'Factura por Contingencia DIAN')],
         string='Invoice Type',
         default='01')
+	send_invoice_to_dian = fields.Selection(
+        [('0', 'Immediately'),
+         ('1', 'After 1 Day'),
+         ('2', 'After 2 Days')],
+        string='Send Invoice to DIAN?',
+        default='1')
 	dian_document_lines = fields.One2many(
 		comodel_name='account.invoice.dian.document',
 		inverse_name='invoice_id',
@@ -35,12 +41,14 @@ class AccountInvoice(models.Model):
 					'invoice_id': self.id,
 					'company_id': self.company_id.id})
 				dian_document._set_files()
-				dian_document.sent_zipped_file()
-				dian_document.GetStatusZip()
 
-				#next lines send an email to the client with the pdf einvoice
-				#if dian_document.state == 'done':
-                dian_document.send_mail()
+				if self.send_invoice_to_dian == '0':
+					dian_document.sent_zipped_file()
+					dian_document.GetStatusZip()
+
+					#next lines send an email to the client with the pdf einvoice
+					if dian_document.state == 'done':
+						dian_document.send_mail()
 
 		return res
 
@@ -98,6 +106,7 @@ class AccountInvoice(models.Model):
 						billing_reference['ID'] = self.refund_invoice_id.number
 						billing_reference['UUID'] = dian_document.cufe_cude
 						billing_reference['IssueDate'] = self.refund_invoice_id.date_invoice
+						billing_reference['CustomizationID'] = self.refund_invoice_id.operation_type
 
 		if not billing_reference and self.refund_type == 'credit':
 			raise UserError('Credit Note has not Billing Reference')
@@ -319,10 +328,13 @@ class AccountInvoice(models.Model):
 				invoice_lines[count]['WithholdingTaxesTotal']['06']['name'] = 'ReteRenta'
 				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes'] = {}
 				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00'] = {}
-				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00']['base'] = invoice_line.price_subtotal
+				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00']['base'] = (
+					invoice_line.price_subtotal)
 				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00']['amount'] = 0
 
 			invoice_lines[count]['ItemDescription'] = invoice_line.name
+			invoice_lines[count]['InformationContentProviderParty'] = (
+				invoice_line._get_information_content_provider_party_values())
 			invoice_lines[count]['PriceAmount'] = '{:.2f}'.format(
 				invoice_line.price_unit)
 

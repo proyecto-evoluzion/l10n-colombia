@@ -302,34 +302,33 @@ Especifación de este grupo igual a la del documento Invoice>
 			</cac:Person>
 		</cac:Party>
 	</cac:AccountingCustomerParty>
-	<cac:TaxRepresentativeParty>
+<!--TODO 2.0 Grupo de información de la Persona autorizada para descargar documentos-->
+	<!--cac:TaxRepresentativeParty>
 		<cac:PartyIdentification>
 			<cbc:ID schemeAgencyID="195"
 				schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
-				schemeID="{{TaxRepresentativeParty.IDschemeID}}"
-				schemeName="{{TaxRepresentativeParty.IDschemeName}}">{{TaxRepresentativeParty.ID}}</cbc:ID>
+				schemeID=""
+				schemeName=""></cbc:ID>
 		</cac:PartyIdentification>
-		<cac:PartyName>
-			<cbc:Name/>
-		</cac:PartyName>
-	</cac:TaxRepresentativeParty>
+	</cac:TaxRepresentativeParty-->
 	<cac:Delivery>
-		<!--cbc:ActualDeliveryDate>11001</cbc:ActualDeliveryDate>
-		<cbc:ActualDeliveryTime>Bogotá, D.c. </cbc:ActualDeliveryTime-->
-	<!--TODO, direccion de entrega-->
+	<!--TODO 2.0 Fecha efectiva de salida de los bienes-->
+		<!--cbc:ActualDeliveryDate></cbc:ActualDeliveryDate-->
+	<!--TODO 2.0 Hora efectiva de salida de los bienes-->
+		<!--cbc:ActualDeliveryTime></cbc:ActualDeliveryTime-->
 		<cac:DeliveryAddress>
-			<cbc:ID>11001</cbc:ID>
-			<cbc:CityName>Bogotá, D.c. </cbc:CityName>
-			<cbc:PostalZone>Bogotá, D.c. </cbc:PostalZone>
-			<cbc:CountrySubentity>Bogotá, D.c. 11</cbc:CountrySubentity>
-			<cbc:CountrySubentityCode>11</cbc:CountrySubentityCode>
+			<cbc:ID>{{Delivery.AddressID}}</cbc:ID>
+			<cbc:CityName>{{Delivery.AddressCityName}}</cbc:CityName>
+			<cbc:PostalZone>{{Delivery.AddressPostalZone}}</cbc:PostalZone>
+			<cbc:CountrySubentity>{{Delivery.AddressCountrySubentity}}</cbc:CountrySubentity>
+			<cbc:CountrySubentityCode>{{Delivery.AddressCountrySubentityCode}}</cbc:CountrySubentityCode>
 			<cac:AddressLine>
-				<cbc:Line>CARRERA 8 No 20-14/40</cbc:Line>
+				<cbc:Line>{{Delivery.AddressLine}}</cbc:Line>
 			</cac:AddressLine>
 			<cac:Country>
-				<cbc:IdentificationCode>CO</cbc:IdentificationCode>
+				<cbc:IdentificationCode>{{Delivery.CountryIdentificationCode}}</cbc:IdentificationCode>
 			<!--TODO 2.0: languageID podria variar, siguiente version revisar esto-->
-				<cbc:Name languageID="es">Colombia</cbc:Name>
+				<cbc:Name languageID="es">{{Delivery.CountryName}}</cbc:Name>
 			</cac:Country>
 		</cac:DeliveryAddress>
 	<!--TODO 2.0, Grupo de datos con información sobre la empresa de transporte
@@ -545,24 +544,20 @@ Especifación de este grupo igual a la del documento Invoice>
 				<cbc:Name></cbc:Name>
 				<cbc:Value></cbc:Value>
 			</cac:AdditionalItemProperty-->
-		<!--TODO, Grupo de información que describen el Mandante de la operación de venta. Aplica
-		solo para mandatos, y se debe informar a nivel de ítem>
-			<cac:InformationContentProviderParty>
+			{% if BillingReference.CustomizationID == '11' %}
+		    <cac:InformationContentProviderParty>
 				<cac:PowerOfAttorney>
 					<cac:AgentParty>
 						<cac:PartyIdentification>
 							<cbc:ID schemeAgencyID="195"
 								schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
-								schemeID="{{TaxRepresentativeParty.IDschemeID}}"
-								schemeName="{{TaxRepresentativeParty.IDschemeName}}">{{TaxRepresentativeParty.ID}}</cbc:ID>
+								schemeID="{{CreditNoteLine.InformationContentProviderParty.IDschemeID}}"
+								schemeName="{{CreditNoteLine.InformationContentProviderParty.IDschemeName}}">{{CreditNoteLine.InformationContentProviderParty.ID}}</cbc:ID>
 						</cac:PartyIdentification>
 					</cac:AgentParty>
 				</cac:PowerOfAttorney>
-			</cac:InformationContentProviderParty-->
-		<!--TODO, borrar no aparece en el anexo tecnico, pero la factura de la dian si recibe este valor-->
-			<cac:AdditionalItemIdentification>
-				<cbc:ID schemeID="999" schemeName="EAN13">6543542313534</cbc:ID>
-			</cac:AdditionalItemIdentification>
+			</cac:InformationContentProviderParty>
+		    {% endif %}
 		</cac:Item>
 		<cac:Price>
 			<cbc:PriceAmount currencyID="{{DocumentCurrencyCode}}">{{CreditNoteLine.PriceAmount}}</cbc:PriceAmount>

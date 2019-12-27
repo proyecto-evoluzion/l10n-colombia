@@ -18,7 +18,6 @@ from odoo.exceptions import ValidationError, UserError
 import logging
 logger = logging.getLogger(__name__)
 from odoo.http import request
-from odoo.addons.ehcs_qr_code_base.models.qr_code_base import generate_qr_code
 
 
 DIAN = {
@@ -220,12 +219,10 @@ class AccountInvoiceDianDocument(models.Model):
             'IndustryClassificationCode': supplier.isic_id.code,
             'AccountingSupplierParty': supplier._get_accounting_partner_party_values(),
             'AccountingCustomerParty': customer._get_accounting_partner_party_values(),
-            #TODO: No esta completamente claro los datos de que tercero son
-            'TaxRepresentativeParty': supplier._get_tax_representative_party_values(),
+            'Delivery': customer._get_delivery_values(),
             'PaymentMeansID': self.invoice_id.payment_mean_id.code,
-            'PaymentMeansCode': '10',
+            'PaymentMeansCode': self.invoice_id.payment_mean_code_id.code,
             'PaymentDueDate': self.invoice_id.date_due,
-            'PaymentID': 'Efectivo',
             'PaymentExchangeRate': self.invoice_id._get_payment_exchange_rate(),
             'TaxesTotal': einvoicing_taxes['TaxesTotal'],
             'WithholdingTaxesTotal': einvoicing_taxes['WithholdingTaxesTotal'],
@@ -506,9 +503,8 @@ class AccountInvoiceDianDocument(models.Model):
             'view_mode': 'form',
             'res_model': self._name,
             'res_id': self.id,
-            'target': 'current',
-        }
-    
+            'target': 'current'}
+
     @api.one
     def _generate_qr_code(self):
         einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
@@ -535,13 +531,19 @@ class AccountInvoiceDianDocument(models.Model):
         qr_data += "\nCUFE: " + cufe if cufe else ''
         qr_data += "\n\n" + self.invoice_url
 
-        self.qr_image = generate_qr_code(qr_data)
+        self.qr_image = global_functions.get_qr_code(qr_data)
 
     @api.multi
     def send_mail(self):
-        template_id= self.env.ref('l10n_co_e_invoicing.email_template_for_einvoice').id
-        xml_attachment = self.env['ir.attachment'].create({'name': self.invoice_id.number+'.xml', 'datas_fname': self.invoice_id.number+'.xml', 'datas': self.xml_file})
-        pdf_attachment = self.env['ir.attachment'].create({'name': self.invoice_id.number or 'NO_VALIDADA', 'datas_fname': (self.invoice_id.number or 'NO_VALIDADA'), 'datas': self.save_reports_file()})
+        template_id= self.env.ref('l10n_co_account_e_invoicing.email_template_for_einvoice').id
+        xml_attachment = self.env['ir.attachment'].create({
+            'name': self.xml_filename,
+            'datas_fname': self.xml_filename,
+            'datas': self.xml_file})
+        pdf_attachment = self.env['ir.attachment'].create({
+            'name': self.invoice_id.number or 'NO_VALIDADA',
+            'datas_fname': (self.invoice_id.number or 'NO_VALIDADA'),
+            'datas': self.save_reports_file()})
         template = self.env['mail.template'].browse(template_id)
         template.attachment_ids = [(6,0,[xml_attachment.id]),(6,0,[pdf_attachment.id])]
         template.send_mail(self.invoice_id.id, force_send=True)
@@ -549,9 +551,7 @@ class AccountInvoiceDianDocument(models.Model):
         xml_attachment.unlink()
         pdf_attachment.unlink()
 
-
     def save_reports_file(self):
         #template_name = self.env['ir.actions.report.xml'].browse(self.company_id.report_template.id).report_name
         pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], 'account.report_invoice')
-
         return b64encode(pdf)
