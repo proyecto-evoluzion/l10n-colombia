@@ -43,10 +43,9 @@
     <!--Email template -->
     <record id="email_template_for_einvoice" model="mail.template">
         <field name="name">Electronic Invoice - Send by Email</field>
-        <field name="email_from">${object.user_id.email}</field>
+        <field name="email_from">${object.company_id.einvoicing_email}</field>
         <field name="subject">EXA Auto Parts S.A.S generó la Factura electrónica ${object.number}</field>
-        <field name="email_to">${(object.partner_id.einvoice_email)}</field>
-        <field name="email_cc">sincorreofe@exaap.com</field>
+        <field name="email_to">${(object.partner_id.einvoice_email) or (object.partner_id.email}</field>
         <field name="model_id" ref="account.model_account_invoice"/>
         <field name="auto_delete" eval="True"/>
         <field name="notification" eval="True"/>
@@ -58,19 +57,19 @@
             <p>Señor(es),</p>
             <p>${object.partner_id.name}</p><br><br>
 
-        <p>Le informamos que ha recibido una factura/nota electrónica de EXA Auto Parts S.A.S.:</p><br><br>
+        <p>Le informamos que ha recibido una factura/nota electrónica de ${object.company_id.name}:</p><br><br>
 
         <p>Número de factura: <strong> ${object.number} </strong></p>
         <p>A nombre de: <strong> ${object.partner_id.name} </strong></p>
         <p>Valor Total: <strong> ${object.amount_total} ${object.currency_id.name} </strong></p><br><br>
 
-        <p>Si tiene inquietud respecto a la información contenida en la factura/nota electrónica debe comunicarse con EXA Auto Parts al correo efactura@exaap.com indicando su rechazo si es necesario.</p><br><br>
+        <p>Si tiene inquietud respecto a la información contenida en la factura/nota electrónica, responda este correo electrónico.</p><br>
         
-        <p>Si pasados tres (3) días hábiles siguientes a la recepción de la factura/nota electrónica, y no se ha recibido un correo indicando  rechazo de la factura/nota electrónica, el sistema la dará por aceptada. Este correo electrónico es generado automáticamente. Por favor no lo responda.</p><br>
+        <p>Si pasados tres (3) días hábiles siguientes a la recepción de la factura/nota electrónica, no se ha recibido un correo indicando rechazo de la factura/nota electrónica, el sistema la dará por aceptada.</p><br>
         
-        <p>Cordialmente,</p><br><br>
+        <p>Cordialmente,</p><br>
 
-        <p><strong>EXA Auto Parts S.A.S</strong></p>
+        <p><strong>${object.company_id.name}</strong></p>
 
         </div>            
         ]]></field>

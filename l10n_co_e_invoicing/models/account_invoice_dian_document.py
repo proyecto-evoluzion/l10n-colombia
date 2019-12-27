@@ -540,7 +540,7 @@ class AccountInvoiceDianDocument(models.Model):
     @api.multi
     def send_mail(self):
         template_id= self.env.ref('l10n_co_e_invoicing.email_template_for_einvoice').id
-        xml_attachment = self.env['ir.attachment'].create({'name': self.xml_filename, 'datas_fname': self.xml_filename, 'datas': self.xml_file})
+        xml_attachment = self.env['ir.attachment'].create({'name': self.invoice_id.number+'.xml', 'datas_fname': self.invoice_id.number+'.xml', 'datas': self.xml_file})
         pdf_attachment = self.env['ir.attachment'].create({'name': self.invoice_id.number or 'NO_VALIDADA', 'datas_fname': (self.invoice_id.number or 'NO_VALIDADA'), 'datas': self.save_reports_file()})
         template = self.env['mail.template'].browse(template_id)
         template.attachment_ids = [(6,0,[xml_attachment.id]),(6,0,[pdf_attachment.id])]
@@ -551,5 +551,7 @@ class AccountInvoiceDianDocument(models.Model):
 
 
     def save_reports_file(self):
+        #template_name = self.env['ir.actions.report.xml'].browse(self.company_id.report_template.id).report_name
         pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], 'account.report_invoice')
+
         return b64encode(pdf)
