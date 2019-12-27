@@ -430,7 +430,7 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 <!--TODO, modulo payment means incompleto-->
 	<cac:PaymentMeans>
         <cbc:ID>{{PaymentMeansID}}</cbc:ID>
-        <!--cbc:PaymentMeansCode>{{PaymentMeansCode}}</cbc:PaymentMeansCode-->
+        <cbc:PaymentMeansCode>{{PaymentMeansCode}}</cbc:PaymentMeansCode>
         <cbc:PaymentDueDate>{{PaymentDueDate}}</cbc:PaymentDueDate>
     <!--TODO 2.0: Identificador del pago, pueden ir de cero a varios PaymentID-->
 		<!--cbc:PaymentID></cbc:PaymentID-->

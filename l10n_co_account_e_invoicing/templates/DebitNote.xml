@@ -75,7 +75,7 @@ referencia la factura por ejemplo en servicios públicos>
 		<cbc:Description>{{DiscrepancyDescription}}</cbc:Description>
     </cac:DiscrepancyResponse>
 <!--TODAS LAS FACTURAS DEBEN SER DEL MISMO ADQUIRIENTE-->
-<!--Si CreditNoteTypeCode igual a 20 es obligatorio-->
+<!--Si DebitNoteTypeCode igual a 30 es obligatorio-->
 	<cac:BillingReference>
 		<cac:InvoiceDocumentReference>
 			<cbc:ID>{{BillingReference.ID}}</cbc:ID>
@@ -419,7 +419,7 @@ Especifación de este grupo igual a la del documento Invoice>
 <!--TODO, modulo payment means incompleto-->
     <cac:PaymentMeans>
         <cbc:ID>{{PaymentMeansID}}</cbc:ID>
-        <!--cbc:PaymentMeansCode>{{PaymentMeansCode}}</cbc:PaymentMeansCode-->
+        <cbc:PaymentMeansCode>{{PaymentMeansCode}}</cbc:PaymentMeansCode>
         <cbc:PaymentDueDate>{{PaymentDueDate}}</cbc:PaymentDueDate>
     <!--TODO 2.0: Identificador del pago, pueden ir de cero a varios PaymentID-->
 		<!--cbc:PaymentID></cbc:PaymentID-->
