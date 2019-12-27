@@ -19,6 +19,9 @@ class ResPartner(models.Model):
 		msg7 = _("'%s' does not have a identification document established.")
 		msg8 = _("'%s' does not have a fiscal position correctly configured.")
 		msg9 = _("'%s' does not have a fiscal position established.")
+		first_name = False
+		family_name = False
+		middle_name = False
 
 		if not self.person_type:
 			raise UserError(msg1 % self.name)
@@ -48,8 +51,22 @@ class ResPartner(models.Model):
 		else:
 			raise UserError(msg9 % self.name)
 
+		if self.firstname:
+			first_name = self.firstname
+			middle_name = self.othernames
+		else:
+			first_name = self.othernames
+
+		if self.lastname and self.lastname2:
+			family_name = self.lastname + self.lastname2
+		elif self.lastname:
+			family_name = self.lastname
+		elif self.lastname2:
+			family_name = self.lastname2
+
 		return {
 			'AdditionalAccountID': self.person_type,
+			'PartyName': self.commercial_name,
 			'Name': self.name,
 			'AddressID': self.zip_id.code,
 			'AddressCityName': self.zip_id.city,
@@ -60,12 +77,16 @@ class ResPartner(models.Model):
 			'CompanyIDschemeID': self.check_digit,
 			'CompanyIDschemeName': self.document_type_id.code,
 			'CompanyID': self.identification_document,
+			'listName': self.property_account_position_id.listname,
 			'TaxLevelCode': self.property_account_position_id.tax_level_code_id.code,
 			'TaxSchemeID': self.property_account_position_id.tax_scheme_id.code,
 			'TaxSchemeName': self.property_account_position_id.tax_scheme_id.name,
 			'CorporateRegistrationSchemeName': self.ref,
 			'CountryIdentificationCode': self.country_id.code,
-			'CountryName': self.country_id.name}
+			'CountryName': self.country_id.name,
+			'FirstName': first_name,
+			'FamilyName': family_name,
+			'MiddleName': middle_name}
 
 	def _get_tax_representative_party_values(self):
 		return {

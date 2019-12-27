@@ -220,16 +220,21 @@ class AccountInvoice(models.Model):
 		return {'TaxesTotal': taxes, 'WithholdingTaxesTotal': withholding_taxes}
 
 	def _get_invoice_lines(self):
-		msg1 = _("Your tax: '%s', has no e-invoicing tax group type, " +
+		msg1 = _("Your Unit of Measure: '%s', has no Unit of Measure Code, " +
 				 "contact with your administrator.")
-		msg2 = _("Your withholding tax: '%s', has positive amount, the withholding " +
+		msg2 = _("Your tax: '%s', has no e-invoicing tax group type, " +
+				 "contact with your administrator.")
+		msg3 = _("Your withholding tax: '%s', has positive amount, the withholding " +
 				 "taxes must have negative amount, contact with your administrator.")
-		msg3 = _("Your tax: '%s', has negative amount, the taxes must have " + 
+		msg4 = _("Your tax: '%s', has negative amount, the taxes must have " + 
 		         "positive amount, contact with your administrator.")
 		invoice_lines = {}
 		count = 1
 
 		for invoice_line in self.invoice_line_ids:
+			if not invoice_line.uom_id.product_uom_code_id:
+				raise UserError(msg1 % invoice_line.uom_id.name)
+
 			disc_amount = 0
 			total_wo_disc = 0
 
@@ -240,16 +245,12 @@ class AccountInvoice(models.Model):
 				total_wo_disc = invoice_line.price_unit * invoice_line.quantity
 
 			invoice_lines[count] = {}
-			invoice_lines[count]['Quantity'] = '{:.2f}'.format(
-				invoice_line.quantity)
-			invoice_lines[count]['LineExtensionAmount'] = '{:.2f}'.format(
-				invoice_line.price_subtotal)
-			invoice_lines[count]['MultiplierFactorNumeric'] = '{:.2f}'.format(
-				invoice_line.discount)
-			invoice_lines[count]['AllowanceChargeAmount'] = '{:.2f}'.format(
-				disc_amount)
-			invoice_lines[count]['AllowanceChargeBaseAmount'] = '{:.2f}'.format(
-				total_wo_disc)
+			invoice_lines[count]['unitCode'] = invoice_line.uom_id.product_uom_code_id.code
+			invoice_lines[count]['Quantity'] = '{:.2f}'.format(invoice_line.quantity)
+			invoice_lines[count]['LineExtensionAmount'] = '{:.2f}'.format(invoice_line.price_subtotal)
+			invoice_lines[count]['MultiplierFactorNumeric'] = '{:.2f}'.format(invoice_line.discount)
+			invoice_lines[count]['AllowanceChargeAmount'] = '{:.2f}'.format(disc_amount)
+			invoice_lines[count]['AllowanceChargeBaseAmount'] = '{:.2f}'.format(total_wo_disc)
 			invoice_lines[count]['TaxesTotal'] = {}
 			invoice_lines[count]['WithholdingTaxesTotal'] = {}
 
@@ -262,7 +263,7 @@ class AccountInvoice(models.Model):
 				for tax_id in tax_ids:
 					if tax_id.tax_group_id.is_einvoicing:
 						if not tax_id.tax_group_id.tax_group_type_id:
-							raise UserError(msg1 % tax.name)
+							raise UserError(msg2 % tax.name)
 
 						tax_type = tax_id.tax_group_id.tax_group_type_id.type
 
@@ -274,7 +275,7 @@ class AccountInvoice(models.Model):
 										tax_id.amount * (-1),
 										invoice_lines[count]['WithholdingTaxesTotal']))
 							else:
-								raise UserError(msg2 % tax_id.name)
+								raise UserError(msg3 % tax_id.name)
 						else:
 							if tax_id.amount > 0:
 								invoice_lines[count]['TaxesTotal'] = (
@@ -283,7 +284,7 @@ class AccountInvoice(models.Model):
 										tax_id.amount,
 										invoice_lines[count]['TaxesTotal']))
 							else:
-								raise UserError(msg3 % tax_id.name)
+								raise UserError(msg4 % tax_id.name)
 
 			if '01' not in invoice_lines[count]['TaxesTotal']:
 				invoice_lines[count]['TaxesTotal']['01'] = {}

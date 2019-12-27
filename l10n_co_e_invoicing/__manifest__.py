@@ -22,9 +22,11 @@
         "l10n_co_partner_isic",
         "l10n_co_partner_person_type",
         "l10n_co_partner_vat",
+        "l10n_co_product_uom",
         "l10n_co_sequence_resolution",
         "account_invoice_refund_link",
-        #"base_iso3166",
+        "partner_other_names",
+        "base_iso3166",
         "ehcs_qr_code_base",
     ],
     'external_dependencies': {

@@ -214,6 +214,7 @@ class AccountInvoiceDianDocument(models.Model):
             'UUID': cufe_cude['CUFE/CUDE'],
             'IssueDate': IssueDate,
             'IssueTime': IssueTime,
+            'DueDate': self.invoice_id.date_due,
             'DocumentCurrencyCode': self.invoice_id.currency_id.name,
             'LineCountNumeric': len(self.invoice_id.invoice_line_ids),
             'IndustryClassificationCode': supplier.isic_id.code,

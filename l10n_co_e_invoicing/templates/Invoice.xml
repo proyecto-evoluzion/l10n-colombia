@@ -69,6 +69,7 @@
 	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUFE-SHA384">{{UUID}}</cbc:UUID>
 	<cbc:IssueDate>{{IssueDate}}</cbc:IssueDate>
 	<cbc:IssueTime>{{IssueTime}}</cbc:IssueTime>
+	<cbc:DueDate>{{DueDate}}</cbc:DueDate>
 	<cbc:InvoiceTypeCode>{{InvoiceTypeCode}}</cbc:InvoiceTypeCode>
 <!--TODO 1.1: Que nota colocar?-->
 	<cbc:Note>{{Note}}</cbc:Note>
@@ -127,16 +128,11 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 		<cbc:AdditionalAccountID>{{AccountingSupplierParty.AdditionalAccountID}}</cbc:AdditionalAccountID>
 		<cac:Party>
 			<cbc:IndustryClassificationCode>{{IndustryClassificationCode}}</cbc:IndustryClassificationCode>
-			<cac:PartyName>
-				<cbc:Name>{{AccountingSupplierParty.Name}}</cbc:Name>
+			{% if AccountingSupplierParty.PartyName%}
+    		<cac:PartyName>
+				<cbc:Name>{{AccountingSupplierParty.PartyName}}</cbc:Name>
 			</cac:PartyName>
-		<!--TODO 2.0, parece informacion adicional, borrar si no es necesario>
-			<cac:PartyName>
-				<cbc:Name>Establecimiento Principal</cbc:Name>
-			</cac:PartyName>
-			<cac:PartyName>
-				<cbc:Name>DIAN</cbc:Name>
-			</cac:PartyName-->
+    		{% endif %}
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
@@ -147,10 +143,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					<cac:AddressLine>
 						<cbc:Line>{{AccountingSupplierParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
-				<!--TODO 1.0: normalmente es colombia, habria laposibilidad que fuera otro pais?-->
 					<cac:Country>
 						<cbc:IdentificationCode>{{AccountingSupplierParty.CountryIdentificationCode}}</cbc:IdentificationCode>
-					<!--TODO 1.0: languageID podria variar-->
+					<!--TODO 2.0: languageID podria variar, siguiente version revisar esto-->
 						<cbc:Name languageID="es">{{AccountingSupplierParty.CountryName}}</cbc:Name>
 					</cac:Country>
 				</cac:Address>
@@ -161,8 +156,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
 					schemeID="{{AccountingSupplierParty.CompanyIDschemeID}}"
 					schemeName="{{AccountingSupplierParty.CompanyIDschemeName}}">{{AccountingSupplierParty.CompanyID}}</cbc:CompanyID>
-			<!--TODO 1.0: listName el anexo dice que eliminar o valor No aplica-->
-				<cbc:TaxLevelCode listName="48">{{AccountingSupplierParty.TaxLevelCode}}</cbc:TaxLevelCode>
+			<!--TODO 2.0: listName el anexo dice que eliminar o valor No aplica,
+			pero para consumidor final dice informar 49-->
+				<cbc:TaxLevelCode listName="{{AccountingSupplierParty.listName}}">{{AccountingSupplierParty.TaxLevelCode}}</cbc:TaxLevelCode>
 				<cac:RegistrationAddress>
 					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
 					<cbc:CityName>{{AccountingSupplierParty.AddressCityName}}</cbc:CityName>
@@ -172,10 +168,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					<cac:AddressLine>
 						<cbc:Line>{{AccountingSupplierParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
-				<!--TODO 1.0: normalmente es colombia, habria la posibilidad que fuera otro pais?-->
 					<cac:Country>
 						<cbc:IdentificationCode>{{AccountingSupplierParty.CountryIdentificationCode}}</cbc:IdentificationCode>
-					<!--TODO 1.0: languageID podria variar-->
+					<!--TODO 2.0: languageID podria variar, siguiente version revisar esto-->
 						<cbc:Name languageID="es">{{AccountingSupplierParty.CountryName}}</cbc:Name>
 					</cac:Country>
 				</cac:RegistrationAddress>
@@ -207,8 +202,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
                                 schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
                                 schemeID=""
                                 schemeName=""></cbc:CompanyID>
-                        <TODO 1.0: listName el anexo dice que eliminar o valor No aplica>
-                            <cbc:TaxLevelCode listName="48"></cbc:TaxLevelCode>
+                        <TODO 2.0: listName el anexo dice que eliminar o valor No aplica,
+						pero para consumidor final dice informar 49>
+							<cbc:TaxLevelCode listName=""></cbc:TaxLevelCode>
                             <cac:TaxScheme>
                                 <cbc:ID></cbc:ID>
                                 <cbc:Name></cbc:Name>
@@ -234,9 +230,11 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
                 <cbc:ID schemeName="{{AccountingCustomerParty.IDschemeName}}"
                     schemeID="{{AccountingCustomerParty.IDschemeID}}">{{AccountingCustomerParty.CompanyID}}</cbc:ID>
             </cac:PartyIdentification>
-			<cac:PartyName>
-				<cbc:Name>{{AccountingCustomerParty.Name}}</cbc:Name>
+            {% if AccountingCustomerParty.PartyName%}
+    		<cac:PartyName>
+				<cbc:Name>{{AccountingCustomerParty.PartyName}}</cbc:Name>
 			</cac:PartyName>
+    		{% endif %}
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
@@ -249,7 +247,7 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					</cac:AddressLine>
 					<cac:Country>
 						<cbc:IdentificationCode>{{AccountingCustomerParty.CountryIdentificationCode}}</cbc:IdentificationCode>
-					<!--TODO: languageID podria variar-->
+					<!--TODO 2.0: languageID podria variar, siguiente version revisar esto-->
 						<cbc:Name languageID="es">{{AccountingCustomerParty.CountryName}}</cbc:Name>
 					</cac:Country>
 				</cac:Address>
@@ -260,8 +258,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
 					schemeID="{{AccountingCustomerParty.CompanyIDschemeID}}"
 					schemeName="{{AccountingCustomerParty.CompanyIDschemeName}}">{{AccountingCustomerParty.CompanyID}}</cbc:CompanyID>
-			<!--TODO, listName el anexo dice que eliminar o valor No aplica-->
-				<cbc:TaxLevelCode listName="48">{{AccountingCustomerParty.TaxLevelCode}}</cbc:TaxLevelCode>
+			<!--TODO 2.0: listName el anexo dice que eliminar o valor No aplica,
+			pero para consumidor final dice informar 49-->
+				<cbc:TaxLevelCode listName="{{AccountingCustomerParty.listName}}">{{AccountingCustomerParty.TaxLevelCode}}</cbc:TaxLevelCode>
 				<cac:RegistrationAddress>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
 					<cbc:CityName>{{AccountingCustomerParty.AddressCityName}}</cbc:CityName>
@@ -273,7 +272,7 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					</cac:AddressLine>
 					<cac:Country>
 						<cbc:IdentificationCode>{{AccountingCustomerParty.CountryIdentificationCode}}</cbc:IdentificationCode>
-					<!--TODO: languageID podria variar-->
+					<!--TODO 2.0: languageID podria variar, siguiente version revisar esto-->
 						<cbc:Name languageID="es">{{AccountingCustomerParty.CountryName}}</cbc:Name>
 					</cac:Country>
 				</cac:RegistrationAddress>
@@ -300,13 +299,14 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 				<cbc:ElectronicMail>dcruz@empresa.org</cbc:ElectronicMail>
                 <cbc:Note>dcruz@empresa.org</cbc:Note>
 			</cac:Contact-->
-		<!--TODO: Para informarse si AdditionalAccountID = 2 >
+			{% if AccountingCustomerParty.AdditionalAccountID == '2' %}
 			<cac:Person>
-				<cbc:ID>{{AccountingCustomerParty.AdditionalAccountID}}</cbc:ID>
-				<cbc:FirstName>“consumidor” o “usuario”</cbc:FirstName>
-                <cbc:FamilyName>“final”</cbc:FamilyName>
-				<cbc:MiddleName>dcruz@empresa.org</cbc:MiddleName>
-			<TODO: solo informar informacion de la residencia>
+			<!--TODO 2.0: no se sabe que es este campo, pero es opcional>
+				<cbc:ID></cbc:ID-->
+				<cbc:FirstName>{{AccountingCustomerParty.FirstName}}</cbc:FirstName>
+                <cbc:FamilyName>{{AccountingCustomerParty.FamilyName}}</cbc:FamilyName>
+				<cbc:MiddleName>{{AccountingCustomerParty.MiddleName}}</cbc:MiddleName>
+			<!--TODO 2.0: solo informar informacion de la residencia>
                 <cac:ResidenceAddress>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
 					<cbc:CityName>{{AccountingCustomerParty.AddressCityName}}</cbc:CityName>
@@ -316,8 +316,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					<cac:AddressLine>
 						<cbc:Line>{{AccountingCustomerParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
-				</cac:ResidenceAddress>
-			</cac:Person-->
+				</cac:ResidenceAddress-->
+			</cac:Person>
+			{% endif %}
 		</cac:Party>
 	</cac:AccountingCustomerParty>
 <!--TODO-->
@@ -344,15 +345,18 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 			</cac:AddressLine>
 			<cac:Country>
 				<cbc:IdentificationCode>CO</cbc:IdentificationCode>
-			<!--TODO: languageID podria variar-->
+			<!--TODO 2.0: languageID podria variar, siguiente version revisar esto-->
 				<cbc:Name languageID="es">Colombia</cbc:Name>
 			</cac:Country>
 		</cac:DeliveryAddress>
-	<!--TODO, podria ser un fragmento no necesario siempre-->
+	<!--TODO 2.0, Grupo de datos con información sobre la empresa de transporte
+	Desarrollo futuro>
 		<cac:DeliveryParty>
-			<cac:PartyName>
-				<cbc:Name>Empresa de transporte</cbc:Name>
+			{% if Delivery.PartyName%}
+    		<cac:PartyName>
+				<cbc:Name>{{Delivery.PartyName}}</cbc:Name>
 			</cac:PartyName>
+    		{% endif %}
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>11001</cbc:ID>
@@ -365,7 +369,7 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					</cac:AddressLine>
 					<cac:Country>
 						<cbc:IdentificationCode>CO</cbc:IdentificationCode>
-					<!--TODO: languageID podria variar-->
+					<TODO 2.0: languageID podria variar, siguiente version revisar esto>
 						<cbc:Name languageID="es">Colombia</cbc:Name>
 					</cac:Country>
 				</cac:Address>
@@ -376,7 +380,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					schemeAgencyName="CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)"
 					schemeID="1"
 					schemeName="31">981223983</cbc:CompanyID>
-				<cbc:TaxLevelCode listName="04">O-99</cbc:TaxLevelCode>
+			<TODO 2.0: listName el anexo dice que eliminar o valor No aplica,
+			pero para consumidor final dice informar 49>
+				<cbc:TaxLevelCode listName="">O-99</cbc:TaxLevelCode>
 				<cac:RegistrationAddress>
 					<cbc:ID>11001</cbc:ID>
 					<cbc:CityName>Bogotá, D.c. </cbc:CityName>
@@ -388,7 +394,7 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 					</cac:AddressLine>
 					<cac:Country>
 						<cbc:IdentificationCode>CO</cbc:IdentificationCode>
-					<!--TODO: languageID podria variar-->
+					<TODO 2.0: languageID podria variar, siguiente version revisar esto>
 						<cbc:Name languageID="es">Colombia</cbc:Name>
 					</cac:Country>
 				</cac:RegistrationAddress>
@@ -414,20 +420,24 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 				<cbc:ElectronicMail>eric.vanboxsom@gosocket.net</cbc:ElectronicMail>
 				<cbc:Note>Test descripcion contacto</cbc:Note>
 			</cac:Contact>
-		</cac:DeliveryParty>
+		</cac:DeliveryParty-->
 	</cac:Delivery>
-<!--TODO, falta definir que modulo del icoterms se elige-->
+<!--TODO 2.0, falta definir que modulo del icoterms se elige>
 	<cac:DeliveryTerms>
 		<cbc:SpecialTerms>Portes Pagados</cbc:SpecialTerms>
 		<cbc:LossRiskResponsibilityCode>CFR</cbc:LossRiskResponsibilityCode>
 		<cbc:LossRisk>Costo y Flete</cbc:LossRisk>
-	</cac:DeliveryTerms>
+	</cac:DeliveryTerms-->
 <!--TODO, modulo payment means incompleto-->
 	<cac:PaymentMeans>
 		<cbc:ID>{{PaymentMeansID}}</cbc:ID>
 		<cbc:PaymentMeansCode>{{PaymentMeansCode}}</cbc:PaymentMeansCode>
 		<cbc:PaymentDueDate>{{PaymentDueDate}}</cbc:PaymentDueDate>
-		<cbc:PaymentID>{{PaymentID}}</cbc:PaymentID>
+	<!--TODO 2.0: Identificador del pago, pueden ir de cero a varios PaymentID,
+	corresponde a los pagos que se hicieron-->
+		<!--cbc:PaymentID>{{PaymentID}}</cbc:PaymentID-->
+	<!--TODO 2.0: En el anexo esta pero solo en facturas y no hay informacion sobre el campo-->
+		<!--cbc:PaymentTerms></cbc:PaymentTerms-->
 	</cac:PaymentMeans>
 <!--TODO: Grupo de campos para informaciónrelacionadas con un anticipo -->
 	<!--cac:PrepaidPayment>
@@ -528,9 +538,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 	<!--TODO: Obligatorio de informar para el caso de facturas por contratos de servicio tipo AIU.
 	Para el ítem Adminsitración. En este caso la cbc:Note debe empezar por el texto: “Contrato de
 	servicios AIU por concepto de:” El contribuyente debe incluir el objeto del contrato facturado-->
-		<cbc:Note>Información Adicional: Texto libre para añadir información adicional al artículo.</cbc:Note>
-	<!--TODO: unitCode debe ser dinamico-->
-		<cbc:InvoicedQuantity unitCode="EA">{{InvoiceLine.Quantity}}</cbc:InvoicedQuantity>
+		<!--cbc:Note>Información Adicional: Texto libre para añadir información adicional al artículo.</cbc:Note-->
+	<!--TODO 2.0: unitCode debe ser dinamico-->
+		<cbc:InvoicedQuantity unitCode="{InvoiceLine.unitCode}}">{{InvoiceLine.Quantity}}</cbc:InvoicedQuantity>
 		<cbc:LineExtensionAmount currencyID="{{DocumentCurrencyCode}}">{{InvoiceLine.LineExtensionAmount}}</cbc:LineExtensionAmount>
 	<!--TODO, Obligatorio de informar si se trata de muestras comerciales.>
 		<cac:PricingReference>
@@ -637,7 +647,7 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 		</cac:Item>
 		<cac:Price>
 			<cbc:PriceAmount currencyID="{{DocumentCurrencyCode}}">{{InvoiceLine.PriceAmount}}</cbc:PriceAmount>
-			<cbc:BaseQuantity unitCode="EA">{{InvoiceLine.Quantity}}</cbc:BaseQuantity>
+			<cbc:BaseQuantity unitCode="{InvoiceLine.unitCode}}">{{InvoiceLine.Quantity}}</cbc:BaseQuantity>
 		</cac:Price>
 	</cac:InvoiceLine>
 	{% endfor -%}
