@@ -87,12 +87,6 @@ class ResPartner(models.Model):
 			'FirstName': first_name,
 			'FamilyName': family_name,
 			'MiddleName': middle_name}
-	
-	def _get_delivery_values(self):
-		return {
-			'IDschemeID': self.check_digit,
-			'IDschemeName': self.document_type_id.code,
-			'ID': self.identification_document}
 
 	def _get_tax_representative_party_values(self):
 		return {
