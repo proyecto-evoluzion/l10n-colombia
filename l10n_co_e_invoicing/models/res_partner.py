@@ -93,3 +93,4 @@ class ResPartner(models.Model):
 			'IDschemeID': self.check_digit,
 			'IDschemeName': self.document_type_id.code,
 			'ID': self.identification_document}
+	

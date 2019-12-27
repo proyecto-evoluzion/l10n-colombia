@@ -352,11 +352,9 @@ Y UNA FACTURA DE NUEVO EN EL CASO DE QUE LA FACTURA ORIGINAL ESTE ERRADA POR FAL
 	<!--TODO 2.0, Grupo de datos con información sobre la empresa de transporte
 	Desarrollo futuro>
 		<cac:DeliveryParty>
-			{% if Delivery.PartyName%}
     		<cac:PartyName>
-				<cbc:Name>{{Delivery.PartyName}}</cbc:Name>
+				<cbc:Name></cbc:Name>
 			</cac:PartyName>
-    		{% endif %}
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>11001</cbc:ID>
