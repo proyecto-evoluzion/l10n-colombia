@@ -531,12 +531,20 @@ class AccountInvoiceDianDocument(models.Model):
         qr_data += "\nValFac: " + str(ValFac)
         qr_data += "\nValIva: " + str(ValImp1)
         qr_data += "\nValOtroIm: " + str(ValImp2 + ValImp3)
-        qr_data += "\nValTolFac: " + str(self.invoice_id.amount_total)
+        qr_data += "\nValTolFac: " + str(ValFac + ValImp1 + ValImp2 + ValImp3)
         qr_data += "\nCUFE: " + cufe if cufe else ''
         qr_data += "\n\n" + self.invoice_url
 
         self.qr_image = generate_qr_code(qr_data)
 
+    @api.multi
     def send_mail(self):
-        template_id=self.env.ref('email_template_for_einvoice').id
-        self.env['mail.template'].browse(template_id).send_mail(self.id, force_send=True)
+        template_id= self.env.ref('l10n_co_e_invoicing.email_template_for_einvoice').id
+        xml_attachment = self.env['ir.attachment'].create({'name': self.xml_filename, 'datas_fname': self.xml_filename, 'datas': self.xml_file})
+        pdf_attachment = self.env['ir.attachment'].create({'name': self.invoice_id.number or 'NO_VALIDADA', 'datas_fname': (self.invoice_id.number or 'NO_VALIDADA'), 'datas': self.save_reports_file()})
+        template = self.env['mail.template'].browse(template_id)
+        template.attachment_ids = [(6,0,[xml_attachment.id]),(6,0,[pdf_attachment.id])]
+        template.send_mail(self.invoice_id.id, force_send=True)
+
+    def save_reports_file(self):
+        b64encode(self.env['report'].sudo().get_pdf([self.invoice_id.id],'l10n_co_e_invoicing.account_invoice_report_template_with_qr')
