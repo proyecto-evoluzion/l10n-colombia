@@ -40,7 +40,7 @@ class AccountInvoice(models.Model):
 
 				#next lines send an email to the client with the pdf einvoice
 				#if dian_document.state == 'done':
-                #dian_document.send_mail()
+                dian_document.send_mail()
 
 		return res
 

@@ -24,7 +24,7 @@
         "l10n_co_partner_vat",
         "l10n_co_sequence_resolution",
         "account_invoice_refund_link",
-        "base_iso3166",
+        #"base_iso3166",
         "ehcs_qr_code_base",
     ],
     'external_dependencies': {

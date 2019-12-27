@@ -544,6 +544,11 @@ class AccountInvoiceDianDocument(models.Model):
         template = self.env['mail.template'].browse(template_id)
         template.attachment_ids = [(6,0,[xml_attachment.id]),(6,0,[pdf_attachment.id])]
         template.send_mail(self.invoice_id.id, force_send=True)
+        #removing attachments
+        xml_attachment.unlink()
+        pdf_attachment.unlink()
+
 
     def save_reports_file(self):
-        b64encode(self.env['report'].sudo().get_pdf([self.invoice_id.id],'l10n_co_e_invoicing.account_invoice_report_template_with_qr')
+        pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], 'account.report_invoice')
+        return b64encode(pdf)
