@@ -343,11 +343,9 @@ Especifación de este grupo igual a la del documento Invoice>
 	<!--TODO 2.0, Grupo de datos con información sobre la empresa de transporte
 	Desarrollo futuro>
 		<cac:DeliveryParty>
-			{% if Delivery.PartyName%}
     		<cac:PartyName>
-				<cbc:Name>{{Delivery.PartyName}}</cbc:Name>
+				<cbc:Name></cbc:Name>
 			</cac:PartyName>
-    		{% endif %}
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>11001</cbc:ID>
