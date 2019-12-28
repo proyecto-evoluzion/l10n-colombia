@@ -540,18 +540,19 @@ class AccountInvoiceDianDocument(models.Model):
             'name': self.xml_filename,
             'datas_fname': self.xml_filename,
             'datas': self.xml_file})
+        pdf_filename = self.invoice_id.number+'.pdf'
         pdf_attachment = self.env['ir.attachment'].create({
-            'name': self.invoice_id.number or 'NO_VALIDADA',
-            'datas_fname': (self.invoice_id.number or 'NO_VALIDADA'),
+            'name': pdf_filename or 'NO_VALIDADA',
+            'datas_fname': pdf_filename or 'NO_VALIDADA',
             'datas': self.save_reports_file()})
         template = self.env['mail.template'].browse(template_id)
-        template.attachment_ids = [(6,0,[xml_attachment.id]),(6,0,[pdf_attachment.id])]
+        template.attachment_ids = [(6,0,[(xml_attachment.id),(pdf_attachment.id)])]
         template.send_mail(self.invoice_id.id, force_send=True)
         #removing attachments
         xml_attachment.unlink()
         pdf_attachment.unlink()
 
     def save_reports_file(self):
-        #template_name = self.env['ir.actions.report.xml'].browse(self.company_id.report_template.id).report_name
-        pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], 'account.report_invoice')
+        template_name = self.env['ir.actions.report.xml'].browse(self.company_id.report_template.id).report_name
+        pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], template_name)
         return b64encode(pdf)
