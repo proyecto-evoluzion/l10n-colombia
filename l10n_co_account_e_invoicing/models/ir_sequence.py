@@ -10,4 +10,6 @@ class IrSequence(models.Model):
     _inherit = 'ir.sequence'
 
     dian_type = fields.Selection(
-        selection_add=[('e-invoicing', _('E-Invoicing'))])
+        selection_add=[
+            ('e-invoicing', _('E-Invoicing')),
+            ('contingency_checkbook_e-invoicing', _('Contingency Checkbook E-Invoicing'))])
