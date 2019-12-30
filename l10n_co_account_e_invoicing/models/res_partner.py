@@ -2,12 +2,21 @@
 # Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, models, _
+from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
 
 class ResPartner(models.Model):
 	_inherit = "res.partner"
+
+	send_zip_code = fields.Boolean(string='Send Zip Code?')
+	is_einvoicing_agent = fields.Selection(
+        [('no', 'No'),
+         ('yes', 'Yes'),
+         ('unknown', 'Unknown')],
+        string='Is E-Invoicing Agent?',
+        default=False)
+	einvoicing_email = fields.Char(string='E-Invoicing Email')
 
 	def _get_accounting_partner_party_values(self):
 		msg1 = _("'%s' does not have a person type established.")
@@ -19,18 +28,22 @@ class ResPartner(models.Model):
 		msg7 = _("'%s' does not have a identification document established.")
 		msg8 = _("'%s' does not have a fiscal position correctly configured.")
 		msg9 = _("'%s' does not have a fiscal position established.")
+		msg10 = _("E-Invoicing Agent: '%s' does not have a E-Invoicing Email.")
+		zip_code = False
 		first_name = False
 		family_name = False
 		middle_name = False
+		telephone = False
 
 		if not self.person_type:
 			raise UserError(msg1 % self.name)
 
 		if self.country_id:
-			if self.country_id.code == 'CO' and not self.zip_id:
-				raise UserError(msg2 % self.name)
-			elif self.country_id.code == 'CO' and not self.state_id:
-				raise UserError(msg3 % self.name)
+			if self.country_id.code == 'CO':
+				if not self.zip_id:
+					raise UserError(msg2 % self.name)
+				elif not self.state_id:
+					raise UserError(msg3 % self.name)
 		else:
 			raise UserError(msg4 % self.name)
 
@@ -51,6 +64,13 @@ class ResPartner(models.Model):
 		else:
 			raise UserError(msg9 % self.name)
 
+		if self.is_einvoicing_agent == 'yes' and not self.einvoicing_email:
+			raise UserError(msg10 % self.name)
+
+		if self.send_zip_code:
+			if self.zip_id:
+				zip_code = self.zip_id.name
+
 		if self.firstname:
 			first_name = self.firstname
 			middle_name = self.othernames
@@ -64,13 +84,20 @@ class ResPartner(models.Model):
 		elif self.lastname2:
 			family_name = self.lastname2
 
+		if self.phone and self.mobile:
+			telephone = self.phone + " / " + self.mobile
+		elif self.lastname:
+			telephone = self.phone
+		elif self.lastname2:
+			telephone = self.mobile
+
 		return {
 			'AdditionalAccountID': self.person_type,
 			'PartyName': self.commercial_name,
 			'Name': self.name,
 			'AddressID': self.zip_id.code,
 			'AddressCityName': self.zip_id.city,
-			'AddressPostalZone': self.zip_id.name,
+			'AddressPostalZone': zip_code,
 			'AddressCountrySubentity': self.state_id.name,
 			'AddressCountrySubentityCode': self.state_id.code,
 			'AddressLine': self.street or '',
@@ -81,30 +108,39 @@ class ResPartner(models.Model):
 			'TaxLevelCode': self.property_account_position_id.tax_level_code_id.code,
 			'TaxSchemeID': self.property_account_position_id.tax_scheme_id.code,
 			'TaxSchemeName': self.property_account_position_id.tax_scheme_id.name,
-			'CorporateRegistrationSchemeName': self.ref,
+			'CorporateRegistrationSchemeName': self.coc_registration_number,
 			'CountryIdentificationCode': self.country_id.code,
 			'CountryName': self.country_id.name,
 			'FirstName': first_name,
 			'FamilyName': family_name,
-			'MiddleName': middle_name}
+			'MiddleName': middle_name,
+			'Telephone': telephone,
+			'Telefax': self.fax,
+			'ElectronicMail': self.einvoicing_email}
 
 	def _get_delivery_values(self):
 		msg1 = _("'%s' does not have a city established.")
 		msg2 = _("'%s' does not have a state established.")
 		msg3 = _("'%s' does not have a country established.")
+		zip_code = False
 
 		if self.country_id:
-			if self.country_id.code == 'CO' and not self.zip_id:
-				raise UserError(msg1 % self.name)
-			elif self.country_id.code == 'CO' and not self.state_id:
-				raise UserError(msg2 % self.name)
+			if self.country_id.code == 'CO':
+				if not self.zip_id:
+					raise UserError(msg1 % self.name)
+				elif not self.state_id:
+					raise UserError(msg2 % self.name)
 		else:
 			raise UserError(msg3 % self.name)
+
+		if self.send_zip_code:
+			if self.zip_id:
+				zip_code = self.zip_id.name
 
 		return {
 			'AddressID': self.zip_id.code,
 			'AddressCityName': self.zip_id.city,
-			'AddressPostalZone': self.zip_id.name,
+			'AddressPostalZone': zip_code,
 			'AddressCountrySubentity': self.state_id.name,
 			'AddressCountrySubentityCode': self.state_id.code,
 			'AddressLine': self.street or '',

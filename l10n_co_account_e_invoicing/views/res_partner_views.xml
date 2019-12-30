@@ -6,11 +6,15 @@
 			<field name="inherit_id" ref="base.view_partner_form"/>
 			<field name="arch" type="xml">
 				<label for="street" position="before">
-					<field name="isic_id"
-						options='{"no_open": True, "no_create": True}'
-						attrs="{'required': ['|', ('supplier', '=', True), ('customer', '=', True)]}"/>
+					<field name="send_zip_code"/>
 				</label>
-		</field>
+
+				<field name="phone" position="before">
+					<field name="is_einvoicing_agent"/>
+					<field name="einvoicing_email"
+						attrs="{'required': [('is_einvoicing_agent', '=', 'yes')]}"/>
+				</field>
+			</field>
 		</record>
 	</data>
 </odoo>

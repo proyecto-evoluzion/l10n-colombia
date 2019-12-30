@@ -65,9 +65,7 @@ class AccountInvoice(models.Model):
 		return res
 
 	def _get_active_dian_resolution(self):
-		msg1 = _("Your active dian resolution has no technical key, " +
-				 "contact with your administrator.")
-		msg2 = _("You do not have an active dian resolution, " +
+		msg = _("You do not have an active dian resolution, "
 				 "contact with your administrator.")
 		resolution_number = False
 
@@ -78,21 +76,17 @@ class AccountInvoice(models.Model):
 				date_to = date_range_id.date_to
 				number_from = date_range_id.number_from
 				number_to = date_range_id.number_to
-
-				if not date_range_id.technical_key:
-					raise UserError(msg1)
-
 				technical_key = date_range_id.technical_key
 				break
 
 		if not resolution_number:
-			raise UserError(msg2)
+			raise UserError(msg)
 
 		return {
 			'InvoiceAuthorization': resolution_number,
 			'StartDate': date_from,
 			'EndDate': date_to,
-			'Prefix': self.journal_id.sequence_id.prefix or '',
+			'Prefix': self.journal_id.sequence_id.prefix,
 			'From': number_from,
 			'To': number_to,
 			'technical_key': technical_key}

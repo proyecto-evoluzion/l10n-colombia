@@ -233,12 +233,32 @@ class AccountInvoiceDianDocument(models.Model):
 
     def _get_invoice_values(self):
         msg1 = _("Your journal: %s, has no a invoice sequence")
+        msg2 = _("Your journal: %s, has no a invoice sequence with type equal to E-Invoicing")
+        msg3 = _("Your active dian resolution has no technical key, "
+				 "contact with your administrator.")
+        msg4 = _("Your journal: %s, has no a invoice sequence with type equal to"
+                 "Contingency Checkbook E-Invoicing")
+        sequence = self.invoice_id.journal_id.sequence_id
+        ClTec = False
 
-        if not self.invoice_id.journal_id.sequence_id:
+        if not sequence:
             raise UserError(msg1 % self.invoice_id.journal_id.name)
 
         active_dian_resolution = self.invoice_id._get_active_dian_resolution()
-        xml_values = self._get_xml_values(active_dian_resolution['technical_key'])
+
+        if self.invoice_id.invoice_type_code != '03':
+            if sequence.dian_type != 'e-invoicing':
+                raise UserError(msg2 % self.invoice_id.journal_id.name)
+            else:
+                ClTec = active_dian_resolution['technical_key']
+
+                if not ClTec:
+					raise UserError(msg3)
+        else:
+            if sequence.dian_type != 'contingency_checkbook_e-invoicing':
+                raise UserError(msg4 % self.invoice_id.journal_id.name)
+
+        xml_values = self._get_xml_values(ClTec)
         xml_values['InvoiceControl'] = active_dian_resolution
         #Tipos de operacion
         #Punto 14.1.5.1. del anexo tecnico version 1.8
