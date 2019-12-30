@@ -46,7 +46,7 @@ class AccountInvoice(models.Model):
 					dian_document.sent_zipped_file()
 					dian_document.GetStatusZip()
 
-					#next lines send an email to the client with the pdf einvoice
+					#next lines sends an email to the client with the pdf einvoice
 					if dian_document.state == 'done':
 						dian_document.send_mail()
 

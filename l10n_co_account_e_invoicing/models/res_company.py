@@ -31,7 +31,9 @@ class ResCompany(models.Model):
     signature_policy_filename = fields.Char(string='Signature Policy Filename')
     signature_policy_file = fields.Binary(string='Signature Policy File')
     files_path = fields.Char(string='Files Path')
-    einvoicing_email = fields.Char(string='E-Invoicing Email')
+    einvoicing_email = fields.Char(string='E-invoice email from', help="Enter the e-invoice sender's email.")
+    einvoicing_partner_no_email = fields.Char(string='Failed Emails to', 
+        help='Enter the email where the invoice will be sent when the customer does not have an email.')
     report_template = fields.Many2one(string='Report Template', comodel_name='ir.actions.report.xml')
 
     @api.onchange('signature_policy_url')
