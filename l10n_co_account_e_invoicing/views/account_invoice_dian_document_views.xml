@@ -45,8 +45,8 @@
                             type="object"
                             states="draft"
                             class="btn-primary"/>
-                        <button name="sent Zipped File"
-                            string="Sent_zipped_file"
+                        <button name="sent_zipped_file"
+                            string="Sent Zipped File"
                             type="object"
                             states="draft"
                             class="btn-primary"/>
