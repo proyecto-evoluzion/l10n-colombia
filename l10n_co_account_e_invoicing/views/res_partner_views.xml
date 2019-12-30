@@ -9,7 +9,7 @@
 					<field name="send_zip_code"/>
 				</label>
 
-				<field for="phone" position="before">
+				<field name="phone" position="before">
 					<field name="is_einvoicing_agent"/>
 					<field name="einvoicing_email"
 						attrs="{'required': [('is_einvoicing_agent', '=', 'yes')]}"/>
