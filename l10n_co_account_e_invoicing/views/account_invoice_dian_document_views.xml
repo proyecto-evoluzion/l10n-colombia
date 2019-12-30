@@ -40,15 +40,25 @@
                         <field name="state"
                             widget="statusbar"
                             statusbar_visible="draft,sent,done,cancel"/>
-                        <button name="action_reprocess"
-                            string="Reprocess"
+                        <button name="_set_files"
+                            string="Set Files"
                             type="object"
-                            states="sent"
+                            states="draft"
+                            class="btn-primary"/>
+                        <button name="sent Zipped File"
+                            string="Sent_zipped_file"
+                            type="object"
+                            states="draft"
                             class="btn-primary"/>
                         <button name="GetStatusZip"
                             string="GetStatusZip"
                             type="object"
                             states="sent,done"
+                            class="btn-primary"/>
+                        <button name="action_reprocess"
+                            string="Reprocess"
+                            type="object"
+                            states="sent"
                             class="btn-primary"/>
                     </header>
                     <sheet>
