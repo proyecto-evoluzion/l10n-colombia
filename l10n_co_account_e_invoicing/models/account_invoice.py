@@ -49,7 +49,8 @@ class AccountInvoice(models.Model):
 					#next lines sends an email to the client with the pdf einvoice
 					if dian_document.state == 'done':
 						dian_document.send_mail()
-
+					else:
+						dian_document.send_failure_email()
 		return res
 
 	@api.multi

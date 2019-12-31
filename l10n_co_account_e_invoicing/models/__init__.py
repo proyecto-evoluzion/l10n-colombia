@@ -10,3 +10,4 @@ import account_tax_group
 import account_invoice
 import account_invoice_line
 import account_invoice_dian_document
+import einvoice_notification_group

@@ -35,6 +35,9 @@ class ResCompany(models.Model):
     einvoicing_partner_no_email = fields.Char(string='Failed Emails to', 
         help='Enter the email where the invoice will be sent when the customer does not have an email.')
     report_template = fields.Many2one(string='Report Template', comodel_name='ir.actions.report.xml')
+    notification_group_ids = fields.One2many(comodel_name='einvoice.notification.group',
+		                                    inverse_name='company_id',
+		                                    string='Notification group')
 
     @api.onchange('signature_policy_url')
     def onchange_signature_policy_url(self):
