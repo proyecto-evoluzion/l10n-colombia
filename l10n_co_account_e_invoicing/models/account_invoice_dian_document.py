@@ -652,11 +652,12 @@ class AccountInvoiceDianDocument(models.Model):
                  "Please go to Settings > Company > Notification Group.")
         subject = _('ALERTA! La Factura %s no fue enviada a la DIAN.') % self.invoice_id.number
         #email_to = self.env['res.users'].browse(self.env.uid).email
-        msg_body = _('''Cordial Saludo,<br/><br/>La factura %s del cliente %s no pudo ser '''
+        msg_body = _('''Cordial Saludo,<br/><br/>La factura ''' + self.invoice_id.number +
+                     ''' del cliente ''' + self.invoice_id.partner_id.name + ''' no pudo ser ''' +
                      '''enviada a la Dian según el protocolo establecido previamente. Por '''
                      '''favor revise el estado de la misma en el menú Documentos Dian e '''
                      '''intente reprocesarla según el procedimiento definido.'''
-                     '''<br/>%s.''')
+                     '''<br/>''' + self.company_id.name + '''.''')
         email_ids = self.company_id.notification_group_ids
 
         if email_ids:
@@ -671,8 +672,6 @@ class AccountInvoiceDianDocument(models.Model):
         msg_vals = {
             'subject': subject,
             'email_to': email_to, 
-            'body_html': (msg_body % self.invoice_id.number,
-                self.invoice_id.partner_id.name,
-                self.company_id.name)}
+            'body_html': msg_body}
         msg_id = mail_obj.create(msg_vals)
         msg_id.send()

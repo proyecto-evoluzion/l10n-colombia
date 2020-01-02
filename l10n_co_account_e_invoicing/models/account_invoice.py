@@ -9,7 +9,6 @@ from odoo.exceptions import UserError
 class AccountInvoice(models.Model):
 	_inherit = "account.invoice"
 
-	#check_contingency = fields.Boolean(string='Check Contingency?')
 	operation_type = fields.Selection(
         [('10', 'Estandar *')],
         string='Operation Type',
@@ -30,18 +29,6 @@ class AccountInvoice(models.Model):
 		comodel_name='account.invoice.dian.document',
 		inverse_name='invoice_id',
 		string='DIAN Documents')
-	
-	'''
-	@api.model
-    def _get_journal(self):
-        journal_type = self._context.get('journal_type')
-        journal = False
-        if journal_type == 'sale':
-            journal = self.env.ref('l10n_pa_debit_credit_note.account_journal_sale_credit_note')
-        elif journal_type == 'purchase':
-            journal = self.env.ref('l10n_pa_debit_credit_note.account_journal_purchase_credit_note')
-        return journal and journal.id or False
-	'''
 
 	@api.multi
 	def invoice_validate(self):
@@ -230,11 +217,13 @@ class AccountInvoice(models.Model):
 		msg1 = _("Your Unit of Measure: '%s', has no Unit of Measure Code, " +
 				 "contact with your administrator.")
 		msg2 = _("The invoice line %s has no reference")
-		msg3 = _("Your tax: '%s', has no e-invoicing tax group type, " +
+		msg3 = _("Your product: '%s', has no reference price, " +
 				 "contact with your administrator.")
-		msg4 = _("Your withholding tax: '%s', has positive amount, the withholding " +
+		msg4 = _("Your tax: '%s', has no e-invoicing tax group type, " +
+				 "contact with your administrator.")
+		msg5 = _("Your withholding tax: '%s', has amount zero, the withholding " +
 				 "taxes must have negative amount, contact with your administrator.")
-		msg5 = _("Your tax: '%s', has negative amount, the taxes must have " + 
+		msg6 = _("Your tax: '%s', has negative amount, the taxes must have " + 
 		         "positive amount, contact with your administrator.")
 		invoice_lines = {}
 		count = 1
@@ -255,9 +244,19 @@ class AccountInvoice(models.Model):
 			if not invoice_line.product_id or not invoice_line.product_id.default_code:
 				raise UserError(msg2 % invoice_line.name)
 
+			if invoice_line.product_id.margin_percentage > 0:
+				reference_price = invoice_line.product_id.margin_percentage
+			else:
+				reference_price = invoice_line.product_id.margin_percentage * \
+					invoice_line.product_id.standard_price
+
+			if invoice_line.price_subtotal <= 0 and reference_price <= 0:
+				raise UserError(msg3 % invoice_line.product_id.default_code)
+
 			invoice_lines[count] = {}
 			invoice_lines[count]['unitCode'] = invoice_line.uom_id.product_uom_code_id.code
 			invoice_lines[count]['Quantity'] = '{:.2f}'.format(invoice_line.quantity)
+			invoice_lines[count]['PriceAmount'] = '{:.2f}'.format(reference_price)
 			invoice_lines[count]['LineExtensionAmount'] = '{:.2f}'.format(invoice_line.price_subtotal)
 			invoice_lines[count]['MultiplierFactorNumeric'] = '{:.2f}'.format(invoice_line.discount)
 			invoice_lines[count]['AllowanceChargeAmount'] = '{:.2f}'.format(disc_amount)
@@ -275,14 +274,14 @@ class AccountInvoice(models.Model):
 				for tax_id in tax_ids:
 					if tax_id.tax_group_id.is_einvoicing:
 						if not tax_id.tax_group_id.tax_group_type_id:
-							raise UserError(msg3 % tax.name)
+							raise UserError(msg4 % tax.name)
 
 						tax_type = tax_id.tax_group_id.tax_group_type_id.type
 
 						if tax_type == 'withholding_tax' and tax_id.amount == 0:
-							raise UserError(msg4 % tax_id.name)
-						elif tax_type == 'tax' and tax_id.amount < 0:
 							raise UserError(msg5 % tax_id.name)
+						elif tax_type == 'tax' and tax_id.amount < 0:
+							raise UserError(msg6 % tax_id.name)
 						if tax_type == 'withholding_tax' and tax_id.amount > 0:
 							invoice_lines[count]['WithholdingTaxesTotal'] = (
 								invoice_line._get_invoice_lines_taxes(
