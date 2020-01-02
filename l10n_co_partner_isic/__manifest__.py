@@ -14,7 +14,8 @@
               "Guillermo Montoya Github@guillermm",
     "category": "Localization",
     "depends": [
-        "base"
+        "base",
+        "account"
     ],
     "data": [
         "security/ir.model.access.csv",
