@@ -541,6 +541,8 @@ class AccountInvoiceDianDocument(models.Model):
 
                 if not self.mail_sent:
                     self.action_send_mail()
+            else:
+                self.send_failure_email()
 
             for element in root.iter("{%s}string" % c):
                 if strings == '':
@@ -640,3 +642,41 @@ class AccountInvoiceDianDocument(models.Model):
         pdf_attachment.unlink()
 
         return True
+
+    @api.multi
+    def send_failure_email(self):
+        msg1 = _("The notification group for Einvoice failures is not set.\n"+
+                "You won't be notified if something goes wrong.\n"+
+                "Please go to Settings>Company>Notification Group.")
+        subject = 'ALERTA! La Factura ' + self.invoice_id.number + ' no fue enviada a la DIAN.' 
+        #email_to = self.env['res.users'].browse(self.env.uid).email
+        msg_body = '''Cordial Saludo,<br/><br/>La factura ''' + self.invoice_id.number + ''' de cliente ''' + \
+            self.invoice_id.partner_id.name + ''' no pudo ser enviada ''' + \
+            ''' a la Dian según el protocolo establecido previamente. Por favor revise el estado de la misma en el ''' + \
+            ''' menú Documentos Dian e intente reprocesarla según el procedimiento definido.<br/>EXA Auto Parts.'''
+
+        email_ids = self.company_id.notification_group_ids
+        if email_ids:
+            email_to = ''
+
+            for mail_id in email_ids:
+                email_to += mail_id.email.strip() + ','
+        else:
+            raise UserError(msg1) 
+
+        mail_obj = self.env['mail.mail']
+        msg_vals = {
+            'subject': subject,
+            'email_to': email_to, 
+            'body_html': msg_body,
+        }
+        msg_id = mail_obj.create(msg_vals)
+        msg_id.send()
+        logger.info(" ===>\n\n Invoice number %s failed for the %s partner \n\n<===" % 
+                    (self.invoice_id.number,self.invoice_id.partner_id.name ))
+        
+
+    def save_reports_file(self):
+        template_name = self.env['ir.actions.report.xml'].browse(self.company_id.report_template.id).report_name
+        pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], template_name)
+        return b64encode(pdf)

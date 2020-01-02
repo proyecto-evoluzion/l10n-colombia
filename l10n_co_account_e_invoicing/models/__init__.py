@@ -14,3 +14,4 @@ import account_invoice_line
 import account_invoice
 import account_invoice_dian_document_line
 import account_invoice_dian_document
+import einvoice_notification_group
