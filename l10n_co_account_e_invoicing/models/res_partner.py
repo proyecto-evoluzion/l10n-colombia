@@ -3,8 +3,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields, _
-from odoo.exceptions import UserError
-
+from odoo.exceptions import UserError, ValidationError
+import re
 
 class ResPartner(models.Model):
 	_inherit = "res.partner"
@@ -32,6 +32,15 @@ class ResPartner(models.Model):
 
 		for partner in self:
 			partner.view_einvoicing_email_field = view_einvoicing_email_field
+
+	@api.constrains('einvoicing_email')
+	@api.onchange('einvoicing_email')
+	def validate_mail(self):
+	   if self.einvoice_email:
+			match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", self.einvoicing_email)
+			if match == None:
+				raise ValidationError(_('The field "E-invoicing email" is not correctly filled.\n\n'+
+										'Please add @ and dot (.)'))
 
 	def _get_accounting_partner_party_values(self):
 		msg1 = _("'%s' does not have a person type established.")
