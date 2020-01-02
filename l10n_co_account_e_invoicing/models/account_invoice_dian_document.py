@@ -529,8 +529,6 @@ class AccountInvoiceDianDocument(models.Model):
     def _generate_qr_code(self):
         einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
         ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
-        ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
-        ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
         ValFac = self.invoice_id.amount_untaxed
         create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         create_date = create_date.replace(tzinfo=timezone('UTC'))
@@ -539,15 +537,15 @@ class AccountInvoiceDianDocument(models.Model):
         cufe = self.cufe_cude
         number = self.invoice_id.number
 
-        qr_data = "NumFac: " + number if number else 'NO VALIDADA'
+        qr_data = "NumFac: " + number if number else 'NO_VALIDADA'
         qr_data += "\nFecFac: " + self.invoice_id.date_invoice
         qr_data += "\nHorFac: " + create_date.astimezone(timezone('America/Bogota')).strftime('%H:%M:%S-05:00')
         qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
         qr_data += "\nNitAdq: " + nit_adq if nit_adq else ''
-        qr_data += "\nValFac: " + str(ValFac)
-        qr_data += "\nValIva: " + str(ValImp1)
-        qr_data += "\nValOtroIm: " + str(ValImp2 + ValImp3)
-        qr_data += "\nValTolFac: " + str(ValFac + ValImp1 + ValImp2 + ValImp3)
+        qr_data += "\nValFac: " + '{:.2f}'.format(ValFac)
+        qr_data += "\nValIva: " + '{:.2f}'.format(ValImp1)
+        qr_data += "\nValOtroIm: " + '{:.2f}'.format(self.invoice_id.amount_tax - ValImp1)
+        qr_data += "\nValTolFac: " + '{:.2f}'.format(self.invoice_id.amount_total)
         qr_data += "\nCUFE: " + cufe if cufe else ''
         qr_data += "\n\n" + self.invoice_url
 
