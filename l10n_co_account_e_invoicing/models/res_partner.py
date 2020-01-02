@@ -21,7 +21,7 @@ class ResPartner(models.Model):
 	@api.constrains('einvoicing_email')
 	@api.onchange('einvoicing_email')
 	def validate_mail(self):
-	   if self.einvoice_email:
+	   if self.einvoicing_email:
 			match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", self.einvoicing_email)
 			if match == None:
 				raise ValidationError(_('The field "E-invoicing email" is not correctly filled.\n\n'+
