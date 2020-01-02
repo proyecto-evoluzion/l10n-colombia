@@ -15,12 +15,12 @@
                     </h2>
                 </div>
                 <t t-if="o.company_id.einvoicing_enabled == True">
-                        <t t-foreach="o.dian_document_lines" t-as="ddl">
-                            <t t-if="ddl.state == 'done' or ddl.state == 'sent'">
-                                <img class="image" t-att-src="'data:image/png;base64,%s' % ddl.qr_image" style="width:100px;height:100px;margin-bottom:5px;"/>
+                        <t t-foreach="o.dian_document_ids" t-as="dd">
+                            <t t-if="dd.state == 'done' or dd.state == 'sent'">
+                                <img class="image" t-att-src="'data:image/png;base64,%s' % dd.qr_image" style="width:100px;height:100px;margin-bottom:5px;"/>
                                 <div style="float:right;width:700px;font-size:11px">
                                     <p>
-                                    <strong>CUFE/CUDE:</strong><span t-field="ddl.cufe_cude"/>
+                                    <strong>CUFE/CUDE:</strong><span t-field="dd.cufe_cude"/>
                                     </p>
                                 </div>
                             </t>

@@ -68,7 +68,8 @@
 	<cbc:ProfileID>DIAN 2.1</cbc:ProfileID>
 	<cbc:ProfileExecutionID>{{ProfileExecutionID}}</cbc:ProfileExecutionID>
 	<cbc:ID>{{ID}}</cbc:ID>
-	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUFE-SHA384">{{UUID}}</cbc:UUID>
+	<cbc:UUID schemeID="{{ProfileExecutionID}}"
+		schemeName="{% if InvoiceTypeCode != '03' %}CUFE-SHA384{% else %}CUDE-SHA384{% endif %}">{{UUID}}</cbc:UUID>
 	<cbc:IssueDate>{{IssueDate}}</cbc:IssueDate>
 	<cbc:IssueTime>{{IssueTime}}</cbc:IssueTime>
 	<cbc:DueDate>{{DueDate}}</cbc:DueDate>
@@ -121,12 +122,18 @@
 		<cbc:ID>12314129 GR</cbc:ID>
         <cbc:IssueDate>2019-12-12</cbc:IssueDate>
 	</cac:ReceiptDocumentReference-->
-<!--TODO 1.0: Obligatorio para InvoiceTypeCode = 03 (Contingencia)>
+	{% if InvoiceTypeCode == '03' %}
 	<cac:AdditionalDocumentReference>
-		<cbc:ID>12314129 GR</cbc:ID>
-        <cbc:IssueDate>2019-12-12</cbc:IssueDate>
-        <cbc:DocumentTypeCode>14.1.4 del anexo tecnico version 1.8</cbc:DocumentTypeCode>
-	</cac:AdditionalDocumentReference-->
+		<cbc:ID>{{ID}}</cbc:ID>
+		<cbc:IssueDate>{{IssueDate}}</cbc:IssueDate>
+	<!--TODO 2.0: Revisar luego se supone hay 3 opciones para contingencia, punto 13.1.4. anexo version 1.8:
+		FTC Factura Talonario Contingencia
+		FTP Factura Talonario Papel
+		FTPC Factura Talonario Por computador
+		se establece FTC, por que es el unico que esta habilitado por el portal DIAN, y es el que dan-->
+        <cbc:DocumentTypeCode>FTC</cbc:DocumentTypeCode>
+	</cac:AdditionalDocumentReference>
+	{% endif %}
 	<cac:AccountingSupplierParty>
 		<cbc:AdditionalAccountID>{{AccountingSupplierParty.AdditionalAccountID}}</cbc:AdditionalAccountID>
 		<cac:Party>
@@ -513,7 +520,6 @@
 		<cbc:CalculationRate>3100</cbc:CalculationRate>
 		<cbc:Date>2019-06-21</cbc:Date>
 	</cac:PaymentAlternativeExchangeRate-->
-<!--TODO 1.0: Revisar envio de impuestos, retenciones negativas-->
 	{% for TaxTotalID, TaxTotal in TaxesTotal.items() -%}
 	<cac:TaxTotal>
 		<cbc:TaxAmount currencyID="{{DocumentCurrencyCode}}">{{'{:.2f}'.format(TaxTotal.total)}}</cbc:TaxAmount>
@@ -636,25 +642,23 @@
 		{% endfor -%}
 		<cac:Item>
 			<cbc:Description>{{InvoiceLine.ItemDescription}}</cbc:Description>
-		<!--TODO 1.0, Cantidad de unidad de este artículo por empaque>
-			<cbc:PackSizeNumeric>{{InvoiceLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
-		<!--TODO 1.0, Marca: Marca del artículo>
-			<cbc:BrandName>{{InvoiceLine.BrandName}}</cbc:BrandName-->
-		<!--TODO 1.0, Modelo: Modelo del artículo>
-			<cbc:ModelName>{{InvoiceLine.BrandName}}</cbc:ModelName-->
-		<!--TODO 1.0, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor-->
+		<!--TODO 2.0, Cantidad de unidad de este artículo por empaque>
+			<cbc:PackSizeNumeric>{{CreditNoteLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
+		<!--TODO 2.0, Marca: Marca del artículo>
+			<cbc:BrandName>{{CreditNoteLine.BrandName}}</cbc:BrandName-->
+		<!--TODO 2.0, Modelo: Modelo del artículo>
+			<cbc:ModelName>{{CreditNoteLine.BrandName}}</cbc:ModelName-->
+		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor>
 			<cac:SellersItemIdentification>
 				<cbc:ID>AOHV84-225</cbc:ID>
 				<cbc:ExtendedID>AOHV84-225</cbc:ExtendedID>
-			</cac:SellersItemIdentification>
-		<!--TODO 1.0, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
+			</cac:SellersItemIdentification-->
+		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
+		<!--OPCIONAL schemeName="Estándar de adopción del contribuyente" schemeAgencyID="" schemeAgencyName=""-->
 			<cac:StandardItemIdentification>
-				<cbc:ID schemeID="999"
-					schemeName="EAN13"
-					schemeAgencyID=""
-					schemeAgencyName="">AOHV84-225</cbc:ID>
+				<cbc:ID schemeID="999">{{InvoiceLinee.StandardItemIdentification}}</cbc:ID>
 			</cac:StandardItemIdentification>
-		<!--TODO 1.0, opcional, Grupo de información para adicionar información específica del ítem que puede
+		<!--TODO 2.0, opcional, Grupo de información para adicionar información específica del ítem que puede
 			ser solicitada por autoridades o entidades diferentes a la DIAN>
 			<cac:AdditionalItemProperty>
 				<cbc:Name></cbc:Name>

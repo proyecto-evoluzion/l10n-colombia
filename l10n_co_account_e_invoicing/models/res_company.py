@@ -12,9 +12,6 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     einvoicing_enabled = fields.Boolean(string='E-Invoicing Enabled')
-    out_invoice_sent = fields.Integer(string='Invoices Sent')
-    out_refund_credit_sent = fields.Integer(string='Credit Notes Sent')
-    out_refund_debit_sent = fields.Integer(string='Debit Notes Sent')
     profile_execution_id = fields.Selection(
         [('1', 'Production'), ('2', 'Test')],
         'Destination Environment of Document',
@@ -28,11 +25,11 @@ class ResCompany(models.Model):
     certificate_password = fields.Char(string='Certificate Password')
     signature_policy_url = fields.Char(string='Signature Policy Url')
     signature_policy_description = fields.Char(string='Signature Policy Description')
-    signature_policy_filename = fields.Char(string='Signature Policy Filename')
-    signature_policy_file = fields.Binary(string='Signature Policy File')
     files_path = fields.Char(string='Files Path')
-    einvoicing_email = fields.Char(string='E-Invoicing Email')
-    report_template = fields.Many2one(string='Report Template', comodel_name='ir.actions.report.xml')
+    einvoicing_email = fields.Char(related='partner_id.einvoicing_email', store=False)
+    report_template = fields.Many2one(
+        string='Report Template',
+        comodel_name='ir.actions.report.xml')
 
     @api.onchange('signature_policy_url')
     def onchange_signature_policy_url(self):

@@ -89,6 +89,8 @@ def get_xml_with_signature(
     #base_path = path.dirname(path.dirname(__file__))
     #root = etree.parse(path.join(base_path, name)).getroot()
     #https://lxml.de/tutorial.html
+    #root = etree.fromstring(response.content)
+    #root = etree.tostring(root, encoding='utf-8')
     #parser = etree.XMLParser(encoding='utf-8', remove_blank_text=True)
     parser =  etree.XMLParser(remove_comments=True)
     root = etree.fromstring(xml_without_signature.encode("utf-8"), parser=parser)

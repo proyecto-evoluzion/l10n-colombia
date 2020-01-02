@@ -9,6 +9,7 @@ from odoo.exceptions import UserError
 class AccountInvoice(models.Model):
 	_inherit = "account.invoice"
 
+	#check_contingency = fields.Boolean(string='Check Contingency?')
 	operation_type = fields.Selection(
         [('10', 'Estandar *')],
         string='Operation Type',
@@ -25,10 +26,22 @@ class AccountInvoice(models.Model):
          ('2', 'After 2 Days')],
         string='Send Invoice to DIAN?',
         default='1')
-	dian_document_lines = fields.One2many(
+	dian_document_ids = fields.One2many(
 		comodel_name='account.invoice.dian.document',
 		inverse_name='invoice_id',
-		string='Dian Document Lines')
+		string='DIAN Documents')
+	
+	'''
+	@api.model
+    def _get_journal(self):
+        journal_type = self._context.get('journal_type')
+        journal = False
+        if journal_type == 'sale':
+            journal = self.env.ref('l10n_pa_debit_credit_note.account_journal_sale_credit_note')
+        elif journal_type == 'purchase':
+            journal = self.env.ref('l10n_pa_debit_credit_note.account_journal_purchase_credit_note')
+        return journal and journal.id or False
+	'''
 
 	@api.multi
 	def invoice_validate(self):
@@ -40,15 +53,11 @@ class AccountInvoice(models.Model):
 				dian_document = dian_document_obj.create({
 					'invoice_id': self.id,
 					'company_id': self.company_id.id})
-				dian_document._set_files()
+				dian_document.action_set_files()
 
-				if self.send_invoice_to_dian == '0':
-					dian_document.sent_zipped_file()
-					dian_document.GetStatusZip()
-
-					#next lines send an email to the client with the pdf einvoice
-					if dian_document.state == 'done':
-						dian_document.send_mail()
+				if self.send_invoice_to_dian == '0' and self.invoice_type_code in ('01', '02'):
+					if dian_document.action_sent_zipped_file():
+						dian_document.action_GetStatusZip()
 
 		return res
 
@@ -56,7 +65,7 @@ class AccountInvoice(models.Model):
 	def action_cancel(self):
 		res = super(AccountInvoice, self).action_cancel()
 
-		for dian_document in self.dian_document_lines:
+		for dian_document in self.dian_document_ids:
 			if dian_document.state == 'done':
 				raise UserError('You cannot cancel a invoice sent to DIAN')
 			else:
@@ -95,7 +104,7 @@ class AccountInvoice(models.Model):
 		billing_reference = {}
 
 		if self.refund_invoice_id and self.refund_invoice_id.state in ('open', 'paid'):
-				for dian_document in self.refund_invoice_id.dian_document_lines:
+				for dian_document in self.refund_invoice_id.dian_document_ids:
 					if dian_document.state == 'done':
 						billing_reference['ID'] = self.refund_invoice_id.number
 						billing_reference['UUID'] = dian_document.cufe_cude
@@ -142,13 +151,13 @@ class AccountInvoice(models.Model):
 				tax_code = tax.tax_id.tax_group_id.tax_group_type_id.code
 				tax_name = tax.tax_id.tax_group_id.tax_group_type_id.name
 				tax_type = tax.tax_id.tax_group_id.tax_group_type_id.type
+				tax_percent = '{:.2f}'.format(tax.tax_id.amount)
 
-				if tax_type == 'withholding_tax':
-					if tax.tax_id.amount < 0:
-						tax_percent = '{:.2f}'.format(tax.tax_id.amount * (-1))
-					else:
-						raise UserError(msg2 % tax.name)
-
+				if tax_type == 'withholding_tax' and tax.tax_id.amount == 0:
+					raise UserError(msg2 % tax.name)
+				elif tax_type == 'tax' and tax.tax_id.amount < 0:
+					raise UserError(msg3 % tax.name)
+				elif tax_type == 'withholding_tax' and tax.tax_id.amount > 0:
 					if tax_code not in withholding_taxes:
 						withholding_taxes[tax_code] = {}
 						withholding_taxes[tax_code]['total'] = 0
@@ -164,11 +173,6 @@ class AccountInvoice(models.Model):
 					withholding_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
 					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount * (-1)
 				else:
-					if tax.tax_id.amount > 0:
-						tax_percent = '{:.2f}'.format(tax.tax_id.amount)
-					else:
-						raise UserError(msg3 % tax.name)
-
 					if tax_code not in taxes:
 						taxes[tax_code] = {}
 						taxes[tax_code]['total'] = 0
@@ -225,11 +229,12 @@ class AccountInvoice(models.Model):
 	def _get_invoice_lines(self):
 		msg1 = _("Your Unit of Measure: '%s', has no Unit of Measure Code, " +
 				 "contact with your administrator.")
-		msg2 = _("Your tax: '%s', has no e-invoicing tax group type, " +
+		msg2 = _("The invoice line %s has no reference")
+		msg3 = _("Your tax: '%s', has no e-invoicing tax group type, " +
 				 "contact with your administrator.")
-		msg3 = _("Your withholding tax: '%s', has positive amount, the withholding " +
+		msg4 = _("Your withholding tax: '%s', has positive amount, the withholding " +
 				 "taxes must have negative amount, contact with your administrator.")
-		msg4 = _("Your tax: '%s', has negative amount, the taxes must have " + 
+		msg5 = _("Your tax: '%s', has negative amount, the taxes must have " + 
 		         "positive amount, contact with your administrator.")
 		invoice_lines = {}
 		count = 1
@@ -246,6 +251,9 @@ class AccountInvoice(models.Model):
 
 			if invoice_line.price_unit != 0 and invoice_line.quantity != 0:
 				total_wo_disc = invoice_line.price_unit * invoice_line.quantity
+			
+			if not invoice_line.product_id or not invoice_line.product_id.default_code:
+				raise UserError(msg2 % invoice_line.name)
 
 			invoice_lines[count] = {}
 			invoice_lines[count]['unitCode'] = invoice_line.uom_id.product_uom_code_id.code
@@ -256,6 +264,7 @@ class AccountInvoice(models.Model):
 			invoice_lines[count]['AllowanceChargeBaseAmount'] = '{:.2f}'.format(total_wo_disc)
 			invoice_lines[count]['TaxesTotal'] = {}
 			invoice_lines[count]['WithholdingTaxesTotal'] = {}
+			invoice_lines[count]['StandardItemIdentification'] = invoice_line.product_id.default_code
 
 			for tax in invoice_line.invoice_line_tax_ids:
 				if tax.amount_type == 'group':
@@ -266,28 +275,26 @@ class AccountInvoice(models.Model):
 				for tax_id in tax_ids:
 					if tax_id.tax_group_id.is_einvoicing:
 						if not tax_id.tax_group_id.tax_group_type_id:
-							raise UserError(msg2 % tax.name)
+							raise UserError(msg3 % tax.name)
 
 						tax_type = tax_id.tax_group_id.tax_group_type_id.type
 
-						if tax_type == 'withholding_tax':
-							if tax_id.amount < 0:
-								invoice_lines[count]['WithholdingTaxesTotal'] = (
-									invoice_line._get_invoice_lines_taxes(
-										tax_id,
-										tax_id.amount * (-1),
-										invoice_lines[count]['WithholdingTaxesTotal']))
-							else:
-								raise UserError(msg3 % tax_id.name)
+						if tax_type == 'withholding_tax' and tax_id.amount == 0:
+							raise UserError(msg4 % tax_id.name)
+						elif tax_type == 'tax' and tax_id.amount < 0:
+							raise UserError(msg5 % tax_id.name)
+						if tax_type == 'withholding_tax' and tax_id.amount > 0:
+							invoice_lines[count]['WithholdingTaxesTotal'] = (
+								invoice_line._get_invoice_lines_taxes(
+									tax_id,
+									tax_id.amount,
+									invoice_lines[count]['WithholdingTaxesTotal']))
 						else:
-							if tax_id.amount > 0:
-								invoice_lines[count]['TaxesTotal'] = (
-									invoice_line._get_invoice_lines_taxes(
-										tax_id,
-										tax_id.amount,
-										invoice_lines[count]['TaxesTotal']))
-							else:
-								raise UserError(msg4 % tax_id.name)
+							invoice_lines[count]['TaxesTotal'] = (
+								invoice_line._get_invoice_lines_taxes(
+									tax_id,
+									tax_id.amount,
+									invoice_lines[count]['TaxesTotal']))			
 
 			if '01' not in invoice_lines[count]['TaxesTotal']:
 				invoice_lines[count]['TaxesTotal']['01'] = {}
@@ -297,7 +304,7 @@ class AccountInvoice(models.Model):
 				invoice_lines[count]['TaxesTotal']['01']['taxes']['0.00'] = {}
 				invoice_lines[count]['TaxesTotal']['01']['taxes']['0.00']['base'] = invoice_line.price_subtotal
 				invoice_lines[count]['TaxesTotal']['01']['taxes']['0.00']['amount'] = 0
-			'''
+
 			if '04' not in invoice_lines[count]['TaxesTotal']:
 				invoice_lines[count]['TaxesTotal']['04'] = {}
 				invoice_lines[count]['TaxesTotal']['04']['total'] = 0
@@ -315,7 +322,7 @@ class AccountInvoice(models.Model):
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00'] = {}
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['base'] = invoice_line.price_subtotal
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['amount'] = 0
-			'''
+
 			if '06' not in invoice_lines[count]['WithholdingTaxesTotal']:
 				invoice_lines[count]['WithholdingTaxesTotal']['06'] = {}
 				invoice_lines[count]['WithholdingTaxesTotal']['06']['total'] = 0

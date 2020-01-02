@@ -468,7 +468,6 @@
 		<cbc:Amount currencyID="{{DocumentCurrencyCode}}">1000.00</cbc:Amount>
 		<cbc:BaseAmount currencyID="{{DocumentCurrencyCode}}">1000.00</cbc:BaseAmount>
 	</cac:AllowanceCharge-->
-<!--TODO 1.0: Revisar envio de impuestos, retenciones negativas-->
 	{% for TaxTotalID, TaxTotal in TaxesTotal.items() -%}
 	<cac:TaxTotal>
 		<cbc:TaxAmount currencyID="{{DocumentCurrencyCode}}">{{'{:.2f}'.format(TaxTotal.total)}}</cbc:TaxAmount>
@@ -554,25 +553,23 @@
 		</cac:AllowanceCharge>
         <cac:Item>
 		    <cbc:Description>{{CreditNoteLine.ItemDescription}}</cbc:Description>
-		<!--TODO 1.0, Cantidad de unidad de este artículo por empaque>
-			<cbc:PackSizeNumeric>{{InvoiceLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
-		<!--TODO 1.0, Marca: Marca del artículo>
-			<cbc:BrandName>{{InvoiceLine.BrandName}}</cbc:BrandName-->
-		<!--TODO 1.0, Modelo: Modelo del artículo>
-			<cbc:ModelName>{{InvoiceLine.BrandName}}</cbc:ModelName-->
-		<!--TODO 1.0, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor-->
+		<!--TODO 2.0, Cantidad de unidad de este artículo por empaque>
+			<cbc:PackSizeNumeric>{{CreditNoteLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
+		<!--TODO 2.0, Marca: Marca del artículo>
+			<cbc:BrandName>{{CreditNoteLine.BrandName}}</cbc:BrandName-->
+		<!--TODO 2.0, Modelo: Modelo del artículo>
+			<cbc:ModelName>{{CreditNoteLine.BrandName}}</cbc:ModelName-->
+		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor>
 			<cac:SellersItemIdentification>
 				<cbc:ID>AOHV84-225</cbc:ID>
 				<cbc:ExtendedID>AOHV84-225</cbc:ExtendedID>
-			</cac:SellersItemIdentification>
-		<!--TODO 1.0, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
+			</cac:SellersItemIdentification-->
+		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
+		<!--OPCIONAL schemeName="Estándar de adopción del contribuyente" schemeAgencyID="" schemeAgencyName=""-->
 			<cac:StandardItemIdentification>
-				<cbc:ID schemeID="999"
-					schemeName="EAN13"
-					schemeAgencyID=""
-					schemeAgencyName="">AOHV84-225</cbc:ID>
+				<cbc:ID schemeID="999">{{CreditNoteLine.StandardItemIdentification}}</cbc:ID>
 			</cac:StandardItemIdentification>
-		<!--TODO 1.0, opcional, Grupo de información para adicionar información específica del ítem que puede
+		<!--TODO 2.0, opcional, Grupo de información para adicionar información específica del ítem que puede
 			ser solicitada por autoridades o entidades diferentes a la DIAN>
 			<cac:AdditionalItemProperty>
 				<cbc:Name></cbc:Name>
