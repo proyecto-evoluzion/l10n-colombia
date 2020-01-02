@@ -1,23 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <record id="invoice_form" model="ir.ui.view">
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="l10n_co_account_invoice_discrepancy_response.invoice_form" />
+        <field name="arch" type="xml">
+            <button name="%(account.action_account_invoice_refund)d" position="attributes">
+                <attribute name="groups">l10n_co_account_e_invoicing.group_view_invoice_refund_buttons</attribute>
+            </button>
+
+            <button name="%(l10n_co_account_invoice_discrepancy_response.account_invoice_debit_note_action)d"
+                position="attributes">
+                <attribute name="groups">l10n_co_account_e_invoicing.group_view_invoice_refund_buttons</attribute>
+            </button>
+        </field>
+    </record>
+
     <record model="ir.ui.view" id="view_invoice_form">
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='date_invoice']" position="after">
+                <field name="send_invoice_to_dian"
+                    required="1"
+                    groups="l10n_co_account_e_invoicing.group_send_invoice_dian_field"/>
                 <field name="operation_type"
                     required="1"
-                    attrs="{'invisible': [('type', '!=', 'out_invoice')]}"/>
+                    attrs="{'invisible': [('type', '!=', 'out_invoice')]}"
+                    groups="l10n_co_account_e_invoicing.group_view_operation_type_field"/>
                 <field name="invoice_type_code"
                     required="1"
-                    attrs="{'invisible': [('type', '!=', 'out_invoice')]}"/>
+                    attrs="{'invisible': [('type', '!=', 'out_invoice')]}"
+                    groups="l10n_co_account_e_invoicing.group_view_invoice_type_field"/>
             </xpath>
             <xpath expr="//notebook" position="inside">
-                <page name="dian_documents" string="DIAN Documents">
+                <page name="dian_documents"
+                    string="DIAN Documents"
+                    groups="l10n_co_account_e_invoicing.group_view_dian_documents">
                     <group>
-                        <group>
-                            <field name="send_invoice_to_dian" required="1"/>
-                        </group>
                         <field name="dian_document_ids" mode="tree" readonly="1">
                             <tree>
                                 <button type="object" name="go_to_dian_document" string="DIAN Document"/>

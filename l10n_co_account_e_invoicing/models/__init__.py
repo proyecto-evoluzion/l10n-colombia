@@ -6,6 +6,7 @@
 import res_company
 import res_partner
 import product_scheme
+import product_template
 import ir_sequence
 import ir_sequence_date_range
 import date_range

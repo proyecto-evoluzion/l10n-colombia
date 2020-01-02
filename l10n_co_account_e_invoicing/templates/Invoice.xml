@@ -48,13 +48,17 @@
 							schemeID="4"
 							schemeName="31">800197268</sts:AuthorizationProviderID>
 					</sts:AuthorizationProvider>
-					<sts:QRCode>NroFactura={{ID}}
-					NitFacturador={{ProviderID}}
-					NitAdquiriente={{NitAdquiriente}}
-					FechaFactura={{IssueDate}}
-					ValorTotalFactura={{PayableAmount}}
-					CUFE={{UUID}}
-					URL={{QRCodeURL}}</sts:QRCode>
+					<sts:QRCode>NumFac: {{ID}}
+					FecFac: {{IssueDate}}
+					HorFac: {{IssueTime}}
+					NitFac: {{ProviderID}}
+					NitAdq: {{NitAdquiriente}}
+					ValFac: {{LineExtensionAmount}}
+					ValIva: {{ValIva}}
+					ValOtroIm: {{ValOtroIm}}
+					ValTolFac:{{PayableAmount}}
+					CUFE: {{UUID}}
+					{{QRCodeURL}}</sts:QRCode>
 				</sts:DianExtensions>
 			</ext:ExtensionContent>
 		</ext:UBLExtension>
@@ -656,7 +660,7 @@
 		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
 		<!--OPCIONAL schemeName="Estándar de adopción del contribuyente" schemeAgencyID="" schemeAgencyName=""-->
 			<cac:StandardItemIdentification>
-				<cbc:ID schemeID="999">{{InvoiceLinee.StandardItemIdentification}}</cbc:ID>
+				<cbc:ID schemeID="999">{{InvoiceLine.StandardItemIdentification}}</cbc:ID>
 			</cac:StandardItemIdentification>
 		<!--TODO 2.0, opcional, Grupo de información para adicionar información específica del ítem que puede
 			ser solicitada por autoridades o entidades diferentes a la DIAN>

@@ -17,6 +17,21 @@ class ResPartner(models.Model):
         string='Is E-Invoicing Agent?',
         default=False)
 	einvoicing_email = fields.Char(string='E-Invoicing Email')
+	view_einvoicing_email_field = fields.Boolean(
+		string="View E-Invoicing Email Fields",
+		compute='_get_view_einvoicing_email_field',
+		store=False)
+
+	@api.multi
+	def _get_view_einvoicing_email_field(self):
+		user = self.env['res.users'].search([('id', '=', self._uid)])
+		view_einvoicing_email_field = False
+
+		if user.has_group('l10n_co_account_e_invoicing.group_view_einvoicing_email_fields'):
+			view_einvoicing_email_field = True
+
+		for partner in self:
+			partner.view_einvoicing_email_field = view_einvoicing_email_field
 
 	def _get_accounting_partner_party_values(self):
 		msg1 = _("'%s' does not have a person type established.")
