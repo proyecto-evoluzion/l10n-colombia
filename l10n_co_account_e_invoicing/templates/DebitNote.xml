@@ -34,13 +34,17 @@
                             schemeID="4"
                             schemeName="31">800197268</sts:AuthorizationProviderID>
                     </sts:AuthorizationProvider>
-					<sts:QRCode>NroFactura={{ID}}
-                    NitFacturador={{ProviderID}}
-                    NitAdquiriente={{NitAdquiriente}}
-                    FechaFactura={{IssueDate}}
-                    ValorTotalFactura={{PayableAmount}}
-                    CUFE={{UUID}}
-                    URL={{QRCodeURL}}</sts:QRCode>
+					<sts:QRCode>NumFac: {{ID}}
+						FecFac: {{IssueDate}}
+						HorFac: {{IssueTime}}
+						NitFac: {{ProviderID}}
+						NitAdq: {{NitAdquiriente}}
+						ValFac: {{LineExtensionAmount}}
+						ValIva: {{ValIva}}
+						ValOtroIm: {{ValOtroIm}}
+						ValTolFac:{{PayableAmount}}
+						CUDE: {{UUID}}
+						{{QRCodeURL}}</sts:QRCode>
 				</sts:DianExtensions>
 			</ext:ExtensionContent>
 		</ext:UBLExtension>

@@ -187,6 +187,7 @@ class AccountInvoiceDianDocument(models.Model):
         ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
         ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
         ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
+        ValOtroIm = self.invoice_id.amount_tax - ValImp1
         TaxInclusiveAmount = self.invoice_id.amount_total
         #El valor a pagar puede verse afectado, por anticipos, y descuentos y
         #cargos a nivel de factura
@@ -234,6 +235,8 @@ class AccountInvoiceDianDocument(models.Model):
             'UUID': cufe_cude['CUFE/CUDE'],
             'IssueDate': IssueDate,
             'IssueTime': IssueTime,
+            'ValIva': '{:.2f}'.format(ValImp1),
+            'ValOtroIm': '{:.2f}'.format(ValOtroIm),
             'DueDate': self.invoice_id.date_due,
             'DocumentCurrencyCode': self.invoice_id.currency_id.name,
             'LineCountNumeric': len(self.invoice_id.invoice_line_ids),
@@ -594,7 +597,8 @@ class AccountInvoiceDianDocument(models.Model):
 
         qr_data = "NumFac: " + number if number else 'NO_VALIDADA'
         qr_data += "\nFecFac: " + self.invoice_id.date_invoice
-        qr_data += "\nHorFac: " + create_date.astimezone(timezone('America/Bogota')).strftime('%H:%M:%S-05:00')
+        qr_data += "\nHorFac: " + create_date.astimezone(timezone(
+            'America/Bogota')).strftime('%H:%M:%S-05:00')
         qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
         qr_data += "\nNitAdq: " + nit_adq if nit_adq else ''
         qr_data += "\nValFac: " + '{:.2f}'.format(ValFac)
@@ -644,16 +648,17 @@ class AccountInvoiceDianDocument(models.Model):
     @api.multi
     def send_failure_email(self):
         msg1 = _("The notification group for Einvoice failures is not set.\n"+
-                "You won't be notified if something goes wrong.\n"+
-                "Please go to Settings>Company>Notification Group.")
-        subject = 'ALERTA! La Factura ' + self.invoice_id.number + ' no fue enviada a la DIAN.' 
+                 "You won't be notified if something goes wrong.\n"+
+                 "Please go to Settings > Company > Notification Group.")
+        subject = _('ALERTA! La Factura %s no fue enviada a la DIAN.') % self.invoice_id.number
         #email_to = self.env['res.users'].browse(self.env.uid).email
-        msg_body = '''Cordial Saludo,<br/><br/>La factura ''' + self.invoice_id.number + ''' de cliente ''' + \
-            self.invoice_id.partner_id.name + ''' no pudo ser enviada ''' + \
-            ''' a la Dian según el protocolo establecido previamente. Por favor revise el estado de la misma en el ''' + \
-            ''' menú Documentos Dian e intente reprocesarla según el procedimiento definido.<br/>EXA Auto Parts.'''
-
+        msg_body = _('''Cordial Saludo,<br/><br/>La factura %s del cliente %s no pudo ser '''
+                     '''enviada a la Dian según el protocolo establecido previamente. Por '''
+                     '''favor revise el estado de la misma en el menú Documentos Dian e '''
+                     '''intente reprocesarla según el procedimiento definido.'''
+                     '''<br/>%s.''')
         email_ids = self.company_id.notification_group_ids
+
         if email_ids:
             email_to = ''
 
@@ -666,15 +671,8 @@ class AccountInvoiceDianDocument(models.Model):
         msg_vals = {
             'subject': subject,
             'email_to': email_to, 
-            'body_html': msg_body,
-        }
+            'body_html': (msg_body % self.invoice_id.number,
+                self.invoice_id.partner_id.name,
+                self.company_id.name)}
         msg_id = mail_obj.create(msg_vals)
         msg_id.send()
-        logger.info(" ===>\n\n Invoice number %s failed for the %s partner \n\n<===" % 
-                    (self.invoice_id.number,self.invoice_id.partner_id.name ))
-        
-
-    def save_reports_file(self):
-        template_name = self.env['ir.actions.report.xml'].browse(self.company_id.report_template.id).report_name
-        pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], template_name)
-        return b64encode(pdf)
