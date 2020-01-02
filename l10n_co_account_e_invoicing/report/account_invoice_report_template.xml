@@ -17,7 +17,7 @@
                 <t t-if="o.company_id.einvoicing_enabled == True">
                         <t t-foreach="o.dian_document_ids" t-as="dd">
                             <t t-if="dd.state == 'done' or dd.state == 'sent'">
-                                <img class="image" t-att-src="'data:image/png;base64,%s' % dd.qr_image" style="width:100px;height:100px;margin-bottom:5px;margin-right:50px"/>
+                                <img class="image" t-att-src="'data:image/png;base64,%s' % dd.qr_image" style="width:100px;height:100px;margin-bottom:5px"/>
                             </t>
                         </t>
                     </t>
