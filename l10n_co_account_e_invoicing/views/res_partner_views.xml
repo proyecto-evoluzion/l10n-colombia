@@ -10,7 +10,7 @@
 				</label>
 
 				<field name="phone" position="before">
-					<field name="is_einvoicing_agent"/>
+					<field name="is_einvoicing_agent" required="1"/>
 					<field name="einvoicing_email"
 						attrs="{'required': [('is_einvoicing_agent', '=', 'yes')]}"/>
 				</field>

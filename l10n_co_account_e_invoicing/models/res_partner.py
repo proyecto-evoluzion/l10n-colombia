@@ -64,7 +64,8 @@ class ResPartner(models.Model):
 		else:
 			raise UserError(msg9 % self.name)
 
-		if self.is_einvoicing_agent == 'yes' and not self.einvoicing_email:
+		if ((self.is_einvoicing_agent == 'yes' or not self.is_einvoicing_agent)
+				and not self.einvoicing_email):
 			raise UserError(msg10 % self.name)
 
 		if self.send_zip_code:

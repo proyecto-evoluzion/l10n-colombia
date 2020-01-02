@@ -40,17 +40,17 @@
                         <field name="state"
                             widget="statusbar"
                             statusbar_visible="draft,sent,done,cancel"/>
-                        <button name="_set_files"
+                        <button name="action_set_files"
                             string="Set Files"
                             type="object"
-                            states="draft"
+                            states="draft,sent"
                             class="btn-primary"/>
-                        <button name="sent_zipped_file"
+                        <button name="action_sent_zipped_file"
                             string="Sent Zipped File"
                             type="object"
-                            states="draft"
+                            states="draft,sent"
                             class="btn-primary"/>
-                        <button name="GetStatusZip"
+                        <button name="action_GetStatusZip"
                             string="GetStatusZip"
                             type="object"
                             states="sent,done"
@@ -58,8 +58,13 @@
                         <button name="action_reprocess"
                             string="Reprocess"
                             type="object"
-                            states="sent"
+                            states="sent,done"
                             class="btn-primary"/>
+                        <button name="action_send_mail"
+                            string="Send Mail"
+                            type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': [('mail_sent', '=', True)]}"/>
                     </header>
                     <sheet>
                         <group>
@@ -79,6 +84,7 @@
                                     widget="binary"
                                     filename="zipped_filename"
                                     readonly="1"/>
+                                <field name="mail_sent"/>
                             </group>
                             <group string="Codes">
                                 <field name="cufe_cude_uncoded" readonly="1"/>
@@ -95,6 +101,18 @@
                             <field name="get_status_zip_status_code" readonly="1"/>
                             <field name="get_status_zip_response" readonly="1"/>
                         </group>
+                        <notebook colspan="4">
+                            <page string="DIAN Document Lines">
+                                <group>
+                                    <field name="dian_document_line_ids" mode="tree" readonly="1">
+                                        <tree>
+                                            <field name="create_date"/>
+                                            <field name="send_async_status_code"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>

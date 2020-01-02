@@ -12,9 +12,6 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     einvoicing_enabled = fields.Boolean(string='E-Invoicing Enabled')
-    out_invoice_sent = fields.Integer(string='Invoices Sent')
-    out_refund_credit_sent = fields.Integer(string='Credit Notes Sent')
-    out_refund_debit_sent = fields.Integer(string='Debit Notes Sent')
     profile_execution_id = fields.Selection(
         [('1', 'Production'), ('2', 'Test')],
         'Destination Environment of Document',
@@ -28,16 +25,20 @@ class ResCompany(models.Model):
     certificate_password = fields.Char(string='Certificate Password')
     signature_policy_url = fields.Char(string='Signature Policy Url')
     signature_policy_description = fields.Char(string='Signature Policy Description')
-    signature_policy_filename = fields.Char(string='Signature Policy Filename')
-    signature_policy_file = fields.Binary(string='Signature Policy File')
     files_path = fields.Char(string='Files Path')
-    einvoicing_email = fields.Char(string='E-invoice email from', help="Enter the e-invoice sender's email.")
-    einvoicing_partner_no_email = fields.Char(string='Failed Emails to', 
+    einvoicing_email = fields.Char(
+        string='E-invoice Email From',
+        help="Enter the e-invoice sender's email.")
+    einvoicing_partner_no_email = fields.Char(
+        string='Failed Emails To', 
         help='Enter the email where the invoice will be sent when the customer does not have an email.')
-    report_template = fields.Many2one(string='Report Template', comodel_name='ir.actions.report.xml')
-    notification_group_ids = fields.One2many(comodel_name='einvoice.notification.group',
-		                                    inverse_name='company_id',
-		                                    string='Notification group')
+    report_template = fields.Many2one(
+        string='Report Template',
+        comodel_name='ir.actions.report.xml')
+    notification_group_ids = fields.One2many(
+        comodel_name='einvoice.notification.group',
+        inverse_name='company_id',
+        string='Notification Group')
 
     @api.onchange('signature_policy_url')
     def onchange_signature_policy_url(self):

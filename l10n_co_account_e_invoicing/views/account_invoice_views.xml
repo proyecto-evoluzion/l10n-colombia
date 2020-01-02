@@ -13,14 +13,14 @@
                     attrs="{'invisible': [('type', '!=', 'out_invoice')]}"/>
             </xpath>
             <xpath expr="//notebook" position="inside">
-                <page name="einvoicing" string="E-Invoicing">
-                    <group name="dian">
+                <page name="dian_documents" string="DIAN Documents">
+                    <group>
                         <group>
                             <field name="send_invoice_to_dian" required="1"/>
                         </group>
-                        <field name="dian_document_lines" mode="tree" readonly="1">
-                            <tree string="DIAN Documents">
-                                <button type="object" name="go_to_dian_document" string="Dian Document"/>
+                        <field name="dian_document_ids" mode="tree" readonly="1">
+                            <tree>
+                                <button type="object" name="go_to_dian_document" string="DIAN Document"/>
                                 <field name="cufe_cude"/>
                                 <field name="create_date"/>
                                 <field name="xml_filename"/>
@@ -33,12 +33,11 @@
         </field>
     </record>
 
-    <!--Email template -->
     <record id="email_template_for_einvoice" model="mail.template">
         <field name="name">Electronic Invoice - Send by Email</field>
         <field name="email_from">${object.company_id.einvoicing_email}</field>
-        <field name="subject">EXA Auto Parts S.A.S generó la Factura electrónica ${object.number}</field>
-        <field name="email_to">${object.partner_id.einvoice_email or object.company_id.einvoicing_partner_no_email}</field>
+        <field name="subject">${object.company_id.name} generó la Factura electrónica ${object.number}</field>
+        <field name="email_to">${(object.partner_id.einvoicing_email) or (object.company_id.einvoicing_partner_no_email)}</field>
         <field name="model_id" ref="account.model_account_invoice"/>
         <field name="auto_delete" eval="True"/>
         <field name="notification" eval="True"/>
