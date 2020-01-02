@@ -643,11 +643,11 @@
 		<cac:Item>
 			<cbc:Description>{{InvoiceLine.ItemDescription}}</cbc:Description>
 		<!--TODO 2.0, Cantidad de unidad de este artículo por empaque>
-			<cbc:PackSizeNumeric>{{CreditNoteLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
+			<cbc:PackSizeNumeric>{{InvoiceLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
 		<!--TODO 2.0, Marca: Marca del artículo>
-			<cbc:BrandName>{{CreditNoteLine.BrandName}}</cbc:BrandName-->
+			<cbc:BrandName>{{InvoiceLine.BrandName}}</cbc:BrandName-->
 		<!--TODO 2.0, Modelo: Modelo del artículo>
-			<cbc:ModelName>{{CreditNoteLine.BrandName}}</cbc:ModelName-->
+			<cbc:ModelName>{{InvoiceLine.BrandName}}</cbc:ModelName-->
 		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor>
 			<cac:SellersItemIdentification>
 				<cbc:ID>AOHV84-225</cbc:ID>
@@ -656,7 +656,7 @@
 		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
 		<!--OPCIONAL schemeName="Estándar de adopción del contribuyente" schemeAgencyID="" schemeAgencyName=""-->
 			<cac:StandardItemIdentification>
-				<cbc:ID schemeID="999">{{InvoiceLinee.StandardItemIdentification}}</cbc:ID>
+				<cbc:ID schemeID="999">{{InvoiceLine.StandardItemIdentification}}</cbc:ID>
 			</cac:StandardItemIdentification>
 		<!--TODO 2.0, opcional, Grupo de información para adicionar información específica del ítem que puede
 			ser solicitada por autoridades o entidades diferentes a la DIAN>
