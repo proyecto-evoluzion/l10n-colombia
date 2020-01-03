@@ -431,15 +431,17 @@ class AccountInvoiceDianDocument(models.Model):
         wsdl = DIAN['wsdl-hab']
 
         if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
             SendBillAsync_values = self._get_SendBillAsync_values()
+            SendBillAsync_values['To'] = wsdl.replace('?wsdl', '')
             xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
                 global_functions.get_template_xml(SendBillAsync_values, 'SendBillAsync'),
                 SendBillAsync_values['Id'],
                 self.company_id.certificate_file,
                 self.company_id.certificate_password)
-            wsdl = DIAN['wsdl']
         else:
             SendTestSetAsync_values = self._get_SendTestSetAsync_values()
+            SendTestSetAsync_values['To'] = wsdl.replace('?wsdl', '')
             xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
                 global_functions.get_template_xml(SendTestSetAsync_values, 'SendTestSetAsync'),
                 SendTestSetAsync_values['Id'],
@@ -491,15 +493,17 @@ class AccountInvoiceDianDocument(models.Model):
         wsdl = DIAN['wsdl-hab']
         strings = ''
         status_code = 'other'
+
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+
         GetStatusZip_values = self._get_GetStatusZip_values()
+        GetStatusZip_values['To'] = wsdl.replace('?wsdl', '')
         xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
             global_functions.get_template_xml(GetStatusZip_values, 'GetStatusZip'),
             GetStatusZip_values['Id'],
             self.company_id.certificate_file,
             self.company_id.certificate_password)
-
-        if self.company_id.profile_execution_id == '1':
-            wsdl = DIAN['wsdl']
 
         response = post(
             wsdl,
