@@ -54,6 +54,7 @@ class ResPartner(models.Model):
 		msg9 = _("'%s' does not have a fiscal position established.")
 		msg10 = _("E-Invoicing Agent: '%s' does not have a E-Invoicing Email.")
 		zip_code = False
+		tax_level_codes = ''
 		first_name = False
 		family_name = False
 		middle_name = False
@@ -81,7 +82,7 @@ class ResPartner(models.Model):
 			raise UserError(msg7 % self.name)
 
 		if self.property_account_position_id:
-			if (not self.property_account_position_id.tax_level_code_id
+			if (not self.property_account_position_id.tax_level_code_ids
 					or not self.property_account_position_id.tax_scheme_id
 					or not self.property_account_position_id.listname):
 				raise UserError(msg8 % self.name)
@@ -95,6 +96,12 @@ class ResPartner(models.Model):
 		if self.send_zip_code:
 			if self.zip_id:
 				zip_code = self.zip_id.name
+
+		for tax_level_code_id in self.property_account_position_id.tax_level_code_ids:
+			if tax_level_codes == '':
+				tax_level_codes = tax_level_code_id.code
+			else:
+				tax_level_codes += ';' + tax_level_code_id.code
 
 		if self.firstname:
 			first_name = self.firstname
@@ -130,7 +137,7 @@ class ResPartner(models.Model):
 			'CompanyIDschemeName': self.document_type_id.code,
 			'CompanyID': self.identification_document,
 			'listName': self.property_account_position_id.listname,
-			'TaxLevelCode': self.property_account_position_id.tax_level_code_id.code,
+			'TaxLevelCode': tax_level_codes,
 			'TaxSchemeID': self.property_account_position_id.tax_scheme_id.code,
 			'TaxSchemeName': self.property_account_position_id.tax_scheme_id.name,
 			'CorporateRegistrationSchemeName': self.coc_registration_number,
