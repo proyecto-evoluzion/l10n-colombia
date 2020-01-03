@@ -48,13 +48,17 @@
 							schemeID="4"
 							schemeName="31">800197268</sts:AuthorizationProviderID>
 					</sts:AuthorizationProvider>
-					<sts:QRCode>NroFactura={{ID}}
-					NitFacturador={{ProviderID}}
-					NitAdquiriente={{NitAdquiriente}}
-					FechaFactura={{IssueDate}}
-					ValorTotalFactura={{PayableAmount}}
-					CUFE={{UUID}}
-					URL={{QRCodeURL}}</sts:QRCode>
+					<sts:QRCode>NumFac: {{ID}}
+					FecFac: {{IssueDate}}
+					HorFac: {{IssueTime}}
+					NitFac: {{ProviderID}}
+					NitAdq: {{NitAdquiriente}}
+					ValFac: {{LineExtensionAmount}}
+					ValIva: {{ValIva}}
+					ValOtroIm: {{ValOtroIm}}
+					ValTolFac:{{PayableAmount}}
+					CUFE: {{UUID}}
+					{{QRCodeURL}}</sts:QRCode>
 				</sts:DianExtensions>
 			</ext:ExtensionContent>
 		</ext:UBLExtension>
@@ -582,13 +586,14 @@
 		<!--cbc:Note>Información Adicional: Texto libre para añadir información adicional al artículo.</cbc:Note-->
 		<cbc:InvoicedQuantity unitCode="{{InvoiceLine.unitCode}}">{{InvoiceLine.Quantity}}</cbc:InvoicedQuantity>
 		<cbc:LineExtensionAmount currencyID="{{DocumentCurrencyCode}}">{{InvoiceLine.LineExtensionAmount}}</cbc:LineExtensionAmount>
-	<!--TODO 1.0, Obligatorio de informar si se trata de muestras comerciales.>
+		{% if InvoiceLine.LineExtensionAmount == 0 -%}
 		<cac:PricingReference>
 			<cac:AlternativeConditionPrice>
-				<cbc:PriceAmount currencyID="COP">100.00</cbc:PriceAmount>
-				<cbc:PriceTypeCode>03</cbc:PriceTypeCode>
+				<cbc:PriceAmount currencyID="{{DocumentCurrencyCode}}">{{InvoiceLine.PriceAmount}}</cbc:PriceAmount>
+				<cbc:PriceTypeCode>01</cbc:PriceTypeCode>
 			</cac:AlternativeConditionPrice>
-		</cac:PricingReference-->
+		</cac:PricingReference>
+		{% endif %}
 	<!--TODO 2.0, puede iterar en el campo ID aumenta segun la cantidad de descuentos o cargos por lineas
 		ChargeIndicator true seria un cargo-->
 		<cac:AllowanceCharge>
@@ -643,11 +648,11 @@
 		<cac:Item>
 			<cbc:Description>{{InvoiceLine.ItemDescription}}</cbc:Description>
 		<!--TODO 2.0, Cantidad de unidad de este artículo por empaque>
-			<cbc:PackSizeNumeric>{{CreditNoteLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
+			<cbc:PackSizeNumeric>{{InvoiceLine.PackSizeNumeric}}</cbc:PackSizeNumeric-->
 		<!--TODO 2.0, Marca: Marca del artículo>
-			<cbc:BrandName>{{CreditNoteLine.BrandName}}</cbc:BrandName-->
+			<cbc:BrandName>{{InvoiceLine.BrandName}}</cbc:BrandName-->
 		<!--TODO 2.0, Modelo: Modelo del artículo>
-			<cbc:ModelName>{{CreditNoteLine.BrandName}}</cbc:ModelName-->
+			<cbc:ModelName>{{InvoiceLine.BrandName}}</cbc:ModelName-->
 		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con el vendedor>
 			<cac:SellersItemIdentification>
 				<cbc:ID>AOHV84-225</cbc:ID>
@@ -656,7 +661,7 @@
 		<!--TODO 2.0, Grupo de datos de identificación del artículo o servicio de acuerdo con un estándar-->
 		<!--OPCIONAL schemeName="Estándar de adopción del contribuyente" schemeAgencyID="" schemeAgencyName=""-->
 			<cac:StandardItemIdentification>
-				<cbc:ID schemeID="999">{{InvoiceLinee.StandardItemIdentification}}</cbc:ID>
+				<cbc:ID schemeID="999">{{InvoiceLine.StandardItemIdentification}}</cbc:ID>
 			</cac:StandardItemIdentification>
 		<!--TODO 2.0, opcional, Grupo de información para adicionar información específica del ítem que puede
 			ser solicitada por autoridades o entidades diferentes a la DIAN>

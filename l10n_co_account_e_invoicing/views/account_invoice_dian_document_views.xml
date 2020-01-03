@@ -130,6 +130,7 @@
             name="DIAN Documents"
             action="account_invoice_dian_document_action"
             parent="account.menu_finance_receivables"
+            groups="l10n_co_account_e_invoicing.group_view_dian_documents"
             sequence="2"/>
     </data>
 </odoo>

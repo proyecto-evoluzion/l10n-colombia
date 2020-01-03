@@ -34,13 +34,17 @@
                             schemeID="4"
                             schemeName="31">800197268</sts:AuthorizationProviderID>
 					</sts:AuthorizationProvider>
-					<sts:QRCode>NroFactura={{ID}}
-					NitFacturador={{ProviderID}}
-					NitAdquiriente={{NitAdquiriente}}
-					FechaFactura={{IssueDate}}
-					ValorTotalFactura={{PayableAmount}}
-					CUFE={{UUID}}
-					URL={{QRCodeURL}}</sts:QRCode>
+					<sts:QRCode>NumFac: {{ID}}
+						FecFac: {{IssueDate}}
+						HorFac: {{IssueTime}}
+						NitFac: {{ProviderID}}
+						NitAdq: {{NitAdquiriente}}
+						ValFac: {{LineExtensionAmount}}
+						ValIva: {{ValIva}}
+						ValOtroIm: {{ValOtroIm}}
+						ValTolFac:{{PayableAmount}}
+						CUDE: {{UUID}}
+						{{QRCodeURL}}</sts:QRCode>
 				</sts:DianExtensions>
 			</ext:ExtensionContent>
 		</ext:UBLExtension>
@@ -512,13 +516,14 @@
         <cbc:Note>Información Adicional: Texto libre para añadir información adicional al artículo.</cbc:Note-->
 		<cbc:CreditedQuantity unitCode="{{CreditNoteLine.unitCode}}">{{CreditNoteLine.Quantity}}</cbc:CreditedQuantity>
 		<cbc:LineExtensionAmount currencyID="{{DocumentCurrencyCode}}">{{CreditNoteLine.LineExtensionAmount}}</cbc:LineExtensionAmount>
-    <!--TODO 1.0, Obligatorio de informar si se trata de muestras comerciales.>
+		{% if CreditNoteLine.LineExtensionAmount == 0 -%}
 		<cac:PricingReference>
 			<cac:AlternativeConditionPrice>
-				<cbc:PriceAmount currencyID="COP">100.00</cbc:PriceAmount>
-				<cbc:PriceTypeCode>03</cbc:PriceTypeCode>
+				<cbc:PriceAmount currencyID="{{DocumentCurrencyCode}}">{{CreditNoteLine.PriceAmount}}</cbc:PriceAmount>
+				<cbc:PriceTypeCode>01</cbc:PriceTypeCode>
 			</cac:AlternativeConditionPrice>
-		</cac:PricingReference-->
+		</cac:PricingReference>
+		{% endif %}
         {% for TaxTotalID, TaxTotal in CreditNoteLine.TaxesTotal.items() -%}
 		<cac:TaxTotal>
 			<cbc:TaxAmount currencyID="{{DocumentCurrencyCode}}">{{'{:.2f}'.format(TaxTotal.total)}}</cbc:TaxAmount>

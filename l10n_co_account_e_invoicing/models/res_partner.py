@@ -3,8 +3,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields, _
-from odoo.exceptions import UserError
-
+from odoo.exceptions import UserError, ValidationError
+import re
 
 class ResPartner(models.Model):
 	_inherit = "res.partner"
@@ -17,6 +17,30 @@ class ResPartner(models.Model):
         string='Is E-Invoicing Agent?',
         default=False)
 	einvoicing_email = fields.Char(string='E-Invoicing Email')
+	view_einvoicing_email_field = fields.Boolean(
+		string="View E-Invoicing Email Fields",
+		compute='_get_view_einvoicing_email_field',
+		store=False)
+
+	@api.multi
+	def _get_view_einvoicing_email_field(self):
+		user = self.env['res.users'].search([('id', '=', self._uid)])
+		view_einvoicing_email_field = False
+
+		if user.has_group('l10n_co_account_e_invoicing.group_view_einvoicing_email_fields'):
+			view_einvoicing_email_field = True
+
+		for partner in self:
+			partner.view_einvoicing_email_field = view_einvoicing_email_field
+
+	@api.constrains('einvoicing_email')
+	@api.onchange('einvoicing_email')
+	def validate_mail(self):
+	   if self.einvoicing_email:
+			match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", self.einvoicing_email)
+			if match == None:
+				raise ValidationError(_('The field "E-invoicing email" is not correctly filled.\n\n'+
+										'Please add @ and dot (.)'))
 
 	def _get_accounting_partner_party_values(self):
 		msg1 = _("'%s' does not have a person type established.")
@@ -30,6 +54,7 @@ class ResPartner(models.Model):
 		msg9 = _("'%s' does not have a fiscal position established.")
 		msg10 = _("E-Invoicing Agent: '%s' does not have a E-Invoicing Email.")
 		zip_code = False
+		tax_level_codes = ''
 		first_name = False
 		family_name = False
 		middle_name = False
@@ -57,7 +82,7 @@ class ResPartner(models.Model):
 			raise UserError(msg7 % self.name)
 
 		if self.property_account_position_id:
-			if (not self.property_account_position_id.tax_level_code_id
+			if (not self.property_account_position_id.tax_level_code_ids
 					or not self.property_account_position_id.tax_scheme_id
 					or not self.property_account_position_id.listname):
 				raise UserError(msg8 % self.name)
@@ -71,6 +96,12 @@ class ResPartner(models.Model):
 		if self.send_zip_code:
 			if self.zip_id:
 				zip_code = self.zip_id.name
+
+		for tax_level_code_id in self.property_account_position_id.tax_level_code_ids:
+			if tax_level_codes == '':
+				tax_level_codes = tax_level_code_id.code
+			else:
+				tax_level_codes += ';' + tax_level_code_id.code
 
 		if self.firstname:
 			first_name = self.firstname
@@ -106,7 +137,7 @@ class ResPartner(models.Model):
 			'CompanyIDschemeName': self.document_type_id.code,
 			'CompanyID': self.identification_document,
 			'listName': self.property_account_position_id.listname,
-			'TaxLevelCode': self.property_account_position_id.tax_level_code_id.code,
+			'TaxLevelCode': tax_level_codes,
 			'TaxSchemeID': self.property_account_position_id.tax_scheme_id.code,
 			'TaxSchemeName': self.property_account_position_id.tax_scheme_id.name,
 			'CorporateRegistrationSchemeName': self.coc_registration_number,
