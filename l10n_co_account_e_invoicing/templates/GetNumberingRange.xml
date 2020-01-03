@@ -13,13 +13,13 @@
         </wsse:Security>
         <wsa:Action>http://wcf.dian.colombia/IWcfDianCustomerServices/GetNumberingRange</wsa:Action>
         <wsa:To wsu:Id="id-{{Id}}"
-            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">https://vpfe.dian.gov.co/WcfDianCustomerServices.svc</wsa:To>
+            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">{{To}}</wsa:To>
     </soap:Header>
     <soap:Body>
         <wcf:GetNumberingRange>
-            <wcf:accountCode></wcf:accountCode>
-            <wcf:accountCodeT></wcf:accountCodeT>
-            <wcf:softwareCode></wcf:softwareCode>
+            <wcf:accountCode>{{accountCode}}</wcf:accountCode>
+            <wcf:accountCodeT>{{accountCodeT}}</wcf:accountCodeT>
+            <wcf:softwareCode>{{softwareCode}}</wcf:softwareCode>
         </wcf:GetNumberingRange>
     </soap:Body>
 </soap:Envelope>
