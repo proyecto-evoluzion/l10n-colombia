@@ -53,10 +53,12 @@ class AccountInvoiceDianDocument(models.Model):
         string='SoftwareSecurityCode Uncoded')
     software_security_code = fields.Char(
         string='SoftwareSecurityCode')
-    xml_filename = fields.Char(string='XML Filename')
-    xml_file = fields.Binary(string='XML File')
+    xml_filename = fields.Char(string='Invoice XML Filename')
+    xml_file = fields.Binary(string='Invoice XML File')
     zipped_filename = fields.Char(string='Zipped Filename')
     zipped_file = fields.Binary(string='Zipped File')
+    ar_xml_filename = fields.Char(string='ApplicationResponse XML Filename')
+    ar_xml_file = fields.Binary(string='ApplicationResponse XML File')
     mail_sent = fields.Boolean(string='Mail Sent?')
     zip_key = fields.Char(string='ZipKey')
     get_status_zip_status_code = fields.Selection(
@@ -540,7 +542,10 @@ class AccountInvoiceDianDocument(models.Model):
                     strings = element.text
                 
                 for element in root.iter("{%s}XmlBase64Bytes" % b):
-                    self.write({'xml_file': element.text})
+                    ar_xml_filename = 'ar' + self.xml_filename[2:]
+                    self.write({
+                        'ar_xml_filename': ar_xml_filename,
+                        'ar_xml_file': element.text})
 
                 if not self.mail_sent:
                     self.action_send_mail()
