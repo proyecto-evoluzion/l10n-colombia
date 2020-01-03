@@ -656,7 +656,6 @@ class AccountInvoiceDianDocument(models.Model):
                  "You won't be notified if something goes wrong.\n"+
                  "Please go to Settings > Company > Notification Group.")
         subject = _('ALERTA! La Factura %s no fue enviada a la DIAN.') % self.invoice_id.number
-        #email_to = self.env['res.users'].browse(self.env.uid).email
         msg_body = _('''Cordial Saludo,<br/><br/>La factura ''' + self.invoice_id.number +
                      ''' del cliente ''' + self.invoice_id.partner_id.name + ''' no pudo ser ''' +
                      '''enviada a la Dian según el protocolo establecido previamente. Por '''
