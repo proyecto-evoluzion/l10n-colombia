@@ -431,15 +431,17 @@ class AccountInvoiceDianDocument(models.Model):
         wsdl = DIAN['wsdl-hab']
 
         if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
             SendBillAsync_values = self._get_SendBillAsync_values()
+            SendBillAsync_values['To'] = wsdl.replace('?wsdl', '')
             xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
                 global_functions.get_template_xml(SendBillAsync_values, 'SendBillAsync'),
                 SendBillAsync_values['Id'],
                 self.company_id.certificate_file,
                 self.company_id.certificate_password)
-            wsdl = DIAN['wsdl']
         else:
             SendTestSetAsync_values = self._get_SendTestSetAsync_values()
+            SendTestSetAsync_values['To'] = wsdl.replace('?wsdl', '')
             xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
                 global_functions.get_template_xml(SendTestSetAsync_values, 'SendTestSetAsync'),
                 SendTestSetAsync_values['Id'],
@@ -491,15 +493,17 @@ class AccountInvoiceDianDocument(models.Model):
         wsdl = DIAN['wsdl-hab']
         strings = ''
         status_code = 'other'
+
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+
         GetStatusZip_values = self._get_GetStatusZip_values()
+        GetStatusZip_values['To'] = wsdl.replace('?wsdl', '')
         xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
             global_functions.get_template_xml(GetStatusZip_values, 'GetStatusZip'),
             GetStatusZip_values['Id'],
             self.company_id.certificate_file,
             self.company_id.certificate_password)
-
-        if self.company_id.profile_execution_id == '1':
-            wsdl = DIAN['wsdl']
 
         response = post(
             wsdl,
@@ -601,7 +605,7 @@ class AccountInvoiceDianDocument(models.Model):
         number = self.invoice_id.number
 
         qr_data = "NumFac: " + number if number else 'NO_VALIDADA'
-        qr_data += "\nFecFac: " + self.invoice_id.date_invoice
+        qr_data += "\nFecFac: " + self.invoice_id.date_invoice if self.invoice_id.date_invoice else ''
         qr_data += "\nHorFac: " + create_date.astimezone(timezone(
             'America/Bogota')).strftime('%H:%M:%S-05:00')
         qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
@@ -611,7 +615,7 @@ class AccountInvoiceDianDocument(models.Model):
         qr_data += "\nValOtroIm: " + '{:.2f}'.format(self.invoice_id.amount_tax - ValImp1)
         qr_data += "\nValTolFac: " + '{:.2f}'.format(self.invoice_id.amount_total)
         qr_data += "\nCUFE: " + cufe if cufe else ''
-        qr_data += "\n\n" + self.invoice_url
+        qr_data += "\n\n" + self.invoice_url if self.invoice_url else ''
 
         self.qr_image = global_functions.get_qr_code(qr_data)
 

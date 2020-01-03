@@ -12,7 +12,8 @@
                             <field name="profile_execution_id"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="test_set_id"
-                                attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
+                                attrs="{'required': [('einvoicing_enabled', '=', True), ('profile_execution_id', '=', '2')],
+                                'invisible': [('profile_execution_id', '=', '')]}"/>
                             <field name="software_id"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="software_pin"
@@ -42,6 +43,15 @@
                                     <field name="email"/>
                                 </tree>
                             </field>
+                            <label for="get_numbering_range_response"/>
+                            <div>
+                                <button name="action_GetNumberingRange"
+                                    string="Get Numbering Range"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-check"/>
+                                <field name="get_numbering_range_response"/>
+                            </div>
                         </group>
                     </page>
                 </xpath>
