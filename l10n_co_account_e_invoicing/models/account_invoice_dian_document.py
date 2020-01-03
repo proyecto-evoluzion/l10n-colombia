@@ -605,7 +605,7 @@ class AccountInvoiceDianDocument(models.Model):
         number = self.invoice_id.number
 
         qr_data = "NumFac: " + number if number else 'NO_VALIDADA'
-        qr_data += "\nFecFac: " + self.invoice_id.date_invoice
+        qr_data += "\nFecFac: " + self.invoice_id.date_invoice if self.invoice_id.date_invoice else ''
         qr_data += "\nHorFac: " + create_date.astimezone(timezone(
             'America/Bogota')).strftime('%H:%M:%S-05:00')
         qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
@@ -615,7 +615,7 @@ class AccountInvoiceDianDocument(models.Model):
         qr_data += "\nValOtroIm: " + '{:.2f}'.format(self.invoice_id.amount_tax - ValImp1)
         qr_data += "\nValTolFac: " + '{:.2f}'.format(self.invoice_id.amount_total)
         qr_data += "\nCUFE: " + cufe if cufe else ''
-        qr_data += "\n\n" + self.invoice_url
+        qr_data += "\n\n" + self.invoice_url if self.invoice_url else ''
 
         self.qr_image = global_functions.get_qr_code(qr_data)
 
