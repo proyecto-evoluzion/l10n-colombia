@@ -46,7 +46,7 @@
                             <label for="get_numbering_range_response"/>
                             <div>
                                 <button name="action_GetNumberingRange"
-                                    string="Get Numbering Range"
+                                    string="GetNumberingRange"
                                     type="object"
                                     class="oe_stat_button"
                                     icon="fa-check"/>
