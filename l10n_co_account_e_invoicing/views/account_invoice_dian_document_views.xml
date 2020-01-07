@@ -53,13 +53,23 @@
                         <button name="action_GetStatusZip"
                             string="GetStatusZip"
                             type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': [('profile_execution_id', '=', '1')]}"/>
+                        <button name="action_GetStatus"
+                            string="GetStatus"
+                            type="object"
                             states="sent,done"
                             class="btn-primary"/>
                         <button name="action_reprocess"
                             string="Reprocess"
                             type="object"
-                            states="sent,done"
-                            class="btn-primary"/>
+                            class="btn-primary"
+                            attrs="{'invisible': [
+                                '|',
+                                '|',
+                                ('xml_filename', '=', False),
+                                ('zipped_filename', '=', False),
+                                ('ar_xml_filename', '=', False)]}"/>
                         <button name="action_send_mail"
                             string="Send Mail"
                             type="object"
@@ -71,6 +81,7 @@
                             <group string="Invoice">
                                 <field name="invoice_id" readonly="1"/>
                                 <field name="company_id" invisible="1"/>
+                                <field name="profile_execution_id" readonly="1" invisible="1"/>
                                 <field name="invoice_url" widget="url" readonly="1"/>
                             </group>
                             <group string="Files">

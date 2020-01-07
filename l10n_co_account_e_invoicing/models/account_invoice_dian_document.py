@@ -2,9 +2,6 @@
 # Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import sys  
-reload(sys)  
-sys.setdefaultencoding('utf8')
 from StringIO import StringIO
 from datetime import datetime
 from base64 import b64encode, b64decode
@@ -15,8 +12,6 @@ from requests import post, exceptions
 from lxml import etree
 from odoo import models, api, fields, _
 from odoo.exceptions import ValidationError, UserError
-import logging
-logger = logging.getLogger(__name__)
 from odoo.http import request
 
 
@@ -45,14 +40,16 @@ class AccountInvoiceDianDocument(models.Model):
         'res.company',
         string='Company')
     invoice_url = fields.Char(string='Invoice Url')
-    operation_type = fields.Selection(related='invoice_id.operation_type', store=False)
-    invoice_type_code = fields.Selection(related='invoice_id.invoice_type_code', store=False)
     cufe_cude_uncoded = fields.Char(string='CUFE/CUDE Uncoded')
     cufe_cude = fields.Char(string='CUFE/CUDE')
     software_security_code_uncoded = fields.Char(
         string='SoftwareSecurityCode Uncoded')
     software_security_code = fields.Char(
         string='SoftwareSecurityCode')
+    profile_execution_id = fields.Selection(
+        string='Destination Environment of Document',
+        related='company_id.profile_execution_id',
+        store=False)
     xml_filename = fields.Char(string='Invoice XML Filename')
     xml_file = fields.Binary(string='Invoice XML File')
     zipped_filename = fields.Char(string='Zipped Filename')
@@ -75,6 +72,47 @@ class AccountInvoiceDianDocument(models.Model):
 		comodel_name='account.invoice.dian.document.line',
 		inverse_name='dian_document_id',
 		string='DIAN Document Lines')
+    
+    def go_to_dian_document(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Dian Document', 
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': self._name,
+            'res_id': self.id,
+            'target': 'current'}
+
+    @api.one
+    def _generate_qr_code(self):
+        einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
+        ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
+        ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
+        ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
+        ValFac = self.invoice_id.amount_untaxed
+        ValOtroIm = ValImp2 - ValImp3
+        ValTolFac = ValFac + ValImp1 + ValImp2 + ValImp3
+        create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
+        create_date = create_date.replace(tzinfo=timezone('UTC'))
+        nit_fac = self.company_id.partner_id.identification_document
+        nit_adq = self.invoice_id.partner_id.identification_document
+        cufe = self.cufe_cude
+        number = self.invoice_id.number
+
+        qr_data = "NumFac: " + number if number else 'NO_VALIDADA'
+        qr_data += "\nFecFac: " + self.invoice_id.date_invoice if self.invoice_id.date_invoice else ''
+        qr_data += "\nHorFac: " + create_date.astimezone(timezone(
+            'America/Bogota')).strftime('%H:%M:%S-05:00')
+        qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
+        qr_data += "\nNitAdq: " + nit_adq if nit_adq else ''
+        qr_data += "\nValFac: " + '{:.2f}'.format(ValFac)
+        qr_data += "\nValIva: " + '{:.2f}'.format(ValImp1)
+        qr_data += "\nValOtroIm: " + '{:.2f}'.format(ValOtroIm)
+        qr_data += "\nValTolFac: " + '{:.2f}'.format(ValTolFac)
+        qr_data += "\nCUFE: " + cufe if cufe else ''
+        qr_data += "\n\n" + self.invoice_url if self.invoice_url else ''
+
+        self.qr_image = global_functions.get_qr_code(qr_data)
 
     def _set_filenames(self):
         msg1 = _("The document type of '%s' is not NIT")
@@ -116,15 +154,11 @@ class AccountInvoiceDianDocument(models.Model):
         #El Código “ppp” es 000 para Software Propio
         ppp = '000'
         #aa: Dos (2) últimos dígitos año calendario
-        #TODO 1.0
-        aa = datetime.now().replace(
-            tzinfo=timezone('America/Bogota')).strftime('%y')
+        aa = date_invoice[2:4]
         #dddddddd: consecutivo del paquete de archivos comprimidos enviados;
         # de ocho (8) dígitos decimales alineados a la derecha y ajustado a la
         # izquierda con ceros; en el rango:
         #   00000001 <= 99999999
-        # Ejemplo de la décima primera factura del Facturador Electrónico con
-        # NIT 800197268 con software propio para el año 2019.
 
         if self.invoice_id.type == 'out_invoice':
             xml_filename_prefix = 'fv'
@@ -136,20 +170,22 @@ class AccountInvoiceDianDocument(models.Model):
             xml_filename_prefix = 'nd'
             dddddddd = str(out_refund_debit_sent + 1).zfill(8)
 
-        #pendiente
+        #TODO 1.0
         #arnnnnnnnnnnpppaadddddddd.xml
         #adnnnnnnnnnnpppaadddddddd.xml
-        #TODO 1.0
         else:
-            raise ValidationError("ERROR: TODO")
+            raise ValidationError("ERROR: TODO 1.0")
 
         zdddddddd = str(zip_sent + 1).zfill(8)
         nnnnnnnnnnpppaadddddddd = nnnnnnnnnn + ppp + aa + dddddddd
-        znnnnnnnnnnpppaadddddddd = nnnnnnnnnn + ppp + aa + zdddddddd
+        zarnnnnnnnnnnpppaadddddddd = nnnnnnnnnn + ppp + aa + zdddddddd
 
         self.write({
             'xml_filename': xml_filename_prefix + nnnnnnnnnnpppaadddddddd + '.xml',
-            'zipped_filename': 'z' + znnnnnnnnnnpppaadddddddd + '.zip'})
+            'zipped_filename': 'z' + zarnnnnnnnnnnpppaadddddddd + '.zip',
+            'ar_xml_filename': 'ar' + zarnnnnnnnnnnpppaadddddddd + '.xml'})
+
+        return True
 
     def _get_xml_values(self, ClTec):
         msg1 = _("'%s' does not have a valid isic code")
@@ -178,7 +214,7 @@ class AccountInvoiceDianDocument(models.Model):
             QRCodeURL = DIAN['catalogo']
         else:
             QRCodeURL = DIAN['catalogo-hab']
-        
+
         create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         create_date = create_date.replace(tzinfo=timezone('UTC'))
         IssueDate = self.invoice_id.date_invoice
@@ -189,8 +225,8 @@ class AccountInvoiceDianDocument(models.Model):
         ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
         ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
         ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
-        ValOtroIm = self.invoice_id.amount_tax - ValImp1
-        TaxInclusiveAmount = self.invoice_id.amount_total
+        ValOtroIm = ValImp2 - ValImp3
+        TaxInclusiveAmount = ValFac + ValImp1 + ValImp2 + ValImp3
         #El valor a pagar puede verse afectado, por anticipos, y descuentos y
         #cargos a nivel de factura
         PayableAmount = TaxInclusiveAmount
@@ -393,11 +429,10 @@ class AccountInvoiceDianDocument(models.Model):
         if not self.xml_filename or not self.zipped_filename:
             self._set_filenames()
 
-        if not self.xml_file:
-            self.write({'xml_file': b64encode(self._get_xml_file())})
+        self.write({'xml_file': b64encode(self._get_xml_file())})
+        self.write({'zipped_file': b64encode(self._get_zipped_file())})
 
-        if not self.zipped_file:
-            self.write({'zipped_file': b64encode(self._get_zipped_file())})
+        return True
 
     def _get_SendTestSetAsync_values(self):
         xml_soap_values = global_functions.get_xml_soap_values(
@@ -420,205 +455,6 @@ class AccountInvoiceDianDocument(models.Model):
 
         return xml_soap_values
 
-    def action_sent_zipped_file(self):
-        msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s,\nContact with your administrator "
-                "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
-                "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
-        msg2 = _("Unknown Error: %s\nContact with your administrator "
-                "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
-                "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
-        b = "http://schemas.datacontract.org/2004/07/UploadDocumentResponse"
-        wsdl = DIAN['wsdl-hab']
-
-        if self.company_id.profile_execution_id == '1':
-            wsdl = DIAN['wsdl']
-            SendBillAsync_values = self._get_SendBillAsync_values()
-            SendBillAsync_values['To'] = wsdl.replace('?wsdl', '')
-            xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
-                global_functions.get_template_xml(SendBillAsync_values, 'SendBillAsync'),
-                SendBillAsync_values['Id'],
-                self.company_id.certificate_file,
-                self.company_id.certificate_password)
-        else:
-            SendTestSetAsync_values = self._get_SendTestSetAsync_values()
-            SendTestSetAsync_values['To'] = wsdl.replace('?wsdl', '')
-            xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
-                global_functions.get_template_xml(SendTestSetAsync_values, 'SendTestSetAsync'),
-                SendTestSetAsync_values['Id'],
-                self.company_id.certificate_file,
-                self.company_id.certificate_password)
-
-        try:
-            response = post(
-                wsdl,
-                headers={'content-type': 'application/soap+xml;charset=utf-8'},
-                data=etree.tostring(xml_soap_with_signature))
-
-            if response.status_code == 200:
-                root = etree.fromstring(response.text)
-
-                for element in root.iter("{%s}ZipKey" % b):
-                    self.write({'zip_key': element.text, 'state': 'sent'})
-
-                return True
-            elif response.status_code in (500, 503, 507):
-                dian_document_line_obj = self.env['account.invoice.dian.document.line']
-                dian_document_line_obj.create({
-                    'dian_document_id': self.id,
-                    'send_async_status_code': response.status_code,
-                    'send_async_reason': response.reason,
-                    'send_async_response': response.text})
-            else:
-                raise ValidationError(msg1 % (response.status_code, response.reason))
-
-            return False
-        except exceptions.RequestException as e:
-            raise ValidationError(msg2 % (e))
-
-        return False
-
-    def _get_GetStatusZip_values(self):
-        xml_soap_values = global_functions.get_xml_soap_values(
-            self.company_id.certificate_file,
-            self.company_id.certificate_password)
-
-        xml_soap_values['trackId'] = self.zip_key
-
-        return xml_soap_values
-
-    def action_GetStatusZip(self):
-        b = "http://schemas.datacontract.org/2004/07/DianResponse"
-        c = "http://schemas.microsoft.com/2003/10/Serialization/Arrays"
-        s = "http://www.w3.org/2003/05/soap-envelope"
-        wsdl = DIAN['wsdl-hab']
-        strings = ''
-        status_code = 'other'
-
-        if self.company_id.profile_execution_id == '1':
-            wsdl = DIAN['wsdl']
-
-        GetStatusZip_values = self._get_GetStatusZip_values()
-        GetStatusZip_values['To'] = wsdl.replace('?wsdl', '')
-        xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
-            global_functions.get_template_xml(GetStatusZip_values, 'GetStatusZip'),
-            GetStatusZip_values['Id'],
-            self.company_id.certificate_file,
-            self.company_id.certificate_password)
-
-        response = post(
-            wsdl,
-            headers={'content-type': 'application/soap+xml;charset=utf-8'},
-            data=etree.tostring(xml_soap_with_signature))
-
-        if response.status_code == 200:
-            root = etree.fromstring(response.content)
-            date_invoice = self.invoice_id.date_invoice
-
-            if not date_invoice:
-                date_invoice = fields.Date.today()
-
-            param = [('date_start', '<=', date_invoice), ('date_end', '>=', date_invoice)]
-            daterange = self.env['date.range'].search(param)
-
-            for element in root.iter("{%s}StatusCode" % b):
-                if element.text in ('0', '00', '66', '90', '99'):
-                    if element.text == '00':
-                        self.write({'state': 'done'})
-
-                        if self.invoice_id.type == "out_invoice":
-                            daterange.out_invoice_sent += 1
-                        elif (self.invoice_id.type == "out_refund"
-                                and self.invoice_id.refund_type == "credit"):
-                            daterange.out_refund_credit_sent += 1
-                        elif (self.invoice_id.type == "out_refund"
-                                and self.invoice_id.refund_type == "debit"):
-                            daterange.out_refund_debit_sent += 1
-
-                    status_code = element.text
-
-            if status_code == '0':
-                self.action_GetStatusZip()
-
-                return True
-
-            if status_code == '00':
-                for element in root.iter("{%s}StatusMessage" % b):
-                    strings = element.text
-                
-                for element in root.iter("{%s}XmlBase64Bytes" % b):
-                    ar_xml_filename = 'ar' + self.xml_filename[2:]
-                    self.write({
-                        'ar_xml_filename': ar_xml_filename,
-                        'ar_xml_file': element.text})
-
-                if not self.mail_sent:
-                    self.action_send_mail()
-            else:
-                self.send_failure_email()
-
-            for element in root.iter("{%s}string" % c):
-                if strings == '':
-                    strings = '- ' + element.text
-                else:
-                    strings += '\n\n- ' + element.text
-
-            if strings == '':
-                for element in root.iter("{%s}Body" % s):
-                    strings = etree.tostring(element, pretty_print=True)
-
-                if strings == '':
-                    strings = etree.tostring(root, pretty_print=True)
-
-            self.write({
-                'get_status_zip_status_code': status_code,
-                'get_status_zip_response': strings})
-        else:
-            raise ValidationError(response.status_code)
-
-    def action_reprocess(self):
-        self.write({'xml_file': b64encode(self._get_xml_file())})
-        self.write({'zipped_file': b64encode(self._get_zipped_file())})
-
-        if self.action_sent_zipped_file():
-            self.action_GetStatusZip()
-
-    def go_to_dian_document(self):
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Dian Document', 
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': self._name,
-            'res_id': self.id,
-            'target': 'current'}
-
-    @api.one
-    def _generate_qr_code(self):
-        einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
-        ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
-        ValFac = self.invoice_id.amount_untaxed
-        create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
-        create_date = create_date.replace(tzinfo=timezone('UTC'))
-        nit_fac = self.company_id.partner_id.identification_document
-        nit_adq = self.invoice_id.partner_id.identification_document
-        cufe = self.cufe_cude
-        number = self.invoice_id.number
-
-        qr_data = "NumFac: " + number if number else 'NO_VALIDADA'
-        qr_data += "\nFecFac: " + self.invoice_id.date_invoice if self.invoice_id.date_invoice else ''
-        qr_data += "\nHorFac: " + create_date.astimezone(timezone(
-            'America/Bogota')).strftime('%H:%M:%S-05:00')
-        qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
-        qr_data += "\nNitAdq: " + nit_adq if nit_adq else ''
-        qr_data += "\nValFac: " + '{:.2f}'.format(ValFac)
-        qr_data += "\nValIva: " + '{:.2f}'.format(ValImp1)
-        qr_data += "\nValOtroIm: " + '{:.2f}'.format(self.invoice_id.amount_tax - ValImp1)
-        qr_data += "\nValTolFac: " + '{:.2f}'.format(self.invoice_id.amount_total)
-        qr_data += "\nCUFE: " + cufe if cufe else ''
-        qr_data += "\n\n" + self.invoice_url if self.invoice_url else ''
-
-        self.qr_image = global_functions.get_qr_code(qr_data)
-
     def _get_pdf_file(self):
         template = self.env['ir.actions.report.xml'].browse(self.company_id.report_template.id)
         pdf = self.env['report'].sudo().get_pdf([self.invoice_id.id], template.report_name)
@@ -632,25 +468,30 @@ class AccountInvoiceDianDocument(models.Model):
         if not self.invoice_id.number:
             raise UserError(msg)
 
-        if not self.invoice_id.partner_id.einvoicing_email and self.invoice_id.partner_id.email:
-            return True
-
         xml_attachment = self.env['ir.attachment'].create({
             'name': self.xml_filename,
             'datas_fname': self.xml_filename,
             'datas': self.xml_file})
+        ar_xml_attachment = self.env['ir.attachment'].create({
+            'name': self.ar_xml_filename,
+            'datas_fname': self.ar_xml_filename,
+            'datas': self.ar_xml_file})
         pdf_attachment = self.env['ir.attachment'].create({
             'name': self.invoice_id.number + '.pdf',
             'datas_fname': self.invoice_id.number + '.pdf',
             'datas': self._get_pdf_file()})
         template_id= self.env.ref('l10n_co_account_e_invoicing.email_template_for_einvoice').id
         template = self.env['mail.template'].browse(template_id)
-        template.attachment_ids = [(6,0,[(xml_attachment.id),(pdf_attachment.id)])]
+        template.attachment_ids = [(6, 0, [
+            (xml_attachment.id),
+            (pdf_attachment.id),
+            (ar_xml_attachment.id)])]
         template.send_mail(self.invoice_id.id, force_send=True)
         self.write({'mail_sent': True})
         #removing attachments
         xml_attachment.unlink()
         pdf_attachment.unlink()
+        ar_xml_attachment.unlink()
 
         return True
 
@@ -684,3 +525,253 @@ class AccountInvoiceDianDocument(models.Model):
             'body_html': msg_body}
         msg_id = mail_obj.create(msg_vals)
         msg_id.send()
+
+        return True
+
+    def _get_status_response(self, response):
+        b = "http://schemas.datacontract.org/2004/07/DianResponse"
+        c = "http://schemas.microsoft.com/2003/10/Serialization/Arrays"
+        s = "http://www.w3.org/2003/05/soap-envelope"
+        strings = ''
+        status_code = 'other'
+        root = etree.fromstring(response.content)
+        date_invoice = self.invoice_id.date_invoice
+
+        if not date_invoice:
+            date_invoice = fields.Date.today()
+
+        param = [('date_start', '<=', date_invoice), ('date_end', '>=', date_invoice)]
+        daterange = self.env['date.range'].search(param)
+
+        for element in root.iter("{%s}StatusCode" % b):
+            if element.text in ('0', '00', '66', '90', '99'):
+                if element.text == '00':
+                    self.write({'state': 'done'})
+
+                    if self.invoice_id.type == "out_invoice":
+                        daterange.out_invoice_sent += 1
+                    elif (self.invoice_id.type == "out_refund"
+                            and self.invoice_id.refund_type == "credit"):
+                        daterange.out_refund_credit_sent += 1
+                    elif (self.invoice_id.type == "out_refund"
+                            and self.invoice_id.refund_type == "debit"):
+                        daterange.out_refund_debit_sent += 1
+
+                status_code = element.text
+
+        if status_code == '0':
+            self.action_GetStatusZip()
+
+            return True
+
+        if status_code == '00':
+            for element in root.iter("{%s}StatusMessage" % b):
+                strings = element.text
+                
+            for element in root.iter("{%s}XmlBase64Bytes" % b):
+                self.write({'ar_xml_file': element.text})
+
+            if not self.mail_sent:
+                self.action_send_mail()
+        else:
+            self.send_failure_email()
+
+        for element in root.iter("{%s}string" % c):
+            if strings == '':
+                strings = '- ' + element.text
+            else:
+                strings += '\n\n- ' + element.text
+
+        if strings == '':
+            for element in root.iter("{%s}Body" % s):
+                strings = etree.tostring(element, pretty_print=True)
+
+            if strings == '':
+                strings = etree.tostring(root, pretty_print=True)
+
+        self.write({
+            'get_status_zip_status_code': status_code,
+            'get_status_zip_response': strings})
+
+        return True
+
+    def _get_GetStatusZip_values(self):
+        xml_soap_values = global_functions.get_xml_soap_values(
+            self.company_id.certificate_file,
+            self.company_id.certificate_password)
+
+        xml_soap_values['trackId'] = self.zip_key
+
+        return xml_soap_values
+
+    def action_GetStatusZip(self):
+        wsdl = DIAN['wsdl-hab']
+
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+
+        GetStatusZip_values = self._get_GetStatusZip_values()
+        GetStatusZip_values['To'] = wsdl.replace('?wsdl', '')
+        xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
+            global_functions.get_template_xml(GetStatusZip_values, 'GetStatusZip'),
+            GetStatusZip_values['Id'],
+            self.company_id.certificate_file,
+            self.company_id.certificate_password)
+
+        response = post(
+            wsdl,
+            headers={'content-type': 'application/soap+xml;charset=utf-8'},
+            data=etree.tostring(xml_soap_with_signature))
+
+        if response.status_code == 200:
+            self._get_status_response(response)
+        else:
+            raise ValidationError(response.status_code)
+
+        return True
+
+    def action_sent_zipped_file(self):
+        msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s,\nContact with your administrator "
+                "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
+                "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
+        msg2 = _("Unknown Error: %s\nContact with your administrator "
+                "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
+                "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
+        b = "http://schemas.datacontract.org/2004/07/UploadDocumentResponse"
+        wsdl = DIAN['wsdl-hab']
+
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+            SendBillAsync_values = self._get_SendBillAsync_values()
+            SendBillAsync_values['To'] = wsdl.replace('?wsdl', '')
+            xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
+                global_functions.get_template_xml(SendBillAsync_values, 'SendBillSync'),
+                SendBillAsync_values['Id'],
+                self.company_id.certificate_file,
+                self.company_id.certificate_password)
+        else:
+            SendTestSetAsync_values = self._get_SendTestSetAsync_values()
+            SendTestSetAsync_values['To'] = wsdl.replace('?wsdl', '')
+            xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
+                global_functions.get_template_xml(SendTestSetAsync_values, 'SendTestSetAsync'),
+                SendTestSetAsync_values['Id'],
+                self.company_id.certificate_file,
+                self.company_id.certificate_password)
+
+        try:
+            response = post(
+                wsdl,
+                headers={'content-type': 'application/soap+xml;charset=utf-8'},
+                data=etree.tostring(xml_soap_with_signature))
+
+            if response.status_code == 200:
+                if self.company_id.profile_execution_id == '1':
+                    self._get_status_response(response)
+                else:
+                    root = etree.fromstring(response.text)
+
+                    for element in root.iter("{%s}ZipKey" % b):
+                        self.write({'zip_key': element.text, 'state': 'sent'})
+                        self.action_GetStatusZip()
+            elif response.status_code in (500, 503, 507):
+                dian_document_line_obj = self.env['account.invoice.dian.document.line']
+                dian_document_line_obj.create({
+                    'dian_document_id': self.id,
+                    'send_async_status_code': response.status_code,
+                    'send_async_reason': response.reason,
+                    'send_async_response': response.text})
+            else:
+                raise ValidationError(msg1 % (response.status_code, response.reason))
+        except exceptions.RequestException as e:
+            raise ValidationError(msg2 % (e))
+
+        return True
+
+    def _get_GetStatus_values(self):
+        xml_soap_values = global_functions.get_xml_soap_values(
+            self.company_id.certificate_file,
+            self.company_id.certificate_password)
+
+        xml_soap_values['trackId'] = self.cufe_cude
+
+        return xml_soap_values
+
+    def action_GetStatus(self):
+        wsdl = DIAN['wsdl-hab']
+
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+
+        GetStatus_values = self._get_GetStatus_values()
+        GetStatus_values['To'] = wsdl.replace('?wsdl', '')
+        xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
+            global_functions.get_template_xml(GetStatus_values, 'GetStatus'),
+            GetStatus_values['Id'],
+            self.company_id.certificate_file,
+            self.company_id.certificate_password)
+
+        response = post(
+            wsdl,
+            headers={'content-type': 'application/soap+xml;charset=utf-8'},
+            data=etree.tostring(xml_soap_with_signature))
+
+        if response.status_code == 200:
+            self._get_status_response(response)
+        else:
+            raise ValidationError(response.status_code)
+
+        return True
+
+    def action_reprocess(self):
+        self.write({'xml_file': b64encode(self._get_xml_file())})
+        self.write({'zipped_file': b64encode(self._get_zipped_file())})
+        self.action_sent_zipped_file()
+
+        return True
+
+    def _get_SendBillAttachmentAsync_values(self):
+        xml_soap_values = global_functions.get_xml_soap_values(
+            self.company_id.certificate_file,
+            self.company_id.certificate_password)
+        output = StringIO()
+        zipfile = ZipFile(output, mode='w')
+        zipfile_content = StringIO()
+        zipfile_content.write(b64decode(self.xml_file))
+        zipfile.writestr(self.xml_filename, zipfile_content.getvalue())
+        zipfile_content = StringIO()
+        zipfile_content.write(b64decode(self.ar_xml_file))
+        zipfile.writestr(self.ar_xml_filename, zipfile_content.getvalue())
+        zipfile.close()
+        xml_soap_values['fileName'] = self.zipped_filename.replace('.zip', '')
+        xml_soap_values['contentFile'] = b64encode(output.getvalue())
+
+        return xml_soap_values
+
+    def action_SendBillAttachmentAsync(self):
+        b = "http://schemas.datacontract.org/2004/07/UploadDocumentResponse"
+        wsdl = DIAN['wsdl-hab']
+
+        if self.company_id.profile_execution_id == '1':
+            wsdl = DIAN['wsdl']
+
+        SendBillAttachmentAsync_values = self._get_SendBillAttachmentAsync_values()
+        SendBillAttachmentAsync_values['To'] = wsdl.replace('?wsdl', '')
+        xml_soap_with_signature = global_functions.get_xml_soap_with_signature(
+            global_functions.get_template_xml(
+                SendBillAttachmentAsync_values,
+                'SendBillAttachmentAsync'),
+            SendBillAttachmentAsync_values['Id'],
+            self.company_id.certificate_file,
+            self.company_id.certificate_password)
+
+        response = post(
+            wsdl,
+            headers={'content-type': 'application/soap+xml;charset=utf-8'},
+            data=etree.tostring(xml_soap_with_signature))
+            
+        if response.status_code == 200:
+            root = etree.fromstring(response.text)
+
+            #raise Warning(response.text)
+
+        return True

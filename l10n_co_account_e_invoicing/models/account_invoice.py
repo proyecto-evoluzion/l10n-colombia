@@ -43,8 +43,7 @@ class AccountInvoice(models.Model):
 				dian_document.action_set_files()
 
 				if self.send_invoice_to_dian == '0' and self.invoice_type_code in ('01', '02'):
-					if dian_document.action_sent_zipped_file():
-						dian_document.action_GetStatusZip()
+					dian_document.action_sent_zipped_file()
 
 		return res
 
@@ -123,10 +122,10 @@ class AccountInvoice(models.Model):
 	def _get_einvoicing_taxes(self):
 		msg1 = _("Your tax: '%s', has no e-invoicing tax group type, " +
 				 "contact with your administrator.")
-		msg2 = _("Your withholding tax: '%s', has positive amount, the taxes " +
-		         "must have negative amount, contact with your administrator.")
-		msg3 = _("Your tax: '%s', has negative amount, the taxes must have " + 
-		         "positive amount, with your administrator.")
+		msg2 = _("Your withholding tax: '%s', has amount equal to zero (0), the withholding taxes " +
+		         "must have amount different to zero (0), contact with your administrator.")
+		msg3 = _("Your tax: '%s', has negative amount or an amount equal to zero (0), the taxes " + 
+		         "must have an amount greater than zero (0), contact with your administrator.")
 		taxes = {}
 		withholding_taxes= {}
 
@@ -142,7 +141,7 @@ class AccountInvoice(models.Model):
 
 				if tax_type == 'withholding_tax' and tax.tax_id.amount == 0:
 					raise UserError(msg2 % tax.name)
-				elif tax_type == 'tax' and tax.tax_id.amount < 0:
+				elif tax_type == 'tax' and tax.tax_id.amount <= 0:
 					raise UserError(msg3 % tax.name)
 				elif tax_type == 'withholding_tax' and tax.tax_id.amount > 0:
 					if tax_code not in withholding_taxes:
@@ -159,6 +158,11 @@ class AccountInvoice(models.Model):
 					withholding_taxes[tax_code]['total'] += tax.amount * (-1)
 					withholding_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
 					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount * (-1)
+				if tax_type == 'withholding_tax' and tax.tax_id.amount < 0:
+					#TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN
+					#Solo las positivas que indicarian una autoretencion, Si la DIAN
+					#pide que se envien las retenciones, seria quitar o comentar este if
+					pass
 				else:
 					if tax_code not in taxes:
 						taxes[tax_code] = {}
@@ -202,15 +206,6 @@ class AccountInvoice(models.Model):
 			taxes['03']['taxes']['0.00']['base'] = 0
 			taxes['03']['taxes']['0.00']['amount'] = 0
 
-		if '06' not in withholding_taxes:
-			withholding_taxes['06'] = {}
-			withholding_taxes['06']['total'] = 0
-			withholding_taxes['06']['name'] = 'ReteRenta'
-			withholding_taxes['06']['taxes'] = {}
-			withholding_taxes['06']['taxes']['0.00'] = {}
-			withholding_taxes['06']['taxes']['0.00']['base'] = 0
-			withholding_taxes['06']['taxes']['0.00']['amount'] = 0
-
 		return {'TaxesTotal': taxes, 'WithholdingTaxesTotal': withholding_taxes}
 
 	def _get_invoice_lines(self):
@@ -221,10 +216,11 @@ class AccountInvoice(models.Model):
 				 "contact with your administrator.")
 		msg4 = _("Your tax: '%s', has no e-invoicing tax group type, " +
 				 "contact with your administrator.")
-		msg5 = _("Your withholding tax: '%s', has amount zero, the withholding " +
-				 "taxes must have negative amount, contact with your administrator.")
-		msg6 = _("Your tax: '%s', has negative amount, the taxes must have " + 
-		         "positive amount, contact with your administrator.")
+		msg5 = _("Your withholding tax: '%s', has amount equal to zero (0), the withholding taxes " +
+		         "must have amount different to zero (0), contact with your administrator.")
+		msg6 = _("Your tax: '%s', has negative amount or an amount equal to zero (0), the taxes " + 
+		         "must have an amount greater than zero (0), contact with your administrator.")
+
 		invoice_lines = {}
 		count = 1
 
@@ -280,7 +276,7 @@ class AccountInvoice(models.Model):
 
 						if tax_type == 'withholding_tax' and tax_id.amount == 0:
 							raise UserError(msg5 % tax_id.name)
-						elif tax_type == 'tax' and tax_id.amount < 0:
+						elif tax_type == 'tax' and tax_id.amount <= 0:
 							raise UserError(msg6 % tax_id.name)
 						if tax_type == 'withholding_tax' and tax_id.amount > 0:
 							invoice_lines[count]['WithholdingTaxesTotal'] = (
@@ -288,6 +284,11 @@ class AccountInvoice(models.Model):
 									tax_id,
 									tax_id.amount,
 									invoice_lines[count]['WithholdingTaxesTotal']))
+						if tax_type == 'withholding_tax' and tax_id.amount < 0:
+							#TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN.
+							#Solo la parte positiva que indicaria una autoretencion, Si la DIAN
+							#pide que se envie la parte negativa, seria quitar o comentar este if
+							pass
 						else:
 							invoice_lines[count]['TaxesTotal'] = (
 								invoice_line._get_invoice_lines_taxes(
@@ -321,16 +322,6 @@ class AccountInvoice(models.Model):
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00'] = {}
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['base'] = invoice_line.price_subtotal
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['amount'] = 0
-
-			if '06' not in invoice_lines[count]['WithholdingTaxesTotal']:
-				invoice_lines[count]['WithholdingTaxesTotal']['06'] = {}
-				invoice_lines[count]['WithholdingTaxesTotal']['06']['total'] = 0
-				invoice_lines[count]['WithholdingTaxesTotal']['06']['name'] = 'ReteRenta'
-				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes'] = {}
-				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00'] = {}
-				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00']['base'] = (
-					invoice_line.price_subtotal)
-				invoice_lines[count]['WithholdingTaxesTotal']['06']['taxes']['0.00']['amount'] = 0
 
 			invoice_lines[count]['ItemDescription'] = invoice_line.name
 			invoice_lines[count]['InformationContentProviderParty'] = (
