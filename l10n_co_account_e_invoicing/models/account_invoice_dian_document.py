@@ -75,7 +75,7 @@ class AccountInvoiceDianDocument(models.Model):
 		comodel_name='account.invoice.dian.document.line',
 		inverse_name='dian_document_id',
 		string='DIAN Document Lines')
-    
+
     def go_to_dian_document(self):
         return {
             'type': 'ir.actions.act_window',
@@ -285,6 +285,7 @@ class AccountInvoiceDianDocument(models.Model):
             'AccountingSupplierParty': supplier._get_accounting_partner_party_values(),
             'AccountingCustomerParty': customer._get_accounting_partner_party_values(),
             'Delivery': customer._get_delivery_values(),
+            'DeliveryTerms': {'LossRiskResponsibilityCode': False, 'LossRisk': False},
             'PaymentMeansID': self.invoice_id.payment_mean_id.code,
             'PaymentMeansCode': self.invoice_id.payment_mean_code_id.code,
             'PaymentDueDate': self.invoice_id.date_due,
@@ -570,7 +571,7 @@ class AccountInvoiceDianDocument(models.Model):
                 status_code = element.text
 
         if status_code == '0':
-            self.action_GetStatusZip()
+            self.action_GetStatus()
 
             return True
 

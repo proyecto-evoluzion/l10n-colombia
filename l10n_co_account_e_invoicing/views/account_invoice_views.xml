@@ -70,12 +70,14 @@
         <p>Le informamos que ha recibido una factura/nota electrónica de ${object.company_id.name}:</p><br><br>
 
         <p>Número de factura: <strong> ${object.number} </strong></p>
-        <p>A nombre de: <strong> ${object.partner_id.name} </strong></p>
+        <p>A Nombre de: <strong> ${object.partner_id.name} </strong></p>
         <p>Valor Total: <strong> ${object.amount_total} ${object.currency_id.name} </strong></p><br><br>
 
         <p>Si tiene inquietud respecto a la información contenida en la factura/nota electrónica, responda este correo electrónico.</p><br>
         
         <p>Si pasados tres (3) días hábiles siguientes a la recepción de la factura/nota electrónica, no se ha recibido un correo indicando rechazo de la factura/nota electrónica, el sistema la dará por aceptada.</p><br>
+
+        <p>Escriba a ${object.company_id.partner_id.einvoicing_email} si desea modificar sus datos para el envío de la factura/nota electrónica.</p><br>
         
         <p>Cordialmente,</p><br>
 

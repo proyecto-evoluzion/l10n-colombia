@@ -3,14 +3,14 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
-    "name": "Colombian E-Invoicing",
-    "category": "Financial",
+    "name": "Colombian Account E-Invoicing",
+    "category": "E-Invoicing",
     "version": "10.0.1.0.0",
     "author": "EXA Auto Parts Github@exaap, "
               "Joan Marín Github@JoanMarin",
     "website": "https://github.com/odooloco/l10n-colombia",
     "license": "AGPL-3",
-    "summary": "Colombian E-Invoicing",
+    "summary": "Colombian Account E-Invoicing",
     "depends": [
         "l10n_co_account_fiscal_position_party_tax_scheme",
         "l10n_co_account_fiscal_position_listname",
@@ -28,6 +28,8 @@
         "partner_coc",
         "partner_other_names",
         "partner_commercial_name",
+        "product_brand",
+        "product_manufacturer",
     ],
     'external_dependencies': {
         'python': [
