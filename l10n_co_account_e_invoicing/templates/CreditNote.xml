@@ -125,7 +125,7 @@
 					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
 					{% if AccountingSupplierParty.AddressCityName %}
 					<cbc:CityName>{{AccountingSupplierParty.AddressCityName}}</cbc:CityName>
-					% endif %}
+					{% endif %}
 					{% if AccountingSupplierParty.AddressPostalZone %}
 					<cbc:PostalZone>{{AccountingSupplierParty.AddressPostalZone}}</cbc:PostalZone>
 					{% endif %}
@@ -158,7 +158,7 @@
 					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
 					{% if AccountingSupplierParty.AddressCityName %}
 					<cbc:CityName>{{AccountingSupplierParty.AddressCityName}}</cbc:CityName>
-					% endif %}
+					{% endif %}
 					{% if AccountingSupplierParty.AddressPostalZone %}
 					<cbc:PostalZone>{{AccountingSupplierParty.AddressPostalZone}}</cbc:PostalZone>
 					{% endif %}
