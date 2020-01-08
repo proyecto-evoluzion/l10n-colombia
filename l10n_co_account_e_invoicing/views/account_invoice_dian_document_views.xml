@@ -49,7 +49,12 @@
                             string="Sent Zipped File"
                             type="object"
                             states="draft,sent"
-                            class="btn-primary"/>
+                            class="btn-primary"
+                            attrs="{'invisible': ['|', '|', '|',
+                                ('xml_filename', '=', False),
+                                ('zipped_filename', '=', False),
+                                ('ar_xml_filename', '=', False),
+                                ('state', 'in', ('done', 'cancel')]}"/>
                         <button name="action_GetStatusZip"
                             string="GetStatusZip"
                             type="object"
@@ -64,9 +69,7 @@
                             string="Reprocess"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': [
-                                '|',
-                                '|',
+                            attrs="{'invisible': ['|', '|',
                                 ('xml_filename', '=', False),
                                 ('zipped_filename', '=', False),
                                 ('ar_xml_filename', '=', False)]}"/>
