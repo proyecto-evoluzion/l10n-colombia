@@ -12,8 +12,9 @@
                             <field name="profile_execution_id"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="test_set_id"
-                                attrs="{'required': [('einvoicing_enabled', '=', True), ('profile_execution_id', '=', '2')],
-                                'invisible': [('profile_execution_id', '=', '')]}"/>
+                                attrs="{
+                                'invisible': [('profile_execution_id', '=', '1')],
+                                'required': [('einvoicing_enabled', '=', True), ('profile_execution_id', '=', '2')]}"/>
                             <field name="software_id"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="software_pin"

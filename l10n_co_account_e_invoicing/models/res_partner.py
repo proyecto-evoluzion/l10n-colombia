@@ -18,9 +18,18 @@ class ResPartner(models.Model):
         default=False)
 	einvoicing_email = fields.Char(string='E-Invoicing Email')
 	view_einvoicing_email_field = fields.Boolean(
-		string="View E-Invoicing Email Fields",
+		string="View 'E-Invoicing Email' Fields",
 		compute='_get_view_einvoicing_email_field',
 		store=False)
+	edit_is_einvoicing_agent_field = fields.Boolean(
+		string="Edit 'Is E-Invoicing Agent?' Field",
+		compute='_get_edit_is_einvoicing_agent_field',
+		store=False)
+
+	@api.onchange('person_type')
+	def onchange_person_type(self):
+		if self.person_type == '1':
+			self.is_einvoicing_agent= 'yes'
 
 	@api.multi
 	def _get_view_einvoicing_email_field(self):
@@ -32,6 +41,17 @@ class ResPartner(models.Model):
 
 		for partner in self:
 			partner.view_einvoicing_email_field = view_einvoicing_email_field
+
+	@api.multi
+	def _get_edit_is_einvoicing_agent_field(self):
+		user = self.env['res.users'].search([('id', '=', self._uid)])
+		edit_is_einvoicing_agent_field = False
+
+		if user.has_group('l10n_co_account_e_invoicing.group_edit_is_einvoicing_agent_field'):
+			edit_is_einvoicing_agent_field = True
+
+		for partner in self:
+			partner.edit_is_einvoicing_agent_field = edit_is_einvoicing_agent_field
 
 	@api.constrains('einvoicing_email')
 	@api.onchange('einvoicing_email')
