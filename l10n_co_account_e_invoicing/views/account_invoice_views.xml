@@ -70,7 +70,7 @@
         <p>Le informamos que ha recibido una factura/nota electrónica de ${object.company_id.name}:</p><br><br>
 
         <p>Número de factura: <strong> ${object.number} </strong></p>
-        <p>A Nombre de: <strong> ${object.partner_id.name} </strong></p>
+        <p>A nombre de: <strong> ${object.partner_id.name} </strong></p>
         <p>Valor Total: <strong> ${object.amount_total} ${object.currency_id.name} </strong></p><br><br>
 
         <p>Si tiene inquietud respecto a la información contenida en la factura/nota electrónica, responda este correo electrónico.</p><br>

@@ -155,6 +155,7 @@
 				pero para consumidor final dice informar 49-->
 				<cbc:TaxLevelCode listName="{{AccountingSupplierParty.listName}}">{{AccountingSupplierParty.TaxLevelCode}}</cbc:TaxLevelCode>
 				<cac:RegistrationAddress>
+					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
 					{% if AccountingSupplierParty.AddressCityName %}
 					<cbc:CityName>{{AccountingSupplierParty.AddressCityName}}</cbc:CityName>
 					% endif %}
