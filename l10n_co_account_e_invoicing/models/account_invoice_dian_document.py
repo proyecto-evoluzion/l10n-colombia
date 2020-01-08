@@ -2,6 +2,9 @@
 # Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import sys  
+reload(sys)  
+sys.setdefaultencoding('utf8')
 from StringIO import StringIO
 from datetime import datetime
 from base64 import b64encode, b64decode
@@ -464,6 +467,8 @@ class AccountInvoiceDianDocument(models.Model):
     @api.multi
     def action_send_mail(self):
         msg = _("Your invoice has not been validated")
+        template_id= self.env.ref('l10n_co_account_e_invoicing.email_template_for_einvoice').id
+        template = self.env['mail.template'].browse(template_id)
 
         if not self.invoice_id.number:
             raise UserError(msg)
@@ -472,26 +477,31 @@ class AccountInvoiceDianDocument(models.Model):
             'name': self.xml_filename,
             'datas_fname': self.xml_filename,
             'datas': self.xml_file})
-        ar_xml_attachment = self.env['ir.attachment'].create({
-            'name': self.ar_xml_filename,
-            'datas_fname': self.ar_xml_filename,
-            'datas': self.ar_xml_file})
         pdf_attachment = self.env['ir.attachment'].create({
             'name': self.invoice_id.number + '.pdf',
             'datas_fname': self.invoice_id.number + '.pdf',
             'datas': self._get_pdf_file()})
-        template_id= self.env.ref('l10n_co_account_e_invoicing.email_template_for_einvoice').id
-        template = self.env['mail.template'].browse(template_id)
-        template.attachment_ids = [(6, 0, [
-            (xml_attachment.id),
-            (pdf_attachment.id),
-            (ar_xml_attachment.id)])]
+
+        if self.invoice_id.invoice_type_code in ('01', '02'):
+            ar_xml_attachment = self.env['ir.attachment'].create({
+                'name': self.ar_xml_filename,
+                'datas_fname': self.ar_xml_filename,
+                'datas': self.ar_xml_file})
+
+            template.attachment_ids = [(6, 0, [
+                (xml_attachment.id),
+                (pdf_attachment.id),
+                (ar_xml_attachment.id)])]
+        else:
+            template.attachment_ids = [(6, 0, [(xml_attachment.id), (pdf_attachment.id)])]
+
         template.send_mail(self.invoice_id.id, force_send=True)
         self.write({'mail_sent': True})
-        #removing attachments
         xml_attachment.unlink()
         pdf_attachment.unlink()
-        ar_xml_attachment.unlink()
+
+        if self.invoice_id.invoice_type_code in ('01', '02'):
+            ar_xml_attachment.unlink()
 
         return True
 

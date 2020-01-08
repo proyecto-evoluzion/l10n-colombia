@@ -42,8 +42,11 @@ class AccountInvoice(models.Model):
 					'company_id': self.company_id.id})
 				dian_document.action_set_files()
 
-				if self.send_invoice_to_dian == '0' and self.invoice_type_code in ('01', '02'):
-					dian_document.action_sent_zipped_file()
+				if self.send_invoice_to_dian == '0':
+					if self.invoice_type_code in ('01', '02'):
+						dian_document.action_sent_zipped_file()
+					elif self.invoice_type_code == '04':
+						dian_document.action_send_mail()
 
 		return res
 
