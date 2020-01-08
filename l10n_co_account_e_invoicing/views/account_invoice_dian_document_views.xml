@@ -54,7 +54,7 @@
                                 ('xml_filename', '=', False),
                                 ('zipped_filename', '=', False),
                                 ('ar_xml_filename', '=', False),
-                                ('state', 'in', ('done', 'cancel')]}"/>
+                                ('state', 'in', ('done', 'cancel'))]}"/>
                         <button name="action_GetStatusZip"
                             string="GetStatusZip"
                             type="object"
