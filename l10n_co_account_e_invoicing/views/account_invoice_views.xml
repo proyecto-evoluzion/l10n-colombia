@@ -76,6 +76,8 @@
         <p>Si tiene inquietud respecto a la información contenida en la factura/nota electrónica, responda este correo electrónico.</p><br>
         
         <p>Si pasados tres (3) días hábiles siguientes a la recepción de la factura/nota electrónica, no se ha recibido un correo indicando rechazo de la factura/nota electrónica, el sistema la dará por aceptada.</p><br>
+
+        <p>Escriba a ${object.company_id.partner_id.einvoicing_email} si desea modificar sus datos para el envío de la factura/nota electrónica.</p><br>
         
         <p>Cordialmente,</p><br>
 

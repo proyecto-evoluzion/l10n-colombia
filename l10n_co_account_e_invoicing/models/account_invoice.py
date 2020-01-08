@@ -56,7 +56,7 @@ class AccountInvoice(models.Model):
 
 		for dian_document in self.dian_document_ids:
 			if dian_document.state == 'done':
-				raise UserError('You cannot cancel a invoice sent to DIAN')
+				raise UserError(_('You cannot cancel a invoice sent to DIAN'))
 			else:
 				dian_document.state == 'cancel'
 
@@ -233,6 +233,8 @@ class AccountInvoice(models.Model):
 
 			disc_amount = 0
 			total_wo_disc = 0
+			brand_name = False
+			model_name = False
 
 			if invoice_line.price_subtotal != 0 and invoice_line.discount != 0:
 				disc_amount = (invoice_line.price_subtotal * invoice_line.discount ) / 100
@@ -251,6 +253,12 @@ class AccountInvoice(models.Model):
 
 			if invoice_line.price_subtotal <= 0 and reference_price <= 0:
 				raise UserError(msg3 % invoice_line.product_id.default_code)
+
+			if self.invoice_type_code == '02':
+				if invoice_line.product_id.product_brand_id:
+					brand_name = invoice_line.product_id.product_brand_id.name
+
+				model_name = invoice_line.product_id.manufacturer_pref
 
 			invoice_lines[count] = {}
 			invoice_lines[count]['unitCode'] = invoice_line.uom_id.product_uom_code_id.code
@@ -326,6 +334,8 @@ class AccountInvoice(models.Model):
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['base'] = invoice_line.price_subtotal
 				invoice_lines[count]['TaxesTotal']['03']['taxes']['0.00']['amount'] = 0
 
+			invoice_lines[count]['BrandName'] = brand_name
+			invoice_lines[count]['ModelName'] = model_name
 			invoice_lines[count]['ItemDescription'] = invoice_line.name
 			invoice_lines[count]['InformationContentProviderParty'] = (
 				invoice_line._get_information_content_provider_party_values())

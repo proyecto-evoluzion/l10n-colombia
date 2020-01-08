@@ -2,9 +2,9 @@
    :target: https://www.gnu.org/licenses/agpl
    :alt: License: AGPL-3
 
-=============================
-Colombian Mandate E-Invoicing
-=============================
+===========================
+Colombian Stock E-Invoicing
+===========================
 
 Credits
 =======
