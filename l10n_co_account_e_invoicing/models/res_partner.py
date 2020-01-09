@@ -28,6 +28,8 @@ class ResPartner(models.Model):
 
 	@api.onchange('person_type')
 	def onchange_person_type(self):
+		super(ResPartner, self).onchange_person_type()
+
 		if self.person_type == '1':
 			self.is_einvoicing_agent= 'yes'
 
