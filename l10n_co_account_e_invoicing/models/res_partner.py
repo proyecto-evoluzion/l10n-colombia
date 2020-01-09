@@ -149,11 +149,11 @@ class ResPartner(models.Model):
 			'AdditionalAccountID': self.person_type,
 			'PartyName': self.commercial_name,
 			'Name': self.name,
-			'AddressID': self.zip_id.code,
-			'AddressCityName': self.zip_id.city,
+			'AddressID': self.zip_id.code or '',
+			'AddressCityName': self.zip_id.city or '',
 			'AddressPostalZone': zip_code,
-			'AddressCountrySubentity': self.state_id.name,
-			'AddressCountrySubentityCode': self.state_id.code,
+			'AddressCountrySubentity': self.state_id.name or '',
+			'AddressCountrySubentityCode': self.state_id.code or '',
 			'AddressLine': self.street or '',
 			'CompanyIDschemeID': self.check_digit,
 			'CompanyIDschemeName': self.document_type_id.code,
@@ -192,11 +192,11 @@ class ResPartner(models.Model):
 				zip_code = self.zip_id.name
 
 		return {
-			'AddressID': self.zip_id.code,
-			'AddressCityName': self.zip_id.city,
+			'AddressID': self.zip_id.code or '',
+			'AddressCityName': self.zip_id.city or '',
 			'AddressPostalZone': zip_code,
-			'AddressCountrySubentity': self.state_id.name,
-			'AddressCountrySubentityCode': self.state_id.code,
+			'AddressCountrySubentity': self.state_id.name or '',
+			'AddressCountrySubentityCode': self.state_id.code or '',
 			'AddressLine': self.street or '',
 			'CountryIdentificationCode': self.country_id.code,
 			'CountryName': self.country_id.name}

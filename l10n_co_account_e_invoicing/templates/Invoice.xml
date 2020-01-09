@@ -150,18 +150,12 @@
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
-					{% if AccountingSupplierParty.AddressCityName %}
 					<cbc:CityName>{{AccountingSupplierParty.AddressCityName}}</cbc:CityName>
-					{% endif %}
 					{% if AccountingSupplierParty.AddressPostalZone %}
 					<cbc:PostalZone>{{AccountingSupplierParty.AddressPostalZone}}</cbc:PostalZone>
 					{% endif %}
-					{% if AccountingSupplierParty.AddressCountrySubentity %}
 					<cbc:CountrySubentity>{{AccountingSupplierParty.AddressCountrySubentity}}</cbc:CountrySubentity>
-					{% endif %}
-					{% if AccountingSupplierParty.AddressCountrySubentityCode %}
 					<cbc:CountrySubentityCode>{{AccountingSupplierParty.AddressCountrySubentityCode}}</cbc:CountrySubentityCode>
-					{% endif %}
 					<cac:AddressLine>
 						<cbc:Line>{{AccountingSupplierParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
@@ -183,18 +177,12 @@
 				<cbc:TaxLevelCode listName="{{AccountingSupplierParty.listName}}">{{AccountingSupplierParty.TaxLevelCode}}</cbc:TaxLevelCode>
 				<cac:RegistrationAddress>
 					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
-					{% if AccountingSupplierParty.AddressCityName %}
 					<cbc:CityName>{{AccountingSupplierParty.AddressCityName}}</cbc:CityName>
-					{% endif %}
 					{% if AccountingSupplierParty.AddressPostalZone %}
 					<cbc:PostalZone>{{AccountingSupplierParty.AddressPostalZone}}</cbc:PostalZone>
 					{% endif %}
-					{% if AccountingSupplierParty.AddressCountrySubentity %}
 					<cbc:CountrySubentity>{{AccountingSupplierParty.AddressCountrySubentity}}</cbc:CountrySubentity>
-					{% endif %}
-					{% if AccountingSupplierParty.AddressCountrySubentityCode %}
 					<cbc:CountrySubentityCode>{{AccountingSupplierParty.AddressCountrySubentityCode}}</cbc:CountrySubentityCode>
-					{% endif %}
 					<cac:AddressLine>
 						<cbc:Line>{{AccountingSupplierParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
@@ -281,18 +269,12 @@
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
-					{% if AccountingCustomerParty.AddressCityName %}
 					<cbc:CityName>{{AccountingCustomerParty.AddressCityName}}</cbc:CityName>
-					{% endif %}
 					{% if AccountingCustomerParty.AddressPostalZone %}
 					<cbc:PostalZone>{{AccountingCustomerParty.AddressPostalZone}}</cbc:PostalZone>
 					{% endif %}
-					{% if AccountingCustomerParty.AddressCountrySubentity %}
 					<cbc:CountrySubentity>{{AccountingCustomerParty.AddressCountrySubentity}}</cbc:CountrySubentity>
-					{% endif %}
-					{% if AccountingCustomerParty.AddressCountrySubentityCode %}
 					<cbc:CountrySubentityCode>{{AccountingCustomerParty.AddressCountrySubentityCode}}</cbc:CountrySubentityCode>
-					{% endif %}
 					<cac:AddressLine>
 						<cbc:Line>{{AccountingCustomerParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
@@ -314,18 +296,12 @@
 				<cbc:TaxLevelCode listName="{{AccountingCustomerParty.listName}}">{{AccountingCustomerParty.TaxLevelCode}}</cbc:TaxLevelCode>
 				<cac:RegistrationAddress>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
-					{% if AccountingCustomerParty.AddressCityName %}
 					<cbc:CityName>{{AccountingCustomerParty.AddressCityName}}</cbc:CityName>
-					{% endif %}
 					{% if AccountingCustomerParty.AddressPostalZone %}
 					<cbc:PostalZone>{{AccountingCustomerParty.AddressPostalZone}}</cbc:PostalZone>
 					{% endif %}
-					{% if AccountingCustomerParty.AddressCountrySubentity %}
 					<cbc:CountrySubentity>{{AccountingCustomerParty.AddressCountrySubentity}}</cbc:CountrySubentity>
-					{% endif %}
-					{% if AccountingCustomerParty.AddressCountrySubentityCode %}
 					<cbc:CountrySubentityCode>{{AccountingCustomerParty.AddressCountrySubentityCode}}</cbc:CountrySubentityCode>
-					{% endif %}
 					<cac:AddressLine>
 						<cbc:Line>{{AccountingCustomerParty.AddressLine}}</cbc:Line>
 					</cac:AddressLine>
@@ -409,18 +385,12 @@
 		<!--cbc:ActualDeliveryTime></cbc:ActualDeliveryTime-->
 		<cac:DeliveryAddress>
 			<cbc:ID>{{Delivery.AddressID}}</cbc:ID>
-			{% if Delivery.AddressCityName %}
 			<cbc:CityName>{{Delivery.AddressCityName}}</cbc:CityName>
-			{% endif %}
 			{% if Delivery.AddressPostalZone %}
 			<cbc:PostalZone>{{Delivery.AddressPostalZone}}</cbc:PostalZone>
 			{% endif %}
-			{% if Delivery.AddressCountrySubentity %}
 			<cbc:CountrySubentity>{{Delivery.AddressCountrySubentity}}</cbc:CountrySubentity>
-			{% endif %}
-			{% if Delivery.AddressCountrySubentityCode %}
 			<cbc:CountrySubentityCode>{{Delivery.AddressCountrySubentityCode}}</cbc:CountrySubentityCode>
-			{% endif %}
 			<cac:AddressLine>
 				<cbc:Line>{{Delivery.AddressLine}}</cbc:Line>
 			</cac:AddressLine>
