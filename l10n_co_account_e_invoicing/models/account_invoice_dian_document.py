@@ -559,14 +559,15 @@ class AccountInvoiceDianDocument(models.Model):
                 if element.text == '00':
                     self.write({'state': 'done'})
 
-                    if self.invoice_id.type == "out_invoice":
-                        daterange.out_invoice_sent += 1
-                    elif (self.invoice_id.type == "out_refund"
-                            and self.invoice_id.refund_type == "credit"):
-                        daterange.out_refund_credit_sent += 1
-                    elif (self.invoice_id.type == "out_refund"
-                            and self.invoice_id.refund_type == "debit"):
-                        daterange.out_refund_debit_sent += 1
+                    if self.get_status_zip_status_code != '00':
+                        if self.invoice_id.type == "out_invoice":
+                            daterange.out_invoice_sent += 1
+                        elif (self.invoice_id.type == "out_refund"
+                                and self.invoice_id.refund_type == "credit"):
+                            daterange.out_refund_credit_sent += 1
+                        elif (self.invoice_id.type == "out_refund"
+                                and self.invoice_id.refund_type == "debit"):
+                            daterange.out_refund_debit_sent += 1
 
                 status_code = element.text
 
