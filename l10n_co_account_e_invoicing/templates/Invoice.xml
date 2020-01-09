@@ -142,7 +142,7 @@
 		<cbc:AdditionalAccountID>{{AccountingSupplierParty.AdditionalAccountID}}</cbc:AdditionalAccountID>
 		<cac:Party>
 			<cbc:IndustryClassificationCode>{{IndustryClassificationCode}}</cbc:IndustryClassificationCode>
-			{% if AccountingSupplierParty.PartyName%}
+			{% if AccountingSupplierParty.PartyName %}
     		<cac:PartyName>
 				<cbc:Name>{{AccountingSupplierParty.PartyName}}</cbc:Name>
 			</cac:PartyName>
@@ -152,7 +152,7 @@
 					<cbc:ID>{{AccountingSupplierParty.AddressID}}</cbc:ID>
 					{% if AccountingSupplierParty.AddressCityName %}
 					<cbc:CityName>{{AccountingSupplierParty.AddressCityName}}</cbc:CityName>
-					% endif %}
+					{% endif %}
 					{% if AccountingSupplierParty.AddressPostalZone %}
 					<cbc:PostalZone>{{AccountingSupplierParty.AddressPostalZone}}</cbc:PostalZone>
 					{% endif %}
