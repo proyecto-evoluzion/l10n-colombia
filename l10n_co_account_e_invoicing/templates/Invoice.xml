@@ -320,7 +320,6 @@
 					<cbc:Name>{{AccountingCustomerParty.TaxSchemeName}}</cbc:Name>
 				</cac:TaxScheme>
 			</cac:PartyTaxScheme>
-			{% if AccountingCustomerParty.CompanyID != '2222222222' %}
 			<cac:PartyLegalEntity>
 				<cbc:RegistrationName>{{AccountingCustomerParty.Name}}</cbc:RegistrationName>
 				<cbc:CompanyID schemeAgencyID="195"
@@ -333,7 +332,6 @@
 				</cac:CorporateRegistrationScheme>
 				{% endif %}
 			</cac:PartyLegalEntity>
-			{% endif %}
 			{% if AccountingCustomerParty.CompanyID != '2222222222' and (AccountingCustomerParty.Telephone or AccountingCustomerParty.Telefax or AccountingCustomerParty.ElectronicMail) %}
 			<cac:Contact>
 			<!--TODO 2.0: opcional, de momento se manda  info de la empresa sin nombre de contacto>
