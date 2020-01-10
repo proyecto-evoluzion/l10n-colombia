@@ -49,21 +49,24 @@
                             string="Sent Zipped File"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': ['|', '|', '|',
-                                ('xml_filename', '=', False),
-                                ('zipped_filename', '=', False),
-                                ('ar_xml_filename', '=', False),
+                            attrs="{'invisible': ['|', '|',
+                                ('xml_file', '=', False),
+                                ('zipped_file', '=', False),
                                 ('state', 'in', ('done', 'cancel'))]}"/>
                         <button name="action_GetStatusZip"
                             string="GetStatusZip"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': [('profile_execution_id', '=', '1')]}"/>
+                            attrs="{'invisible': [('zip_key', '=', False)]}"/>
                         <button name="action_GetStatus"
                             string="GetStatus"
                             type="object"
-                            states="sent,done"
-                            class="btn-primary"/>
+                            class="btn-primary"
+                            attrs="{'invisible': ['|', '|', '|',
+                                ('cufe_cude', '=', False),
+                                ('xml_file', '=', False),
+                                ('zipped_file', '=', False),
+                                ('state', 'in', ('draft', 'cancel'))]}"/>
                         <button name="action_reprocess"
                             string="Reprocess"
                             type="object"
@@ -73,7 +76,7 @@
                             string="Send Mail"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': [('mail_sent', '=', True)]}"/>
+                            attrs="{'invisible': ['|', ('ar_xml_file', '=', False), ('mail_sent', '=', True)]}"/>
                     </header>
                     <sheet>
                         <group>
@@ -106,10 +109,15 @@
                                 <field name="cufe_cude" readonly="1"/>
                                 <field name="software_security_code_uncoded" readonly="1"/>
                                 <field name="software_security_code" readonly="1"/>
-                                <field name="zip_key" readonly="1"/>
+                                <field name="zip_key"
+                                    readonly="1"
+                                    attrs="{'invisible': [('profile_execution_id', '=', '1')]}"/>
                             </group>
                             <group string="QR Image">
-                                <field name="qr_image" widget="image" style="width: 200px; height: 200px;" nolabel="1"/>
+                                <field name="qr_image"
+                                    widget="image"
+                                    style="width: 200px; height: 200px;"
+                                    nolabel="1"/>
                             </group>
                         </group>
                         <group string="GetStatusZip">
