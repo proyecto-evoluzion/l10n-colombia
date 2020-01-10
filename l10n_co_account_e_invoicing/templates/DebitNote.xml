@@ -232,7 +232,8 @@
     		<cac:PartyName>
 				<cbc:Name>{{AccountingCustomerParty.PartyName}}</cbc:Name>
 			</cac:PartyName>
-    		{% endif %}
+			{% endif %}
+			{% if AccountingCustomerParty.CompanyID != '2222222222' %}
 			<cac:PhysicalLocation>
 				<cac:Address>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
@@ -252,6 +253,7 @@
 					</cac:Country>
 				</cac:Address>
 			</cac:PhysicalLocation>
+			{% endif %}
 			<cac:PartyTaxScheme>
 				<cbc:RegistrationName>{{AccountingCustomerParty.Name}}</cbc:RegistrationName>
 
@@ -262,6 +264,7 @@
 			<!--TODO 2.0: listName el anexo dice que eliminar o valor No aplica,
 				pero para consumidor final dice informar 49-->
 				<cbc:TaxLevelCode listName="{{AccountingCustomerParty.listName}}">{{AccountingCustomerParty.TaxLevelCode}}</cbc:TaxLevelCode>
+				{% if AccountingCustomerParty.CompanyID != '2222222222' %}
 				<cac:RegistrationAddress>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
 					<cbc:CityName>{{AccountingCustomerParty.AddressCityName}}</cbc:CityName>
@@ -279,11 +282,13 @@
                         <cbc:Name languageID="es">{{AccountingCustomerParty.CountryName}}</cbc:Name>
 					</cac:Country>
 				</cac:RegistrationAddress>
+				{% endif %}
 				<cac:TaxScheme>
 					<cbc:ID>{{AccountingCustomerParty.TaxSchemeID}}</cbc:ID>
 					<cbc:Name>{{AccountingCustomerParty.TaxSchemeName}}</cbc:Name>
 				</cac:TaxScheme>
 			</cac:PartyTaxScheme>
+			{% if AccountingCustomerParty.CompanyID != '2222222222' %}
 			<cac:PartyLegalEntity>
 				<cbc:RegistrationName>{{AccountingCustomerParty.Name}}</cbc:RegistrationName>
 				<cbc:CompanyID schemeAgencyID="195"
@@ -296,7 +301,8 @@
 				</cac:CorporateRegistrationScheme>
 				{% endif %}
 			</cac:PartyLegalEntity>
-			{% if AccountingCustomerParty.Telephone or AccountingCustomerParty.Telefax or AccountingCustomerParty.ElectronicMail %}
+			{% endif %}
+			{% if AccountingCustomerParty.CompanyID != '2222222222' and (AccountingCustomerParty.Telephone or AccountingCustomerParty.Telefax or AccountingCustomerParty.ElectronicMail) %}
 			<cac:Contact>
 			<!--TODO 3.0: opcional, de momento se manda  info de la empresa sin nombre de contacto>
 				<cbc:Name>Diana Cruz</cbc:Name-->
@@ -319,7 +325,9 @@
 				<cbc:ID></cbc:ID-->
 				<cbc:FirstName>{{AccountingCustomerParty.FirstName}}</cbc:FirstName>
                 <cbc:FamilyName>{{AccountingCustomerParty.FamilyName}}</cbc:FamilyName>
+				{% if AccountingCustomerParty.MiddleName %}
 				<cbc:MiddleName>{{AccountingCustomerParty.MiddleName}}</cbc:MiddleName>
+				{% endif %}
 			<!--TODO 3.0: solo informar informacion de la residencia>
                 <cac:ResidenceAddress>
 					<cbc:ID>{{AccountingCustomerParty.AddressID}}</cbc:ID>
@@ -361,6 +369,7 @@
 		<!--cbc:ActualDeliveryDate></cbc:ActualDeliveryDate-->
 	<!--TODO 2.0 Hora efectiva de salida de los bienes-->
 		<!--cbc:ActualDeliveryTime></cbc:ActualDeliveryTime-->
+		{% if AccountingCustomerParty.CompanyID != '2222222222' %}
 		<cac:DeliveryAddress>
 			<cbc:ID>{{Delivery.AddressID}}</cbc:ID>
 			<cbc:CityName>{{Delivery.AddressCityName}}</cbc:CityName>
@@ -378,6 +387,7 @@
 				<cbc:Name languageID="es">{{Delivery.CountryName}}</cbc:Name>
 			</cac:Country>
 		</cac:DeliveryAddress>
+		{% endif %}
 	<!--TODO 3.0, Grupo de datos con información sobre la empresa de transporte
 		Desarrollo futuro>
 		<cac:DeliveryParty>

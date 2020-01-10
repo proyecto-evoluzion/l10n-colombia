@@ -94,26 +94,25 @@ class AccountInvoiceDianDocument(models.Model):
         ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
         ValFac = self.invoice_id.amount_untaxed
         ValOtroIm = ValImp2 - ValImp3
-        ValTolFac = ValFac + ValImp1 + ValImp2 + ValImp3
+        ValTolFac = ValFac + ValImp1 + ValOtroIm
         create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
         create_date = create_date.replace(tzinfo=timezone('UTC'))
-        nit_fac = self.company_id.partner_id.identification_document
-        nit_adq = self.invoice_id.partner_id.identification_document
-        cufe = self.cufe_cude
-        number = self.invoice_id.number
+        create_date = create_date.astimezone(timezone('America/Bogota'))
 
-        qr_data = "NumFac: " + number if number else 'NO_VALIDADA'
-        qr_data += "\nFecFac: " + self.invoice_id.date_invoice if self.invoice_id.date_invoice else ''
-        qr_data += "\nHorFac: " + create_date.astimezone(timezone(
-            'America/Bogota')).strftime('%H:%M:%S-05:00')
-        qr_data += "\nNitFac: " + nit_fac if nit_fac else ''
-        qr_data += "\nNitAdq: " + nit_adq if nit_adq else ''
+        qr_data = "NumFac: " + (self.invoice_id.number or _('WITHOUT VALIDATE'))
+        qr_data += "\nFecFac: " + (self.invoice_id.date_invoice or '')
+        qr_data += "\nHorFac: " + create_date.strftime('%H:%M:%S-05:00')
+        qr_data += "\nNitFac: " + (self.company_id.partner_id.identification_document or '')
+        qr_data += "\nNitAdq: " + (self.invoice_id.partner_id.identification_document or '')
         qr_data += "\nValFac: " + '{:.2f}'.format(ValFac)
         qr_data += "\nValIva: " + '{:.2f}'.format(ValImp1)
         qr_data += "\nValOtroIm: " + '{:.2f}'.format(ValOtroIm)
         qr_data += "\nValTolFac: " + '{:.2f}'.format(ValTolFac)
-        qr_data += "\nCUFE: " + cufe if cufe else ''
-        qr_data += "\n\n" + self.invoice_url if self.invoice_url else ''
+        if self.invoice_id.type == "out_invoice" and self.cufe_cude:
+            qr_data += "\nCUFE: " + self.cufe_cude
+        elif self.invoice_id.type == "out_refund" and self.cufe_cude: 
+            qr_data += "\nCUDE: " + self.cufe_cude
+        qr_data += "\n\n" + (self.invoice_url or '')
 
         self.qr_image = global_functions.get_qr_code(qr_data)
 
@@ -165,13 +164,16 @@ class AccountInvoiceDianDocument(models.Model):
 
         if self.invoice_id.type == 'out_invoice':
             xml_filename_prefix = 'fv'
-            dddddddd = str(out_invoice_sent + 1).zfill(8)
+            daterange.out_invoice_sent += 1
+            dddddddd = str(daterange.out_invoice_sent).zfill(8)
         elif self.invoice_id.type == 'out_refund' and self.invoice_id.refund_type == 'credit':
             xml_filename_prefix = 'nc'
-            dddddddd = str(out_refund_credit_sent + 1).zfill(8)
+            daterange.out_refund_credit_sent += 1
+            dddddddd = str(daterange.out_refund_credit_sent).zfill(8)
         elif self.invoice_id.type == 'out_refund' and self.invoice_id.refund_type == 'debit':
             xml_filename_prefix = 'nd'
-            dddddddd = str(out_refund_debit_sent + 1).zfill(8)
+            daterange.out_refund_debit_sent += 1
+            dddddddd = str(daterange.out_refund_debit_sent).zfill(8)
 
         #TODO 1.0
         #arnnnnnnnnnnpppaadddddddd.xml
@@ -212,6 +214,14 @@ class AccountInvoiceDianDocument(models.Model):
         TipoAmbie = self.company_id.profile_execution_id
         customer = self.invoice_id.partner_id
         NitAdq = customer.identification_document
+        document_type_code = False
+
+        if customer.document_type_id:
+            document_type_code = customer.document_type_id.code
+
+        if document_type_code not in ('11', '12', '13', '21', '22', '31', '41', '42', '50', '91'):
+			if customer.person_type == '2':
+				NitAdq = '2222222222'
 
         if TipoAmbie == '1':
             QRCodeURL = DIAN['catalogo']
@@ -512,7 +522,6 @@ class AccountInvoiceDianDocument(models.Model):
                  "You won't be notified if something goes wrong.\n"+
                  "Please go to Settings > Company > Notification Group.")
         subject = _('ALERTA! La Factura %s no fue enviada a la DIAN.') % self.invoice_id.number
-        #email_to = self.env['res.users'].browse(self.env.uid).email
         msg_body = _('''Cordial Saludo,<br/><br/>La factura ''' + self.invoice_id.number +
                      ''' del cliente ''' + self.invoice_id.partner_id.name + ''' no pudo ser ''' +
                      '''enviada a la Dian según el protocolo establecido previamente. Por '''
@@ -546,28 +555,11 @@ class AccountInvoiceDianDocument(models.Model):
         strings = ''
         status_code = 'other'
         root = etree.fromstring(response.content)
-        date_invoice = self.invoice_id.date_invoice
-
-        if not date_invoice:
-            date_invoice = fields.Date.today()
-
-        param = [('date_start', '<=', date_invoice), ('date_end', '>=', date_invoice)]
-        daterange = self.env['date.range'].search(param)
 
         for element in root.iter("{%s}StatusCode" % b):
             if element.text in ('0', '00', '66', '90', '99'):
                 if element.text == '00':
                     self.write({'state': 'done'})
-
-                    if self.get_status_zip_status_code != '00':
-                        if self.invoice_id.type == "out_invoice":
-                            daterange.out_invoice_sent += 1
-                        elif (self.invoice_id.type == "out_refund"
-                                and self.invoice_id.refund_type == "credit"):
-                            daterange.out_refund_credit_sent += 1
-                        elif (self.invoice_id.type == "out_refund"
-                                and self.invoice_id.refund_type == "debit"):
-                            daterange.out_refund_debit_sent += 1
 
                 status_code = element.text
 
@@ -579,7 +571,7 @@ class AccountInvoiceDianDocument(models.Model):
         if status_code == '00':
             for element in root.iter("{%s}StatusMessage" % b):
                 strings = element.text
-                
+
             for element in root.iter("{%s}XmlBase64Bytes" % b):
                 self.write({'ar_xml_file': element.text})
 
@@ -643,10 +635,10 @@ class AccountInvoiceDianDocument(models.Model):
         return True
 
     def action_sent_zipped_file(self):
-        msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s,\nContact with your administrator "
+        msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s,\n\nContact with your administrator "
                 "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
                 "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
-        msg2 = _("Unknown Error: %s\nContact with your administrator "
+        msg2 = _("Unknown Error: %s\n\nContact with your administrator "
                 "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
                 "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
         b = "http://schemas.datacontract.org/2004/07/UploadDocumentResponse"

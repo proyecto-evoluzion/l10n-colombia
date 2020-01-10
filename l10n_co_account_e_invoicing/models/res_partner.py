@@ -70,13 +70,14 @@ class ResPartner(models.Model):
 		msg3 = _("'%s' does not have a state established.")
 		msg4 = _("'%s' does not have a country established.")
 		msg5 = _("'%s' does not have a verification digit established.")
-		msg6 = _("'%s' does not have a document type established.")
+		msg6 = _("'%s' does not have a DIAN document type established.")
 		msg7 = _("'%s' does not have a identification document established.")
 		msg8 = _("'%s' does not have a fiscal position correctly configured.")
 		msg9 = _("'%s' does not have a fiscal position established.")
 		msg10 = _("E-Invoicing Agent: '%s' does not have a E-Invoicing Email.")
+		name = self.name
 		zip_code = False
-		tax_level_codes = ''
+		identification_document = self.identification_document
 		first_name = False
 		family_name = False
 		middle_name = False
@@ -95,12 +96,23 @@ class ResPartner(models.Model):
 			raise UserError(msg4 % self.name)
 
 		if self.document_type_id:
-			if self.document_type_id.code == '31' and not self.check_digit:
+			document_type_code = self.document_type_id.code
+
+			if document_type_code == '31' and not self.check_digit:
 				raise UserError(msg5 % self.name)
+
+			#Punto 13.2.1. del anexo técnico version 1.8
+			if document_type_code not in ('11', '12', '13', '21', '22', '31', '41', '42', '50', '91'):
+				if self.person_type == '1':
+					raise UserError(msg6 % self.name)
+				else:
+					name = 'usuario final'
+					document_type_code = '13'
+					identification_document = '2222222222'
 		else:
 			raise UserError(msg6 % self.name)
 
-		if not self.identification_document:
+		if not identification_document:
 			raise UserError(msg7 % self.name)
 
 		if self.property_account_position_id:
@@ -108,6 +120,10 @@ class ResPartner(models.Model):
 					or not self.property_account_position_id.tax_scheme_id
 					or not self.property_account_position_id.listname):
 				raise UserError(msg8 % self.name)
+
+			tax_level_codes = ''
+			tax_scheme_code = self.property_account_position_id.tax_scheme_id.code
+			tax_scheme_name = self.property_account_position_id.tax_scheme_id.name
 		else:
 			raise UserError(msg9 % self.name)
 
@@ -145,10 +161,21 @@ class ResPartner(models.Model):
 		elif self.lastname2:
 			telephone = self.mobile
 
+		if identification_document == '2222222222':
+			tax_level_codes = 'ZZ'
+			tax_scheme_code = 'ZY'
+			tax_scheme_name = 'No causa'
+			first_name = 'usuario'
+			family_name = 'final'
+			middle_name = False
+
+			if self.property_account_position_id.listname != '49':
+				raise UserError(msg8 % self.name)
+
 		return {
 			'AdditionalAccountID': self.person_type,
 			'PartyName': self.commercial_name,
-			'Name': self.name,
+			'Name': name,
 			'AddressID': self.zip_id.code or '',
 			'AddressCityName': self.zip_id.city or '',
 			'AddressPostalZone': zip_code,
@@ -156,12 +183,12 @@ class ResPartner(models.Model):
 			'AddressCountrySubentityCode': self.state_id.code or '',
 			'AddressLine': self.street or '',
 			'CompanyIDschemeID': self.check_digit,
-			'CompanyIDschemeName': self.document_type_id.code,
-			'CompanyID': self.identification_document,
+			'CompanyIDschemeName': document_type_code,
+			'CompanyID': identification_document,
 			'listName': self.property_account_position_id.listname,
 			'TaxLevelCode': tax_level_codes,
-			'TaxSchemeID': self.property_account_position_id.tax_scheme_id.code,
-			'TaxSchemeName': self.property_account_position_id.tax_scheme_id.name,
+			'TaxSchemeID': tax_scheme_code,
+			'TaxSchemeName': tax_scheme_name,
 			'CorporateRegistrationSchemeName': self.coc_registration_number,
 			'CountryIdentificationCode': self.country_id.code,
 			'CountryName': self.country_id.name,
