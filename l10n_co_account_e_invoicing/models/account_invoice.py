@@ -19,7 +19,12 @@ class AccountInvoice(models.Model):
 		if user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field'):
 			view_operation_type_field = True
 
-		if self._context['type'] == 'out_invoice' and not view_operation_type_field:
+		if 'type' in self._context.keys():
+			if self._context.get['type'] == 'out_invoice' and not view_operation_type_field:
+				return '10'
+			else:
+				return False
+		elif not view_operation_type_field:
 			return '10'
 		else:
 			return False
@@ -31,8 +36,13 @@ class AccountInvoice(models.Model):
 
 		if user.has_group('l10n_co_account_e_invoicing.group_view_invoice_type_field'):
 			view_invoice_type_field = True
-
-		if self._context['type'] == 'out_invoice' and not view_invoice_type_field:
+		
+		if 'type' in self._context.keys():
+			if self._context.get['type'] == 'out_invoice' and not view_invoice_type_field:
+				return '01'
+			else:
+				return False
+		elif not view_invoice_type_field:
 			return '01'
 		else:
 			return False
