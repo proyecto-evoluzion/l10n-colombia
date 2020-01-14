@@ -759,8 +759,7 @@ class AccountInvoiceDianDocument(models.Model):
         return True
 
     def action_reprocess(self):
-        self.write({'xml_file': b64encode(self._get_xml_file())})
-        self.write({'zipped_file': b64encode(self._get_zipped_file())})
+        self.action_set_files()
         self.action_sent_zipped_file()
 
         return True
