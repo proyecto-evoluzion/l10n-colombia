@@ -168,7 +168,7 @@ def get_xml_with_signature(
     return root
 
 def get_pkcs12(certificate_file, certificate_password):
-    msg = _("The cretificate password or certificate file is not valid.\n\nException: %s")
+    msg = _("The certificate password or certificate file is not valid.\n\nException: %s")
 
     try:
         return crypto.load_pkcs12(

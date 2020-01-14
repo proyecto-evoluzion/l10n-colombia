@@ -35,7 +35,7 @@ class ResPartner(models.Model):
 
 	@api.multi
 	def _get_view_einvoicing_email_field(self):
-		user = self.env['res.users'].search([('id', '=', self._uid)])
+		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_einvoicing_email_field = False
 
 		if user.has_group('l10n_co_account_e_invoicing.group_view_einvoicing_email_fields'):
@@ -46,7 +46,7 @@ class ResPartner(models.Model):
 
 	@api.multi
 	def _get_edit_is_einvoicing_agent_field(self):
-		user = self.env['res.users'].search([('id', '=', self._uid)])
+		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		edit_is_einvoicing_agent_field = False
 
 		if user.has_group('l10n_co_account_e_invoicing.group_edit_is_einvoicing_agent_field'):

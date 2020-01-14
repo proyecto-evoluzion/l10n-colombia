@@ -13,14 +13,14 @@ class AccountInvoice(models.Model):
 
 	@api.model
 	def _default_operation_type(self):
-		user = self.env['res.users'].search([('id', '=', self._uid)])
+		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_operation_type_field = False
 
 		if user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field'):
 			view_operation_type_field = True
 
 		if 'type' in self._context.keys():
-			if self._context.get['type'] == 'out_invoice' and not view_operation_type_field:
+			if self._context['type'] == 'out_invoice' and not view_operation_type_field:
 				return '10'
 			else:
 				return False
@@ -31,14 +31,14 @@ class AccountInvoice(models.Model):
 
 	@api.model
 	def _default_invoice_type_code(self):
-		user = self.env['res.users'].search([('id', '=', self._uid)])
+		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_invoice_type_field = False
 
 		if user.has_group('l10n_co_account_e_invoicing.group_view_invoice_type_field'):
 			view_invoice_type_field = True
 		
 		if 'type' in self._context.keys():
-			if self._context.get['type'] == 'out_invoice' and not view_invoice_type_field:
+			if self._context['type'] == 'out_invoice' and not view_invoice_type_field:
 				return '01'
 			else:
 				return False
@@ -58,7 +58,7 @@ class AccountInvoice(models.Model):
 
 		if self.company_id.einvoicing_enabled:
 			warn_inactive_certificate = True
-		
+
 		if (self.company_id.certificate_file
 				and self.company_id.certificate_password
 				and self.company_id.certificate_date):

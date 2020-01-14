@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import global_functions
+from datetime import datetime
 from validators import url
 from requests import post, exceptions
 from lxml import etree
@@ -122,5 +123,25 @@ class ResCompany(models.Model):
 
         except exceptions.RequestException as e:
             raise ValidationError(msg2 % (e))
+
+        return True
+
+    @api.multi
+    def action_process_dian_documents(self):
+        for company in self:
+            dian_documents = self.env['account.invoice.dian.document'].search(
+                    [('state', 'in', ('draft', 'sent')), ('company_id', '=', company.id)],
+                    order = 'zipped_filename asc')
+
+            for dian_document in dian_documents:
+                today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
+                date_from = datetime.strptime(dian_document.invoice_id.date_invoice, '%Y-%m-%d')
+                days = (today - date_from).days
+
+                if int(dian_document.invoice_id.send_invoice_to_dian) <= days:
+                    dian_document.action_reprocess()
+
+                if dian_document.state != 'done':
+                    return True
 
         return True

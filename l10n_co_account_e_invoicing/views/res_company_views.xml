@@ -8,7 +8,16 @@
                 <xpath expr="//notebook" position="inside">
                     <page name="einvoicing" string="E-Invoicing">
                         <group>
-                            <field name="einvoicing_enabled"/>
+                            <label for="einvoicing_enabled"/>
+                            <div>
+                                <field name="einvoicing_enabled"/>
+                                <button name="action_process_dian_documents"
+                                    string="Process DIAN Documents"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-check"
+                                    attrs="{'invisible': [('einvoicing_enabled', '!=', True)]}"/>
+                            </div>
                             <field name="send_invoice_to_dian"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="profile_execution_id"
