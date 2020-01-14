@@ -2,6 +2,8 @@
 # Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+from global_functions import get_pkcs12
+from datetime import datetime
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
@@ -9,62 +11,156 @@ from odoo.exceptions import UserError
 class AccountInvoice(models.Model):
 	_inherit = "account.invoice"
 
+	@api.model
+	def _default_operation_type(self):
+		user = self.env['res.users'].search([('id', '=', self._uid)])
+		view_operation_type_field = False
+
+		if user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field'):
+			view_operation_type_field = True
+
+		if self._context['type'] == 'out_invoice' and not view_operation_type_field:
+			return '10'
+		else:
+			return False
+
+	@api.model
+	def _default_invoice_type_code(self):
+		user = self.env['res.users'].search([('id', '=', self._uid)])
+		view_invoice_type_field = False
+
+		if user.has_group('l10n_co_account_e_invoicing.group_view_invoice_type_field'):
+			view_invoice_type_field = True
+
+		if self._context['type'] == 'out_invoice' and not view_invoice_type_field:
+			return '01'
+		else:
+			return False
+
+	@api.model
+	def _default_send_invoice_to_dian(self):
+		return self.env.user.company_id.send_invoice_to_dian or '0'
+
+	@api.one
+	def _get_warn_certificate(self):
+		warn_remaining_certificate = False
+		warn_inactive_certificate = False
+
+		if self.company_id.einvoicing_enabled:
+			warn_inactive_certificate = True
+		
+		if (self.company_id.certificate_file
+				and self.company_id.certificate_password
+				and self.company_id.certificate_date):
+			remaining_days = self.company_id.certificate_remaining_days or 0
+			today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
+			date_to = datetime.strptime(self.company_id.certificate_date, '%Y-%m-%d')
+			days = (date_to - today).days
+			pkcs12 = get_pkcs12(self.company_id.certificate_file, self.company_id.certificate_password)
+			x509 = pkcs12.get_certificate()
+			warn_inactive_certificate = x509.has_expired()
+
+			if days < remaining_days:
+				warn_remaining_certificate = True
+
+		self.warn_inactive_certificate = warn_inactive_certificate
+		self.warn_remaining_certificate = warn_remaining_certificate
+
+	warn_remaining_certificate = fields.Boolean(
+        string="Warn About Remainings?",
+        compute="_get_warn_certificate",
+        store=False)
+	warn_inactive_certificate = fields.Boolean(
+        string="Warn About Inactive Certificate?",
+        compute="_get_warn_certificate",
+        store=False)
 	operation_type = fields.Selection(
-        [('10', 'Estandar *')],
+        [('10', 'Estandar *'),
+		 ('20', 'Nota Crédito que referencia una factura electrónica'),
+		 ('22', 'Nota Crédito sin referencia a facturas *'),
+		 ('30', 'Nota Débito que referencia una factura electrónica.'),
+		 ('32', 'Nota Débito sin referencia a facturas *')],
         string='Operation Type',
-        default='10')
+        default=_default_operation_type)
 	invoice_type_code = fields.Selection(
         [('01', 'Factura de Venta'),
          ('03', 'Factura por Contingencia Facturador'),
          ('04', 'Factura por Contingencia DIAN')],
         string='Invoice Type',
-        default='01')
+        default=_default_invoice_type_code)
 	send_invoice_to_dian = fields.Selection(
         [('0', 'Immediately'),
          ('1', 'After 1 Day'),
          ('2', 'After 2 Days')],
         string='Send Invoice to DIAN?',
-        default='1')
+        default=_default_send_invoice_to_dian)
 	dian_document_ids = fields.One2many(
 		comodel_name='account.invoice.dian.document',
 		inverse_name='invoice_id',
 		string='DIAN Documents')
 
 	@api.multi
+	def update(self, values):
+		res = super(AccountInvoice, self).update(values)
+
+		for invoice in self:
+			if invoice.type == 'out_refund' and values.get('refund_type') == "credit":
+				invoice.operation_type = '20'
+			elif invoice.type == 'out_refund' and values.get('refund_type') == "debit":
+				invoice.operation_type = '30'
+
+		return res
+
+	@api.multi
 	def invoice_validate(self):
 		res = super(AccountInvoice, self).invoice_validate()
 
-		if self.company_id.einvoicing_enabled:
-			if self.type in ("out_invoice", "out_refund"):
-				dian_document_obj = self.env['account.invoice.dian.document']
-				dian_document = dian_document_obj.create({
-					'invoice_id': self.id,
-					'company_id': self.company_id.id})
-				dian_document.action_set_files()
+		for invoice in self:
+			if invoice.company_id.einvoicing_enabled:
+				if invoice.type in ("out_invoice", "out_refund"):
+					xml_filename = False
+					zipped_filename = False
+					ar_xml_filename = False
 
-				if self.send_invoice_to_dian == '0':
-					if self.invoice_type_code in ('01', '02'):
-						dian_document.action_sent_zipped_file()
-					elif self.invoice_type_code == '04':
-						dian_document.action_send_mail()
+					for dian_document in invoice.dian_document_ids:
+						xml_filename = dian_document.xml_filename
+						zipped_filename = dian_document.zipped_filename
+						ar_xml_filename = dian_document.ar_xml_filename
+						break
+
+					dian_document_obj = self.env['account.invoice.dian.document']
+					dian_document = dian_document_obj.create({
+						'invoice_id': invoice.id,
+						'company_id': invoice.company_id.id,
+						'xml_filename': xml_filename,
+						'zipped_filename': zipped_filename,
+						'ar_xml_filename': ar_xml_filename})
+					dian_document.action_set_files()
+
+					if invoice.send_invoice_to_dian == '0':
+						if invoice.invoice_type_code in ('01', '02'):
+							dian_document.action_sent_zipped_file()
+						elif invoice.invoice_type_code == '04':
+							dian_document.action_send_mail()
 
 		return res
 
 	@api.multi
 	def action_cancel(self):
+		msg = _('You cannot cancel a invoice sent to the DIAN and that was approved.')
 		res = super(AccountInvoice, self).action_cancel()
 
-		for dian_document in self.dian_document_ids:
-			if dian_document.state == 'done':
-				raise UserError(_('You cannot cancel a invoice sent to DIAN'))
-			else:
-				dian_document.state == 'cancel'
+		for invoice in self:
+			for dian_document in invoice.dian_document_ids:
+				if dian_document.state == 'done':
+					raise UserError(msg)
+				else:
+					dian_document.state = 'cancel'
 
 		return res
 
 	def _get_active_dian_resolution(self):
-		msg = _("You do not have an active dian resolution, "
-				 "contact with your administrator.")
+		msg = _("You do not have an active dian resolution, contact with your administrator.")
 		resolution_number = False
 
 		for date_range_id in self.journal_id.sequence_id.date_range_ids:
@@ -90,22 +186,45 @@ class AccountInvoice(models.Model):
 			'technical_key': technical_key}
 
 	def _get_billing_reference(self):
+		msg1 = _("You can not make a refund invoice of an invoce with state different to "
+				 "'Open' or 'Paid'.")
+		msg2 = _("You can not make a refund invoice of an invoce with DIAN documents with "
+				 "state 'Draft', 'Sent' or 'Cancelled'.")
 		billing_reference = {}
 
-		if self.refund_invoice_id and self.refund_invoice_id.state in ('open', 'paid'):
+		if self.refund_invoice_id:
+			if self.refund_invoice_id.state not in ('open', 'paid'):
+				raise UserError(msg1)
+
+			if self.refund_invoice_id.state in ('open', 'paid'):
+				dian_document_state_done = False
+				dian_document_state_cancel = False
+				dian_document_state_sent = False
+				dian_document_state_draft = False
+
 				for dian_document in self.refund_invoice_id.dian_document_ids:
 					if dian_document.state == 'done':
+						dian_document_state_done = True
 						billing_reference['ID'] = self.refund_invoice_id.number
 						billing_reference['UUID'] = dian_document.cufe_cude
 						billing_reference['IssueDate'] = self.refund_invoice_id.date_invoice
 						billing_reference['CustomizationID'] = self.refund_invoice_id.operation_type
 
-		if not billing_reference and self.refund_type == 'credit':
-			raise UserError('Credit Note has not Billing Reference')
-		elif not billing_reference and self.refund_type == 'debit':
-			raise UserError('Debit Note has not Billing Reference')
-		else:
-			return billing_reference
+					if dian_document.state == 'cancel':
+						dian_document_state_cancel = True
+
+					if dian_document.state == 'draft':
+						dian_document_state_draft = True
+
+					if dian_document.state == 'sent':
+						dian_document_state_sent = True
+
+				if  ((not dian_document_state_done and dian_document_state_cancel)
+						or dian_document_state_draft
+						or dian_document_state_sent):
+					raise UserError(msg2)
+
+		return billing_reference
 
 	def _get_payment_exchange_rate(self):
 		company_currency = self.company_id.currency_id
@@ -163,7 +282,7 @@ class AccountInvoice(models.Model):
 					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount * (-1)
 				if tax_type == 'withholding_tax' and tax.tax_id.amount < 0:
 					#TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN
-					#Solo las positivas que indicarian una autoretencion, Si la DIAN
+					#Solo las positivas que indicarian una autorretencion, Si la DIAN
 					#pide que se envien las retenciones, seria quitar o comentar este if
 					pass
 				else:

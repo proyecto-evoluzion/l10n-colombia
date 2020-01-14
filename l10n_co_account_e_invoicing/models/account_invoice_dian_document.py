@@ -32,7 +32,7 @@ class AccountInvoiceDianDocument(models.Model):
         [('draft', 'Draft'),
          ('sent', 'Sent'),
          ('done', 'Done'),
-         ('cancel', 'Cancel')],
+         ('cancel', 'Cancelled')],
         string='State',
         readonly=True,
         default='draft')
@@ -108,10 +108,12 @@ class AccountInvoiceDianDocument(models.Model):
         qr_data += "\nValIva: " + '{:.2f}'.format(ValImp1)
         qr_data += "\nValOtroIm: " + '{:.2f}'.format(ValOtroIm)
         qr_data += "\nValTolFac: " + '{:.2f}'.format(ValTolFac)
+
         if self.invoice_id.type == "out_invoice" and self.cufe_cude:
             qr_data += "\nCUFE: " + self.cufe_cude
         elif self.invoice_id.type == "out_refund" and self.cufe_cude: 
             qr_data += "\nCUDE: " + self.cufe_cude
+
         qr_data += "\n\n" + (self.invoice_url or '')
 
         self.qr_image = global_functions.get_qr_code(qr_data)
@@ -195,6 +197,7 @@ class AccountInvoiceDianDocument(models.Model):
     def _get_xml_values(self, ClTec):
         msg1 = _("'%s' does not have a valid isic code")
         msg2 = _("'%s' does not have a isic code established.")
+        msg3 = _("'%s' does not have a identification document established.")
         supplier = self.company_id.partner_id
 
         if supplier.isic_id:
@@ -220,8 +223,10 @@ class AccountInvoiceDianDocument(models.Model):
             document_type_code = customer.document_type_id.code
 
         if document_type_code not in ('11', '12', '13', '21', '22', '31', '41', '42', '50', '91'):
-			if customer.person_type == '2':
-				NitAdq = '2222222222'
+            if customer.person_type == '2':
+                NitAdq = '2222222222'
+            else:
+                raise UserError(msg3 % customer.name)
 
         if TipoAmbie == '1':
             QRCodeURL = DIAN['catalogo']
@@ -314,6 +319,7 @@ class AccountInvoiceDianDocument(models.Model):
         msg3 = _("Your journal: %s, has no a invoice sequence with type equal to E-Invoicing")
         msg4 = _("Your journal: %s, has no a invoice sequence with type equal to"
                  "Contingency Checkbook E-Invoicing")
+        msg5 = _("The invoice type selected is not valid to this invoice.")
         sequence = self.invoice_id.journal_id.sequence_id
         ClTec = False
 
@@ -334,6 +340,9 @@ class AccountInvoiceDianDocument(models.Model):
         else:
             if sequence.dian_type != 'contingency_checkbook_e-invoicing':
                 raise UserError(msg4 % self.invoice_id.journal_id.name)
+
+        if self.invoice_id.operation_type not in ('10', '11'):
+            raise UserError(msg5)
 
         xml_values = self._get_xml_values(ClTec)
         xml_values['InvoiceControl'] = active_dian_resolution
@@ -361,16 +370,21 @@ class AccountInvoiceDianDocument(models.Model):
             raise UserError(msg % self.invoice_id.journal_id.name)
 
         xml_values = self._get_xml_values(False)
+        billing_reference = self.invoice_id._get_billing_reference()
         #Punto 14.1.5.2. del anexo tecnico version 1.8
         #20 Nota Crédito que referencia una factura electrónica.
         #22 Nota Crédito sin referencia a facturas*.
         #23 Nota Crédito para facturación electrónica V1 (Decreto 2242).
-        xml_values['CustomizationID'] = '20'
-        #Exclusivo en referencias a documentos (elementos DocumentReference)
+        if billing_reference:
+            xml_values['CustomizationID'] = '20'
+            self.invoice_id.operation_type = '20'
+        else:
+            xml_values['CustomizationID'] = '22'
+            self.invoice_id.operation_type = '22'
+        #TODO 2.0: Exclusivo en referencias a documentos (elementos DocumentReference)
         #Punto 14.1.3 del anexo tecnico version 1.8
         #91 Nota Crédito
         xml_values['CreditNoteTypeCode'] = '91'
-        billing_reference = self.invoice_id._get_billing_reference()
         xml_values['BillingReference'] = billing_reference
         xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
@@ -386,18 +400,23 @@ class AccountInvoiceDianDocument(models.Model):
             raise UserError(msg % self.invoice_id.journal_id.name)
 
         xml_values = self._get_xml_values(False)
+        billing_reference = self.invoice_id._get_billing_reference()
         #Punto 14.1.5.3. del anexo tecnico version 1.8
         #30 Nota Débito que referencia una factura electrónica.
         #32 Nota Débito sin referencia a facturas*.
         #33 Nota Débito para facturación electrónica V1 (Decreto 2242).
-        xml_values['CustomizationID'] = '30'
+        if billing_reference:
+            xml_values['CustomizationID'] = '30'
+            self.invoice_id.operation_type = '30'
+        else:
+            xml_values['CustomizationID'] = '32'
+            self.invoice_id.operation_type = '32'
         #Exclusivo en referencias a documentos (elementos DocumentReference)
         #Punto 14.1.3 del anexo tecnico version 1.8
         #92 Nota Débito 
-        #TODO: Parece que este valor se informa solo en la factura de venta
+        #TODO 2.0: Parece que este valor se informa solo en la factura de venta
         #parece que en exportaciones
         #xml_values['DebitNoteTypeCode'] = '92'
-        billing_reference = self.invoice_id._get_billing_reference()
         xml_values['BillingReference'] = billing_reference
         xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
         xml_values['DiscrepancyResponseCode'] = self.invoice_id.discrepancy_response_code_id.code
@@ -440,6 +459,9 @@ class AccountInvoiceDianDocument(models.Model):
         return output.getvalue()
 
     def action_set_files(self):
+        if self.invoice_id.warn_inactive_certificate:
+            raise ValidationError(_("There is no an active certificate."))
+
         if not self.xml_filename or not self.zipped_filename:
             self._set_filenames()
 
