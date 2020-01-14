@@ -14,7 +14,7 @@
                         <span t-field="o.number"/>
                     </h2>
                 </div>
-                <t t-if="o.company_id.einvoicing_enabled == True">
+                <t t-if="o.company_id.einvoicing_enabled == True and o.dian_document_ids">
                         <t t-foreach="o.dian_document_ids" t-as="dd">
                             <t t-if="dd.state == 'done' or dd.state == 'sent'">
                                 <img class="image" t-att-src="'data:image/png;base64,%s' % dd.qr_image" style="width:100px;height:100px;margin-bottom:5px"/>
@@ -26,7 +26,7 @@
     </template>
     <template id="external_layout_footer" inherit_id="report.external_layout_footer">
     <xpath expr="//ul" position="inside">
-        <t t-if="o.company_id.einvoicing_enabled == True">
+        <t t-if="o.company_id.einvoicing_enabled == True and o.dian_document_ids">
             <t t-foreach="o.dian_document_ids" t-as="dd">
                 <t t-if="dd.state == 'done' or dd.state == 'sent'">
                     <br/>
