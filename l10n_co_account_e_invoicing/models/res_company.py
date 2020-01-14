@@ -14,6 +14,12 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     einvoicing_enabled = fields.Boolean(string='E-Invoicing Enabled')
+    send_invoice_to_dian = fields.Selection(
+        [('0', 'Immediately'),
+         ('1', 'After 1 Day'),
+         ('2', 'After 2 Days')],
+        string='Send Invoice to DIAN?',
+        default='0')
     profile_execution_id = fields.Selection(
         [('1', 'Production'), ('2', 'Test')],
         'Destination Environment of Document',
@@ -25,6 +31,10 @@ class ResCompany(models.Model):
     certificate_filename = fields.Char(string='Certificate Filename')
     certificate_file = fields.Binary(string='Certificate File')
     certificate_password = fields.Char(string='Certificate Password')
+    certificate_date = fields.Date(string='Certificate Date Validity')
+    certificate_remaining_days = fields.Integer(
+        string='Certificate Remaining Days',
+        default=False)
     signature_policy_url = fields.Char(string='Signature Policy Url')
     signature_policy_description = fields.Char(string='Signature Policy Description')
     files_path = fields.Char(string='Files Path')
@@ -51,10 +61,20 @@ class ResCompany(models.Model):
     @api.multi
     def write(self, vals):
         rec = super(ResCompany, self).write(vals)
-        global_functions.get_pkcs12(self.certificate_file, self.certificate_password)
+
+        for company in self:
+            if company.einvoicing_enabled:
+                if not vals.get('certificate_date'):
+                    pkcs12 = global_functions.get_pkcs12(
+                        company.certificate_file,
+                        company.certificate_password)
+                    x509 = pkcs12.get_certificate()
+                    date = x509.get_notAfter()
+                    date = '{}-{}-{}'.format(date[0:4], date[4:6], date[6:8])
+                    company.certificate_date = date
 
         return rec
-    
+
     def _get_GetNumberingRange_values(self):
         xml_soap_values = global_functions.get_xml_soap_values(
             self.certificate_file,
