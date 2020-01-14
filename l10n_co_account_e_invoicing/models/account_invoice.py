@@ -56,12 +56,13 @@ class AccountInvoice(models.Model):
 			today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
 			date_to = datetime.strptime(self.company_id.certificate_date, '%Y-%m-%d')
 			days = (date_to - today).days
-			pkcs12 = get_pkcs12(self.company_id.certificate_file, self.company_id.certificate_password)
-			x509 = pkcs12.get_certificate()
-			warn_inactive_certificate = x509.has_expired()
+			warn_inactive_certificate = False
 
 			if days < remaining_days:
-				warn_remaining_certificate = True
+				if days < 0:
+					warn_inactive_certificate = True
+				else:
+					warn_remaining_certificate = True
 
 		self.warn_inactive_certificate = warn_inactive_certificate
 		self.warn_remaining_certificate = warn_remaining_certificate
