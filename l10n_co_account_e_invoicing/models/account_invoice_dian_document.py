@@ -381,6 +381,11 @@ class AccountInvoiceDianDocument(models.Model):
         else:
             xml_values['CustomizationID'] = '22'
             self.invoice_id.operation_type = '22'
+            billing_reference = {
+                'ID': False,
+                'UUID': False,
+                'IssueDate': False,
+                'CustomizationID': False}
         #TODO 2.0: Exclusivo en referencias a documentos (elementos DocumentReference)
         #Punto 14.1.3 del anexo tecnico version 1.8
         #91 Nota Crédito
@@ -411,6 +416,11 @@ class AccountInvoiceDianDocument(models.Model):
         else:
             xml_values['CustomizationID'] = '32'
             self.invoice_id.operation_type = '32'
+            billing_reference = {
+                'ID': False,
+                'UUID': False,
+                'IssueDate': False,
+                'CustomizationID': False}
         #Exclusivo en referencias a documentos (elementos DocumentReference)
         #Punto 14.1.3 del anexo tecnico version 1.8
         #92 Nota Débito 
