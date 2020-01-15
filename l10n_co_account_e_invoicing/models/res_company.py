@@ -145,3 +145,8 @@ class ResCompany(models.Model):
                     return True
 
         return True
+
+    @api.model
+    def cron_process_dian_documents(self):
+        for company in self.search([]):
+            company.action_process_dian_documents()

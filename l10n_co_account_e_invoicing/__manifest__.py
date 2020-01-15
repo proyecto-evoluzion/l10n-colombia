@@ -41,6 +41,7 @@
         'data/ir_module_category_data.xml',
         'data/res_groups_data.xml',
         'data/product_scheme_data.xml',
+        'data/ir_cron_data.xml',
         "views/account_invoice_views.xml",
         "views/account_invoice_dian_document_views.xml",
         "views/account_tax_group_views.xml",

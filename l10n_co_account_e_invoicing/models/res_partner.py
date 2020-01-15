@@ -11,9 +11,10 @@ class ResPartner(models.Model):
 
 	send_zip_code = fields.Boolean(string='Send Zip Code?')
 	is_einvoicing_agent = fields.Selection(
-        [('no', 'No'),
-         ('yes', 'Yes'),
-         ('unknown', 'Unknown')],
+        [('yes', 'Yes'),
+		 ('no_but', 'No, but has email'),
+		 ('no', 'No'),
+		 ('unknown', 'Unknown')],
         string='Is E-Invoicing Agent?',
         default=False)
 	einvoicing_email = fields.Char(string='E-Invoicing Email')
@@ -31,7 +32,9 @@ class ResPartner(models.Model):
 		super(ResPartner, self).onchange_person_type()
 
 		if self.person_type == '1':
-			self.is_einvoicing_agent= 'yes'
+			self.is_einvoicing_agent = 'yes'
+		
+		self.property_account_position_id = False
 
 	@api.multi
 	def _get_view_einvoicing_email_field(self):
@@ -71,10 +74,11 @@ class ResPartner(models.Model):
 		msg4 = _("'%s' does not have a country established.")
 		msg5 = _("'%s' does not have a verification digit established.")
 		msg6 = _("'%s' does not have a DIAN document type established.")
-		msg7 = _("'%s' does not have a identification document established.")
-		msg8 = _("'%s' does not have a fiscal position correctly configured.")
-		msg9 = _("'%s' does not have a fiscal position established.")
-		msg10 = _("E-Invoicing Agent: '%s' does not have a E-Invoicing Email.")
+		msg7 = _("The document type of '%s' does not seem to correspond with the person type.")
+		msg8 = _("'%s' does not have a identification document established.")
+		msg9 = _("'%s' does not have a fiscal position correctly configured.")
+		msg10 = _("'%s' does not have a fiscal position established.")
+		msg11 = _("E-Invoicing Agent: '%s' does not have a E-Invoicing Email.")
 		name = self.name
 		zip_code = False
 		identification_document = self.identification_document
@@ -112,24 +116,28 @@ class ResPartner(models.Model):
 		else:
 			raise UserError(msg6 % self.name)
 
-		if not identification_document:
+		if ((self.person_type == '1' and document_type_code not in ('31', '50'))
+				or (self.person_type == '2' and document_type_code in ('31', '50'))):
 			raise UserError(msg7 % self.name)
+
+		if not identification_document:
+			raise UserError(msg8 % self.name)
 
 		if self.property_account_position_id:
 			if (not self.property_account_position_id.tax_level_code_ids
 					or not self.property_account_position_id.tax_scheme_id
 					or not self.property_account_position_id.listname):
-				raise UserError(msg8 % self.name)
+				raise UserError(msg9 % self.name)
 
 			tax_level_codes = ''
 			tax_scheme_code = self.property_account_position_id.tax_scheme_id.code
 			tax_scheme_name = self.property_account_position_id.tax_scheme_id.name
 		else:
-			raise UserError(msg9 % self.name)
-
-		if ((self.is_einvoicing_agent == 'yes' or not self.is_einvoicing_agent)
-				and not self.einvoicing_email):
 			raise UserError(msg10 % self.name)
+
+		if ((self.is_einvoicing_agent in ('yes', 'not_but') or not self.is_einvoicing_agent)
+				and not self.einvoicing_email):
+			raise UserError(msg11 % self.name)
 
 		if self.send_zip_code:
 			if self.zip_id:
