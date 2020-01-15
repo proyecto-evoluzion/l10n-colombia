@@ -16,6 +16,8 @@ class AccountInvoice(models.Model):
 		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_operation_type_field = False
 
+		#raise Warning(self.env.uid, self.env.user.id, self._uid)
+
 		if user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field'):
 			view_operation_type_field = True
 
