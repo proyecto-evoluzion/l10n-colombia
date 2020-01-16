@@ -129,9 +129,10 @@ class ResCompany(models.Model):
     @api.multi
     def action_process_dian_documents(self):
         for company in self:
+            count = 0
             dian_documents = self.env['account.invoice.dian.document'].search(
-                    [('state', 'in', ('draft', 'sent')), ('company_id', '=', company.id)],
-                    order = 'zipped_filename asc')
+                [('state', 'in', ('draft', 'sent')), ('company_id', '=', company.id)],
+                order = 'zipped_filename asc')
 
             for dian_document in dian_documents:
                 today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
@@ -139,9 +140,10 @@ class ResCompany(models.Model):
                 days = (today - date_from).days
 
                 if int(dian_document.invoice_id.send_invoice_to_dian) <= days:
-                    dian_document.action_reprocess()
+                    dian_document.action_process()
+                    count += 1
 
-                if dian_document.state != 'done':
+                if dian_document.state != 'done' or count <= 10:
                     return True
 
         return True

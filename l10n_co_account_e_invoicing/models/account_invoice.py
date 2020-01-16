@@ -4,7 +4,7 @@
 
 from global_functions import get_pkcs12
 from datetime import datetime
-from odoo import api, models, fields, _
+from odoo import api, models, fields, SUPERUSER_ID, _
 from odoo.exceptions import UserError
 
 
@@ -16,9 +16,8 @@ class AccountInvoice(models.Model):
 		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_operation_type_field = False
 
-		#raise Warning(self.env.uid, self.env.user.id, self._uid)
-
-		if user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field'):
+		if (user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field')
+				and self.env.user.id != SUPERUSER_ID):
 			view_operation_type_field = True
 
 		if 'type' in self._context.keys():
@@ -36,9 +35,10 @@ class AccountInvoice(models.Model):
 		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_invoice_type_field = False
 
-		if user.has_group('l10n_co_account_e_invoicing.group_view_invoice_type_field'):
+		if (user.has_group('l10n_co_account_e_invoicing.group_view_invoice_type_field')
+				and self.env.user.id != SUPERUSER_ID):
 			view_invoice_type_field = True
-		
+
 		if 'type' in self._context.keys():
 			if self._context['type'] == 'out_invoice' and not view_invoice_type_field:
 				return '01'
