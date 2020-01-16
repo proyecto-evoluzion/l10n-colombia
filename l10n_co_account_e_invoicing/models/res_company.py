@@ -143,7 +143,7 @@ class ResCompany(models.Model):
                     dian_document.action_process()
                     count += 1
 
-                if dian_document.state != 'done' or count <= 10:
+                if dian_document.state != 'done' or count == 10:
                     return True
 
         return True
