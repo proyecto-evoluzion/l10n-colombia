@@ -28,6 +28,46 @@ class AccountInvoiceDianDocument(models.Model):
     ''''''
     _name = "account.invoice.dian.document"
 
+    def go_to_dian_document(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Dian Document', 
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': self._name,
+            'res_id': self.id,
+            'target': 'current'}
+
+    @api.one
+    def _get_qr_code(self):
+        einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
+        ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
+        ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
+        ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
+        ValFac = self.invoice_id.amount_untaxed
+        ValOtroIm = ValImp2 - ValImp3
+        ValTolFac = ValFac + ValImp1 + ValOtroIm
+        create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
+        create_date = create_date.replace(tzinfo=timezone('UTC'))
+        create_date = create_date.astimezone(timezone('America/Bogota'))
+        qr_data = "NumFac: " + (self.invoice_id.number or _('WITHOUT VALIDATE'))
+        qr_data += "\nFecFac: " + (self.invoice_id.date_invoice or '')
+        qr_data += "\nHorFac: " + create_date.strftime('%H:%M:%S-05:00')
+        qr_data += "\nNitFac: " + (self.company_id.partner_id.identification_document or '')
+        qr_data += "\nNitAdq: " + (self.invoice_id.partner_id.identification_document or '')
+        qr_data += "\nValFac: " + '{:.2f}'.format(ValFac)
+        qr_data += "\nValIva: " + '{:.2f}'.format(ValImp1)
+        qr_data += "\nValOtroIm: " + '{:.2f}'.format(ValOtroIm)
+        qr_data += "\nValTolFac: " + '{:.2f}'.format(ValTolFac)
+
+        if self.invoice_id.type == "out_invoice" and self.cufe_cude:
+            qr_data += "\nCUFE: " + self.cufe_cude
+        elif self.invoice_id.type == "out_refund" and self.cufe_cude: 
+            qr_data += "\nCUDE: " + self.cufe_cude
+
+        qr_data += "\n\n" + (self.invoice_url or '')
+        self.qr_image = global_functions.get_qr_code(qr_data)
+
     state = fields.Selection(
         [('draft', 'Draft'),
          ('sent', 'Sent'),
@@ -70,53 +110,11 @@ class AccountInvoiceDianDocument(models.Model):
         string='Status Code',
         default=False)
     get_status_zip_response = fields.Text(string='Response')
-    qr_image = fields.Binary("QR Code", compute='_generate_qr_code')
+    qr_image = fields.Binary("QR Code", compute='_get_qr_code')
     dian_document_line_ids = fields.One2many(
 		comodel_name='account.invoice.dian.document.line',
 		inverse_name='dian_document_id',
 		string='DIAN Document Lines')
-
-    def go_to_dian_document(self):
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Dian Document', 
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': self._name,
-            'res_id': self.id,
-            'target': 'current'}
-
-    @api.one
-    def _generate_qr_code(self):
-        einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
-        ValImp1 = einvoicing_taxes['TaxesTotal']['01']['total']
-        ValImp2 = einvoicing_taxes['TaxesTotal']['04']['total']
-        ValImp3 = einvoicing_taxes['TaxesTotal']['03']['total']
-        ValFac = self.invoice_id.amount_untaxed
-        ValOtroIm = ValImp2 - ValImp3
-        ValTolFac = ValFac + ValImp1 + ValOtroIm
-        create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
-        create_date = create_date.replace(tzinfo=timezone('UTC'))
-        create_date = create_date.astimezone(timezone('America/Bogota'))
-
-        qr_data = "NumFac: " + (self.invoice_id.number or _('WITHOUT VALIDATE'))
-        qr_data += "\nFecFac: " + (self.invoice_id.date_invoice or '')
-        qr_data += "\nHorFac: " + create_date.strftime('%H:%M:%S-05:00')
-        qr_data += "\nNitFac: " + (self.company_id.partner_id.identification_document or '')
-        qr_data += "\nNitAdq: " + (self.invoice_id.partner_id.identification_document or '')
-        qr_data += "\nValFac: " + '{:.2f}'.format(ValFac)
-        qr_data += "\nValIva: " + '{:.2f}'.format(ValImp1)
-        qr_data += "\nValOtroIm: " + '{:.2f}'.format(ValOtroIm)
-        qr_data += "\nValTolFac: " + '{:.2f}'.format(ValTolFac)
-
-        if self.invoice_id.type == "out_invoice" and self.cufe_cude:
-            qr_data += "\nCUFE: " + self.cufe_cude
-        elif self.invoice_id.type == "out_refund" and self.cufe_cude: 
-            qr_data += "\nCUDE: " + self.cufe_cude
-
-        qr_data += "\n\n" + (self.invoice_url or '')
-
-        self.qr_image = global_functions.get_qr_code(qr_data)
 
     def _set_filenames(self):
         msg1 = _("The document type of '%s' is not NIT")
@@ -176,12 +174,12 @@ class AccountInvoiceDianDocument(models.Model):
             xml_filename_prefix = 'nd'
             daterange.out_refund_debit_sent += 1
             dddddddd = str(daterange.out_refund_debit_sent).zfill(8)
+        else:
+            raise ValidationError("ERROR: TODO 2.0")
 
-        #TODO 1.0
+        #TODO 2.0
         #arnnnnnnnnnnpppaadddddddd.xml
         #adnnnnnnnnnnpppaadddddddd.xml
-        else:
-            raise ValidationError("ERROR: TODO 1.0")
 
         zdddddddd = str(zip_sent + 1).zfill(8)
         nnnnnnnnnnpppaadddddddd = nnnnnnnnnn + ppp + aa + dddddddd
@@ -424,8 +422,7 @@ class AccountInvoiceDianDocument(models.Model):
         #Exclusivo en referencias a documentos (elementos DocumentReference)
         #Punto 14.1.3 del anexo tecnico version 1.8
         #92 Nota Débito 
-        #TODO 2.0: Parece que este valor se informa solo en la factura de venta
-        #parece que en exportaciones
+        #TODO 2.0: DebitNoteTypeCode no existe en DebitNote
         #xml_values['DebitNoteTypeCode'] = '92'
         xml_values['BillingReference'] = billing_reference
         xml_values['DiscrepancyReferenceID'] = billing_reference['ID']
@@ -580,10 +577,11 @@ class AccountInvoiceDianDocument(models.Model):
 
         return True
 
-    def _get_status_response(self, response):
+    def _get_status_response(self, response, send_mail):
         b = "http://schemas.datacontract.org/2004/07/DianResponse"
         c = "http://schemas.microsoft.com/2003/10/Serialization/Arrays"
         s = "http://www.w3.org/2003/05/soap-envelope"
+        to_return = True
         strings = ''
         status_code = 'other'
         root = etree.fromstring(response.content)
@@ -596,9 +594,7 @@ class AccountInvoiceDianDocument(models.Model):
                 status_code = element.text
 
         if status_code == '0':
-            self.action_GetStatus()
-
-            return True
+            return self._get_GetStatus(send_mail)
 
         if status_code == '00':
             for element in root.iter("{%s}StatusMessage" % b):
@@ -607,10 +603,13 @@ class AccountInvoiceDianDocument(models.Model):
             for element in root.iter("{%s}XmlBase64Bytes" % b):
                 self.write({'ar_xml_file': element.text})
 
-            if not self.mail_sent:
+            if not self.mail_sent and send_mail:
                 self.action_send_mail()
+            
+            to_return = True
         else:
             self.send_failure_email()
+            to_return = False
 
         for element in root.iter("{%s}string" % c):
             if strings == '':
@@ -629,7 +628,7 @@ class AccountInvoiceDianDocument(models.Model):
             'get_status_zip_status_code': status_code,
             'get_status_zip_response': strings})
 
-        return True
+        return to_return
 
     def _get_GetStatusZip_values(self):
         xml_soap_values = global_functions.get_xml_soap_values(
@@ -660,13 +659,16 @@ class AccountInvoiceDianDocument(models.Model):
             data=etree.tostring(xml_soap_with_signature))
 
         if response.status_code == 200:
-            self._get_status_response(response)
+            self._get_status_response(response, True)
         else:
             raise ValidationError(response.status_code)
 
         return True
 
     def action_sent_zipped_file(self):
+        if self._get_GetStatus(False):
+            return True
+
         msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s,\n\nContact with your administrator "
                 "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
                 "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
@@ -701,13 +703,15 @@ class AccountInvoiceDianDocument(models.Model):
                 data=etree.tostring(xml_soap_with_signature))
 
             if response.status_code == 200:
+                self.write({'state': 'sent'})
+
                 if self.company_id.profile_execution_id == '1':
-                    self._get_status_response(response)
+                    self._get_status_response(response, True)
                 else:
                     root = etree.fromstring(response.text)
 
                     for element in root.iter("{%s}ZipKey" % b):
-                        self.write({'zip_key': element.text, 'state': 'sent'})
+                        self.write({'zip_key': element.text})
                         self.action_GetStatusZip()
             elif response.status_code in (500, 503, 507):
                 dian_document_line_obj = self.env['account.invoice.dian.document.line']
@@ -732,7 +736,10 @@ class AccountInvoiceDianDocument(models.Model):
 
         return xml_soap_values
 
-    def action_GetStatus(self):
+    def _get_GetStatus(self, send_mail):
+        msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s"
+                 "\n\nContact with your administrator.")
+        msg2 = _("Unknown Error: %s\n\nContact with your administrator.")
         wsdl = DIAN['wsdl-hab']
 
         if self.company_id.profile_execution_id == '1':
@@ -746,24 +753,29 @@ class AccountInvoiceDianDocument(models.Model):
             self.company_id.certificate_file,
             self.company_id.certificate_password)
 
-        response = post(
-            wsdl,
-            headers={'content-type': 'application/soap+xml;charset=utf-8'},
-            data=etree.tostring(xml_soap_with_signature))
+        try:
+            response = post(
+                wsdl,
+                headers={'content-type': 'application/soap+xml;charset=utf-8'},
+                data=etree.tostring(xml_soap_with_signature))
 
-        if response.status_code == 200:
-            self._get_status_response(response)
-        else:
-            raise ValidationError(response.status_code)
+            if response.status_code == 200:
+                return self._get_status_response(response, send_mail)
+            else:
+                raise ValidationError(msg1 % (response.status_code, response.reason))
+        except exceptions.RequestException as e:
+            raise ValidationError(msg2 % (e))
 
-        return True
+    def action_GetStatus_without_send_mail(self):
+        return self._get_GetStatus(False)
 
-    def action_reprocess(self):
+    def action_process(self):
         self.action_set_files()
         self.action_sent_zipped_file()
 
         return True
 
+    #TODO: 2.0
     def _get_SendBillAttachmentAsync_values(self):
         xml_soap_values = global_functions.get_xml_soap_values(
             self.company_id.certificate_file,

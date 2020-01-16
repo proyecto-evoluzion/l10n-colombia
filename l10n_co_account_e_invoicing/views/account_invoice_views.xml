@@ -60,7 +60,7 @@
                                 <button type="object" name="go_to_dian_document" string="DIAN Document"/>
                                 <field name="cufe_cude"/>
                                 <field name="create_date"/>
-                                <field name="xml_filename"/>
+                                <field name="zipped_filename"/>
                                 <field name="state"/>
                             </tree>
                         </field>
