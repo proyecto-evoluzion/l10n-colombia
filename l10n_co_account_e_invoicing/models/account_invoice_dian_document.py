@@ -608,7 +608,9 @@ class AccountInvoiceDianDocument(models.Model):
             
             to_return = True
         else:
-            self.send_failure_email()
+            if send_mail:
+                self.send_failure_email()
+
             to_return = False
 
         for element in root.iter("{%s}string" % c):
