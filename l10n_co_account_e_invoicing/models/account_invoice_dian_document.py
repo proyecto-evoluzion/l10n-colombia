@@ -102,10 +102,10 @@ class AccountInvoiceDianDocument(models.Model):
     mail_sent = fields.Boolean(string='Mail Sent?')
     zip_key = fields.Char(string='ZipKey')
     get_status_zip_status_code = fields.Selection(
-        [('00', 'Procesado Correctamente'),
-         ('66', 'NSU no encontrado'),
-         ('90', 'TrackId no encontrado'),
-         ('99', 'Validaciones contienen errores en campos mandatorios'),
+        [('00', 'Processed Correctly'),
+         ('66', 'NSU not found'),
+         ('90', 'TrackId not found'),
+         ('99', 'Validations contain errors in mandatory fields'),
          ('other', 'Other')],
         string='Status Code',
         default=False)
@@ -315,7 +315,7 @@ class AccountInvoiceDianDocument(models.Model):
         msg2 = _("Your active dian resolution has no technical key, "
 				 "contact with your administrator.")
         msg3 = _("Your journal: %s, has no a invoice sequence with type equal to E-Invoicing")
-        msg4 = _("Your journal: %s, has no a invoice sequence with type equal to"
+        msg4 = _("Your journal: %s, has no a invoice sequence with type equal to "
                  "Contingency Checkbook E-Invoicing")
         msg5 = _("The invoice type selected is not valid to this invoice.")
         sequence = self.invoice_id.journal_id.sequence_id
@@ -406,7 +406,7 @@ class AccountInvoiceDianDocument(models.Model):
         billing_reference = self.invoice_id._get_billing_reference()
         #Punto 14.1.5.3. del anexo tecnico version 1.8
         #30 Nota Débito que referencia una factura electrónica.
-        #32 Nota Débito sin referencia a facturas*.
+        #32 Nota Débito sin referencia a facturas *.
         #33 Nota Débito para facturación electrónica V1 (Decreto 2242).
         if billing_reference:
             xml_values['CustomizationID'] = '30'
@@ -547,10 +547,10 @@ class AccountInvoiceDianDocument(models.Model):
 
     @api.multi
     def send_failure_email(self):
-        msg1 = _("The notification group for Einvoice failures is not set.\n"+
+        msg1 = _("The notification group for e-invoice failures is not set.\n"+
                  "You won't be notified if something goes wrong.\n"+
                  "Please go to Settings > Company > Notification Group.")
-        subject = _('ALERTA! La Factura %s no fue enviada a la DIAN.') % self.invoice_id.number
+        subject = _('ALERT! Invoice %s was not sent to DIAN.') % self.invoice_id.number
         msg_body = _('''Cordial Saludo,<br/><br/>La factura ''' + self.invoice_id.number +
                      ''' del cliente ''' + self.invoice_id.partner_id.name + ''' no pudo ser ''' +
                      '''enviada a la Dian según el protocolo establecido previamente. Por '''
@@ -667,16 +667,16 @@ class AccountInvoiceDianDocument(models.Model):
 
         return True
 
-    def action_sent_zipped_file(self):
+    def action_send_zipped_file(self):
         if self._get_GetStatus(False):
             return True
 
         msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s,\n\nContact with your administrator "
                 "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
-                "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
+                "and change the Invoice Type to 'Biller Contingency Invoice'.")
         msg2 = _("Unknown Error: %s\n\nContact with your administrator "
                 "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
-                "and change the Invoice Type to 'Factura por Contingencia Facturador'.")
+                "and change the Invoice Type to 'Biller Contingency Invoice'.")
         b = "http://schemas.datacontract.org/2004/07/UploadDocumentResponse"
         wsdl = DIAN['wsdl-hab']
 
@@ -773,7 +773,7 @@ class AccountInvoiceDianDocument(models.Model):
 
     def action_process(self):
         self.action_set_files()
-        self.action_sent_zipped_file()
+        self.action_send_zipped_file()
 
         return True
 

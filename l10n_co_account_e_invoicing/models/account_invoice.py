@@ -88,17 +88,17 @@ class AccountInvoice(models.Model):
         compute="_get_warn_certificate",
         store=False)
 	operation_type = fields.Selection(
-        [('10', 'Estandar *'),
-		 ('20', 'Nota Crédito que referencia una factura electrónica'),
-		 ('22', 'Nota Crédito sin referencia a facturas *'),
-		 ('30', 'Nota Débito que referencia una factura electrónica.'),
-		 ('32', 'Nota Débito sin referencia a facturas *')],
+        [('10', 'Standard *'),
+		 ('20', 'Credit note that references an e-invoice'),
+		 ('22', 'Credit note without reference to invoices *'),
+		 ('30', 'Debit note that references an e-invoice'),
+		 ('32', 'Debit note without reference to invoices *')],
         string='Operation Type',
         default=_default_operation_type)
 	invoice_type_code = fields.Selection(
-        [('01', 'Factura de Venta'),
-         ('03', 'Factura por Contingencia Facturador'),
-         ('04', 'Factura por Contingencia DIAN')],
+        [('01', 'Sales Invoice'),
+         ('03', 'Biller Contingency Invoice'),
+         ('04', 'DIAN Contingency Invoice')],
         string='Invoice Type',
         default=_default_invoice_type_code)
 	send_invoice_to_dian = fields.Selection(
@@ -152,7 +152,7 @@ class AccountInvoice(models.Model):
 
 					if invoice.send_invoice_to_dian == '0':
 						if invoice.invoice_type_code in ('01', '02'):
-							dian_document.action_sent_zipped_file()
+							dian_document.action_send_zipped_file()
 						elif invoice.invoice_type_code == '04':
 							dian_document.action_send_mail()
 
@@ -199,9 +199,9 @@ class AccountInvoice(models.Model):
 			'technical_key': technical_key}
 
 	def _get_billing_reference(self):
-		msg1 = _("You can not make a refund invoice of an invoce with state different to "
+		msg1 = _("You can not make a refund invoice of an invoice with state different to "
 				 "'Open' or 'Paid'.")
-		msg2 = _("You can not make a refund invoice of an invoce with DIAN documents with "
+		msg2 = _("You can not make a refund invoice of an invoice with DIAN documents with "
 				 "state 'Draft', 'Sent' or 'Cancelled'.")
 		billing_reference = {}
 
