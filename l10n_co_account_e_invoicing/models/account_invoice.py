@@ -273,12 +273,18 @@ class AccountInvoice(models.Model):
 				tax_name = tax.tax_id.tax_group_id.tax_group_type_id.name
 				tax_type = tax.tax_id.tax_group_id.tax_group_type_id.type
 				tax_percent = '{:.2f}'.format(tax.tax_id.amount)
+				tax_amount = tax.amount
 
 				if tax_type == 'withholding_tax' and tax.tax_id.amount == 0:
 					raise UserError(msg2 % tax.name)
-				elif tax_type == 'tax' and tax.tax_id.amount <= 0:
+	
+				if tax_type == 'tax' and tax.tax_id.amount <= 0:
 					raise UserError(msg3 % tax.name)
-				elif tax_type == 'withholding_tax' and tax.tax_id.amount > 0:
+
+				if tax_amount != (tax.base * tax.tax_id.amount / 100):
+					tax_amount = (tax.base * tax.tax_id.amount / 100)
+
+				if tax_type == 'withholding_tax' and tax.tax_id.amount > 0:
 					if tax_code not in withholding_taxes:
 						withholding_taxes[tax_code] = {}
 						withholding_taxes[tax_code]['total'] = 0
@@ -290,10 +296,10 @@ class AccountInvoice(models.Model):
 						withholding_taxes[tax_code]['taxes'][tax_percent]['base'] = 0
 						withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
 
-					withholding_taxes[tax_code]['total'] += tax.amount * (-1)
+					withholding_taxes[tax_code]['total'] += tax_amount * (-1)
 					withholding_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
-					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount * (-1)
-				if tax_type == 'withholding_tax' and tax.tax_id.amount < 0:
+					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax_amount * (-1)
+				elif tax_type == 'withholding_tax' and tax.tax_id.amount < 0:
 					#TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN
 					#Solo las positivas que indicarian una autorretencion, Si la DIAN
 					#pide que se envien las retenciones, seria quitar o comentar este if
@@ -310,9 +316,9 @@ class AccountInvoice(models.Model):
 						taxes[tax_code]['taxes'][tax_percent]['base'] = 0
 						taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
 
-					taxes[tax_code]['total'] += tax.amount
+					taxes[tax_code]['total'] += tax_amount
 					taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
-					taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount
+					taxes[tax_code]['taxes'][tax_percent]['amount'] += tax_amount
 
 		if '01' not in taxes:
 			taxes['01'] = {}
@@ -368,12 +374,12 @@ class AccountInvoice(models.Model):
 			brand_name = False
 			model_name = False
 
-			if invoice_line.price_subtotal != 0 and invoice_line.discount != 0:
-				disc_amount = (invoice_line.price_subtotal * invoice_line.discount ) / 100
-
 			if invoice_line.price_unit != 0 and invoice_line.quantity != 0:
 				total_wo_disc = invoice_line.price_unit * invoice_line.quantity
-			
+
+			if total_wo_disc != 0 and invoice_line.discount != 0:
+				disc_amount = (total_wo_disc * invoice_line.discount) / 100
+
 			if not invoice_line.product_id or not invoice_line.product_id.default_code:
 				raise UserError(msg2 % invoice_line.name)
 
@@ -419,15 +425,17 @@ class AccountInvoice(models.Model):
 
 						if tax_type == 'withholding_tax' and tax_id.amount == 0:
 							raise UserError(msg5 % tax_id.name)
-						elif tax_type == 'tax' and tax_id.amount <= 0:
+
+						if tax_type == 'tax' and tax_id.amount <= 0:
 							raise UserError(msg6 % tax_id.name)
+
 						if tax_type == 'withholding_tax' and tax_id.amount > 0:
 							invoice_lines[count]['WithholdingTaxesTotal'] = (
 								invoice_line._get_invoice_lines_taxes(
 									tax_id,
 									tax_id.amount,
 									invoice_lines[count]['WithholdingTaxesTotal']))
-						if tax_type == 'withholding_tax' and tax_id.amount < 0:
+						elif tax_type == 'withholding_tax' and tax_id.amount < 0:
 							#TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN.
 							#Solo la parte positiva que indicaria una autoretencion, Si la DIAN
 							#pide que se envie la parte negativa, seria quitar o comentar este if
