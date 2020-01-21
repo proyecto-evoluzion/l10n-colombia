@@ -177,6 +177,11 @@ msgid "ApplicationResponse XML Filename"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
+#: selection:account.invoice,invoice_type_code:0
+msgid "Biller Contingency Invoice"
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
 #: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_account_invoice_dian_document_cufe_cude
 msgid "CUFE/CUDE"
 msgstr ""
@@ -266,6 +271,16 @@ msgid "Credit Notes Sent"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
+#: selection:account.invoice,operation_type:0
+msgid "Credit note that references an e-invoice"
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
+#: selection:account.invoice,operation_type:0
+msgid "Credit note without reference to invoices *"
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
 #: selection:account.invoice,invoice_type_code:0
 msgid "DIAN Contingency Invoice"
 msgstr ""
@@ -308,6 +323,16 @@ msgid "Debit Notes Sent"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
+#: selection:account.invoice,operation_type:0
+msgid "Debit note that references an e-invoice"
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
+#: selection:account.invoice,operation_type:0
+msgid "Debit note without reference to invoices *"
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
 #: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_account_invoice_dian_document_profile_execution_id
 #: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_res_company_profile_execution_id
 msgid "Destination Environment of Document"
@@ -338,6 +363,11 @@ msgid "Draft"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
+#: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_res_company_einvoicing_email
+msgid "E-Invoice Email, From:"
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
 #: code:addons/l10n_co_account_e_invoicing/models/ir_sequence.py:14
 #: model:ir.module.category,name:l10n_co_account_e_invoicing.category_einvoicing
 #: model:ir.ui.view,arch_db:l10n_co_account_e_invoicing.product_template_form_view
@@ -364,11 +394,6 @@ msgid "E-Invoicing Enabled"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
-#: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_res_company_einvoicing_email
-msgid "E-invoice Email From"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
 #: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_res_partner_edit_is_einvoicing_agent_field
 #: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_res_users_edit_is_einvoicing_agent_field
 #: model:res.groups,name:l10n_co_account_e_invoicing.group_edit_is_einvoicing_agent_field
@@ -388,16 +413,6 @@ msgstr ""
 #. module: l10n_co_account_e_invoicing
 #: model:ir.model.fields,help:l10n_co_account_e_invoicing.field_res_company_einvoicing_partner_no_email
 msgid "Enter the email where the invoice will be sent when the customer does not have an email."
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
-#: selection:account.invoice,invoice_type_code:0
-msgid "Export Bill"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
-#: selection:account.invoice,invoice_type_code:0
-msgid "Biller Contingency Invoice"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
@@ -564,26 +579,6 @@ msgid "Not Done"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
-#: selection:account.invoice,operation_type:0
-msgid "Credit note that references an e-invoice"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
-#: selection:account.invoice,operation_type:0
-msgid "Credit note without reference to invoices *"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
-#: selection:account.invoice,operation_type:0
-msgid "Debit note that references an e-invoice"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
-#: selection:account.invoice,operation_type:0
-msgid "Debit note without reference to invoices *"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
 #: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_res_company_notification_group_ids
 msgid "Notification Group"
 msgstr ""
@@ -604,11 +599,6 @@ msgid "Partner"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
-#: selection:account.invoice.dian.document,get_status_zip_status_code:0
-msgid "Processed Correctly"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
 #: model:ir.ui.view,arch_db:l10n_co_account_e_invoicing.account_invoice_dian_document_view_form
 msgid "Process"
 msgstr ""
@@ -616,6 +606,11 @@ msgstr ""
 #. module: l10n_co_account_e_invoicing
 #: model:ir.ui.view,arch_db:l10n_co_account_e_invoicing.view_company_form
 msgid "Process DIAN Documents"
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
+#: selection:account.invoice.dian.document,get_status_zip_status_code:0
+msgid "Processed Correctly"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
@@ -694,13 +689,13 @@ msgid "Send Zip Code?"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
-#: selection:account.invoice.dian.document,state:0
-msgid "Sent"
+#: model:ir.ui.view,arch_db:l10n_co_account_e_invoicing.account_invoice_dian_document_view_form
+msgid "Send Zipped File"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
-#: model:ir.ui.view,arch_db:l10n_co_account_e_invoicing.account_invoice_dian_document_view_form
-msgid "Send Zipped File"
+#: selection:account.invoice.dian.document,state:0
+msgid "Sent"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
@@ -805,7 +800,7 @@ msgstr ""
 #. module: l10n_co_account_e_invoicing
 #: code:addons/l10n_co_account_e_invoicing/models/res_partner.py:67
 #, python-format
-msgid "The field \"E-invoicing email\" is not correctly filled.\n"
+msgid "The field 'E-Invoicing Email' is not correctly filled.\n"
 "\n"
 "Please add @ and dot (.)"
 msgstr ""
@@ -907,6 +902,12 @@ msgstr ""
 #, python-format
 msgid "Unknown Error: %s\n"
 "."
+msgstr ""
+
+#. module: l10n_co_account_e_invoicing
+#: model:ir.model.fields,help:l10n_co_account_e_invoicing.field_product_product_reference_price
+#: model:ir.model.fields,help:l10n_co_account_e_invoicing.field_product_template_reference_price
+msgid "Use this field if the reference price does not depend on the cost price"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
@@ -1028,15 +1029,15 @@ msgid "Your journal: %s, has no a invoice sequence"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
-#: code:addons/l10n_co_account_e_invoicing/models/account_invoice_dian_document.py:317
+#: code:addons/l10n_co_account_e_invoicing/models/account_invoice_dian_document.py:318
 #, python-format
-msgid "Your journal: %s, has no a invoice sequence with type equal to E-Invoicing"
+msgid "Your journal: %s, has no a invoice sequence with type equal to Contingency Checkbook E-Invoicing"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
-#: code:addons/l10n_co_account_e_invoicing/models/account_invoice_dian_document.py:318
+#: code:addons/l10n_co_account_e_invoicing/models/account_invoice_dian_document.py:317
 #, python-format
-msgid "Your journal: %s, has no a invoice sequence with type equal toContingency Checkbook E-Invoicing"
+msgid "Your journal: %s, has no a invoice sequence with type equal to E-Invoicing"
 msgstr ""
 
 #. module: l10n_co_account_e_invoicing
@@ -1129,10 +1130,4 @@ msgstr ""
 #. module: l10n_co_account_e_invoicing
 #: model:ir.model.fields,field_description:l10n_co_account_e_invoicing.field_product_scheme_name
 msgid "schemeName"
-msgstr ""
-
-#. module: l10n_co_account_e_invoicing
-#: model:ir.model.fields,help:l10n_co_account_e_invoicing.field_product_product_reference_price
-#: model:ir.model.fields,help:l10n_co_account_e_invoicing.field_product_template_reference_price
-msgid "Use this field if the reference price does not depend on the cost price"
 msgstr ""
