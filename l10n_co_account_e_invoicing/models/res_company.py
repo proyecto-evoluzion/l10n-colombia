@@ -26,8 +26,8 @@ class ResCompany(models.Model):
         'Destination Environment of Document',
         default='2',
         required=True)
-    test_set_id = fields.Char(string='Test Set Id')
-    software_id = fields.Char(string='Software Id')
+    test_set_id = fields.Char(string='Test Set ID')
+    software_id = fields.Char(string='Software ID')
     software_pin = fields.Char(string='Software PIN')
     certificate_filename = fields.Char(string='Certificate Filename')
     certificate_file = fields.Binary(string='Certificate File')
@@ -36,14 +36,14 @@ class ResCompany(models.Model):
     certificate_remaining_days = fields.Integer(
         string='Certificate Remaining Days',
         default=False)
-    signature_policy_url = fields.Char(string='Signature Policy Url')
+    signature_policy_url = fields.Char(string='Signature Policy URL')
     signature_policy_description = fields.Char(string='Signature Policy Description')
     files_path = fields.Char(string='Files Path')
     einvoicing_email = fields.Char(
-        string='E-invoice Email From',
+        string='E-Invoice Email, From:',
         help="Enter the e-invoice sender's email.")
     einvoicing_partner_no_email = fields.Char(
-        string='Failed Emails To', 
+        string='Failed Emails, To:', 
         help='Enter the email where the invoice will be sent when the customer does not have an email.')
     report_template = fields.Many2one(
         string='Report Template',

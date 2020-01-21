@@ -15,7 +15,7 @@ class ResPartner(models.Model):
 		 ('no_but', 'No, but has email'),
 		 ('no', 'No'),
 		 ('unknown', 'Unknown')],
-        string='Is E-Invoicing Agent?',
+        string='Is an E-Invoicing Agent?',
         default=False)
 	einvoicing_email = fields.Char(string='E-Invoicing Email')
 	view_einvoicing_email_field = fields.Boolean(
@@ -23,7 +23,7 @@ class ResPartner(models.Model):
 		compute='_get_view_einvoicing_email_field',
 		store=False)
 	edit_is_einvoicing_agent_field = fields.Boolean(
-		string="Edit 'Is E-Invoicing Agent?' Field",
+		string="Edit 'Is an E-Invoicing Agent?' Field",
 		compute='_get_edit_is_einvoicing_agent_field',
 		store=False)
 
@@ -64,8 +64,8 @@ class ResPartner(models.Model):
 	   if self.einvoicing_email:
 			match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", self.einvoicing_email)
 			if match == None:
-				raise ValidationError(_('The field "E-invoicing email" is not correctly filled.\n\n'+
-										'Please add @ and dot (.)'))
+				raise ValidationError(_("The field 'E-Invoicing Email' is not correctly filled.\n\n"
+										"Please add @ and dot (.)"))
 
 	def _get_accounting_partner_party_values(self):
 		msg1 = _("'%s' does not have a person type established.")

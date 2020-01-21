@@ -7,7 +7,7 @@
             <field name="category_id" ref="l10n_co_account_e_invoicing.category_einvoicing"/>
         </record>
         <record model="res.groups" id="group_edit_is_einvoicing_agent_field">
-            <field name="name">Edit 'Is E-Invoicing Agent?' Field</field>
+            <field name="name">Edit 'Is an E-Invoicing Agent?' Field</field>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
             <field name="category_id" ref="l10n_co_account_e_invoicing.category_einvoicing"/>
         </record>
@@ -22,7 +22,7 @@
             <field name="category_id" ref="l10n_co_account_e_invoicing.category_einvoicing"/>
         </record>
         <record model="res.groups" id="group_send_invoice_dian_field">
-            <field name="name">View 'Send Invoice to DIAN?'' Field</field>
+            <field name="name">View 'Send Invoice to DIAN?' Field</field>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
             <field name="category_id" ref="l10n_co_account_e_invoicing.category_einvoicing"/>
         </record>
