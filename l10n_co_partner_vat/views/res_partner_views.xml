@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="view_partner_form" model="ir.ui.view">
+        <record id="view_partner_property_form" model="ir.ui.view">
             <field name="model">res.partner</field>
-            <field name="inherit_id" ref="base_vat.view_partner_form"/>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
             <field name="arch" type="xml">
                 <field name="property_account_position_id" position="replace"/>
-                <label for="vat" position="replace"/>
-                <div name="vat_info" position="replace"/>
                 <field name="country_id" position="attributes">
                     <attribute name="required">1</attribute>
                 </field>
@@ -26,6 +24,16 @@
                     <field name="vat" invisible="1"/>
                 </field>
                 <group name="fiscal_information" position="replace"/>
+            </field>
+        </record>
+
+        <record id="view_partner_form" model="ir.ui.view">
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base_vat.view_partner_form"/>
+            <field name="arch" type="xml">
+                <field name="vat" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
             </field>
         </record>
 
