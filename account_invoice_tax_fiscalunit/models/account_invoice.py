@@ -34,10 +34,13 @@ class AccountInvoice(models.Model):
     def write(self, vals):
         rec = super(AccountInvoice, self).write(vals)
 
+        for invoice in self:
+            invoice.invoice_line_ids._recompute_tax_id()
+        '''
         if vals.get('invoice_line_ids'):
             for invoice in self:
                 invoice.invoice_line_ids._recompute_tax_id()
-            '''
+            
             for line in vals.get('invoice_line_ids'):
                 if line[0] == 2:
                     for invoice in self:
@@ -55,7 +58,7 @@ class AccountInvoice(models.Model):
                         invoice.invoice_line_ids._recompute_tax_id()
 
                     break
-            '''
+        '''
         return rec
 
     @api.model
