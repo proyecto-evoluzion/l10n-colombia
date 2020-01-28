@@ -18,12 +18,13 @@
             <field name="model">account.invoice.dian.document</field>
             <field name="arch" type="xml">
                 <tree string="DIAN Documents"
+                    default_order="zipped_filename"
                     decoration-info="state=='draft'"
                     decoration-muted="state=='cancel'">
                     <field name="invoice_id"/>
                     <field name="cufe_cude"/>
                     <field name="create_date"/>
-                    <field name="xml_filename"/>
+                    <field name="zipped_filename"/>
                     <field name="state"/>
                     <field name="company_id"
                         groups="base.group_multi_company"
@@ -45,8 +46,8 @@
                             type="object"
                             states="draft,sent"
                             class="btn-primary"/>
-                        <button name="action_sent_zipped_file"
-                            string="Sent Zipped File"
+                        <button name="action_send_zipped_file"
+                            string="Send Zipped File"
                             type="object"
                             class="btn-primary"
                             attrs="{'invisible': ['|', '|',
@@ -58,7 +59,7 @@
                             type="object"
                             class="btn-primary"
                             attrs="{'invisible': [('zip_key', '=', False)]}"/>
-                        <button name="action_GetStatus"
+                        <button name="action_GetStatus_without_send_mail"
                             string="GetStatus"
                             type="object"
                             class="btn-primary"
@@ -66,12 +67,15 @@
                                 ('cufe_cude', '=', False),
                                 ('xml_file', '=', False),
                                 ('zipped_file', '=', False),
-                                ('state', 'in', ('draft', 'cancel'))]}"/>
-                        <button name="action_reprocess"
-                            string="Reprocess"
+                                ('state', 'in', ('cancel'))]}"/>
+                        <button name="action_process"
+                            string="Process"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': [('profile_execution_id', '=', '1')]}"/>
+                            attrs="{'invisible': ['|', '|',
+                                ('xml_file', '=', False),
+                                ('zipped_file', '=', False),
+                                ('state', 'in', ('done', 'cancel'))]}"/>
                         <button name="action_send_mail"
                             string="Send Mail"
                             type="object"

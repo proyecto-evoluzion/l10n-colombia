@@ -4,7 +4,7 @@
 
 from global_functions import get_pkcs12
 from datetime import datetime
-from odoo import api, models, fields, _
+from odoo import api, models, fields, SUPERUSER_ID, _
 from odoo.exceptions import UserError
 
 
@@ -16,9 +16,8 @@ class AccountInvoice(models.Model):
 		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_operation_type_field = False
 
-		#raise Warning(self.env.uid, self.env.user.id, self._uid)
-
-		if user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field'):
+		if (user.has_group('l10n_co_account_e_invoicing.group_view_operation_type_field')
+				and self.env.user.id != SUPERUSER_ID):
 			view_operation_type_field = True
 
 		if 'type' in self._context.keys():
@@ -36,9 +35,10 @@ class AccountInvoice(models.Model):
 		user = self.env['res.users'].search([('id', '=', self.env.user.id)])
 		view_invoice_type_field = False
 
-		if user.has_group('l10n_co_account_e_invoicing.group_view_invoice_type_field'):
+		if (user.has_group('l10n_co_account_e_invoicing.group_view_invoice_type_field')
+				and self.env.user.id != SUPERUSER_ID):
 			view_invoice_type_field = True
-		
+
 		if 'type' in self._context.keys():
 			if self._context['type'] == 'out_invoice' and not view_invoice_type_field:
 				return '01'
@@ -88,17 +88,17 @@ class AccountInvoice(models.Model):
         compute="_get_warn_certificate",
         store=False)
 	operation_type = fields.Selection(
-        [('10', 'Estandar *'),
-		 ('20', 'Nota Crédito que referencia una factura electrónica'),
-		 ('22', 'Nota Crédito sin referencia a facturas *'),
-		 ('30', 'Nota Débito que referencia una factura electrónica.'),
-		 ('32', 'Nota Débito sin referencia a facturas *')],
+        [('10', 'Standard *'),
+		 ('20', 'Credit note that references an e-invoice'),
+		 ('22', 'Credit note without reference to invoices *'),
+		 ('30', 'Debit note that references an e-invoice'),
+		 ('32', 'Debit note without reference to invoices *')],
         string='Operation Type',
         default=_default_operation_type)
 	invoice_type_code = fields.Selection(
-        [('01', 'Factura de Venta'),
-         ('03', 'Factura por Contingencia Facturador'),
-         ('04', 'Factura por Contingencia DIAN')],
+        [('01', 'Sales Invoice'),
+         ('03', 'Biller Contingency Invoice'),
+         ('04', 'DIAN Contingency Invoice')],
         string='Invoice Type',
         default=_default_invoice_type_code)
 	send_invoice_to_dian = fields.Selection(
@@ -152,7 +152,7 @@ class AccountInvoice(models.Model):
 
 					if invoice.send_invoice_to_dian == '0':
 						if invoice.invoice_type_code in ('01', '02'):
-							dian_document.action_sent_zipped_file()
+							dian_document.action_send_zipped_file()
 						elif invoice.invoice_type_code == '04':
 							dian_document.action_send_mail()
 
@@ -199,9 +199,9 @@ class AccountInvoice(models.Model):
 			'technical_key': technical_key}
 
 	def _get_billing_reference(self):
-		msg1 = _("You can not make a refund invoice of an invoce with state different to "
+		msg1 = _("You can not make a refund invoice of an invoice with state different to "
 				 "'Open' or 'Paid'.")
-		msg2 = _("You can not make a refund invoice of an invoce with DIAN documents with "
+		msg2 = _("You can not make a refund invoice of an invoice with DIAN documents with "
 				 "state 'Draft', 'Sent' or 'Cancelled'.")
 		billing_reference = {}
 
@@ -273,12 +273,18 @@ class AccountInvoice(models.Model):
 				tax_name = tax.tax_id.tax_group_id.tax_group_type_id.name
 				tax_type = tax.tax_id.tax_group_id.tax_group_type_id.type
 				tax_percent = '{:.2f}'.format(tax.tax_id.amount)
+				tax_amount = tax.amount
 
 				if tax_type == 'withholding_tax' and tax.tax_id.amount == 0:
 					raise UserError(msg2 % tax.name)
-				elif tax_type == 'tax' and tax.tax_id.amount <= 0:
+	
+				if tax_type == 'tax' and tax.tax_id.amount <= 0:
 					raise UserError(msg3 % tax.name)
-				elif tax_type == 'withholding_tax' and tax.tax_id.amount > 0:
+
+				if tax_amount != (tax.base * tax.tax_id.amount / 100):
+					tax_amount = (tax.base * tax.tax_id.amount / 100)
+
+				if tax_type == 'withholding_tax' and tax.tax_id.amount > 0:
 					if tax_code not in withholding_taxes:
 						withholding_taxes[tax_code] = {}
 						withholding_taxes[tax_code]['total'] = 0
@@ -290,10 +296,10 @@ class AccountInvoice(models.Model):
 						withholding_taxes[tax_code]['taxes'][tax_percent]['base'] = 0
 						withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
 
-					withholding_taxes[tax_code]['total'] += tax.amount * (-1)
+					withholding_taxes[tax_code]['total'] += tax_amount * (-1)
 					withholding_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
-					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount * (-1)
-				if tax_type == 'withholding_tax' and tax.tax_id.amount < 0:
+					withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax_amount * (-1)
+				elif tax_type == 'withholding_tax' and tax.tax_id.amount < 0:
 					#TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN
 					#Solo las positivas que indicarian una autorretencion, Si la DIAN
 					#pide que se envien las retenciones, seria quitar o comentar este if
@@ -310,9 +316,9 @@ class AccountInvoice(models.Model):
 						taxes[tax_code]['taxes'][tax_percent]['base'] = 0
 						taxes[tax_code]['taxes'][tax_percent]['amount'] = 0
 
-					taxes[tax_code]['total'] += tax.amount
+					taxes[tax_code]['total'] += tax_amount
 					taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
-					taxes[tax_code]['taxes'][tax_percent]['amount'] += tax.amount
+					taxes[tax_code]['taxes'][tax_percent]['amount'] += tax_amount
 
 		if '01' not in taxes:
 			taxes['01'] = {}
@@ -368,12 +374,12 @@ class AccountInvoice(models.Model):
 			brand_name = False
 			model_name = False
 
-			if invoice_line.price_subtotal != 0 and invoice_line.discount != 0:
-				disc_amount = (invoice_line.price_subtotal * invoice_line.discount ) / 100
-
 			if invoice_line.price_unit != 0 and invoice_line.quantity != 0:
 				total_wo_disc = invoice_line.price_unit * invoice_line.quantity
-			
+
+			if total_wo_disc != 0 and invoice_line.discount != 0:
+				disc_amount = (total_wo_disc * invoice_line.discount) / 100
+
 			if not invoice_line.product_id or not invoice_line.product_id.default_code:
 				raise UserError(msg2 % invoice_line.name)
 
@@ -419,15 +425,17 @@ class AccountInvoice(models.Model):
 
 						if tax_type == 'withholding_tax' and tax_id.amount == 0:
 							raise UserError(msg5 % tax_id.name)
-						elif tax_type == 'tax' and tax_id.amount <= 0:
+
+						if tax_type == 'tax' and tax_id.amount <= 0:
 							raise UserError(msg6 % tax_id.name)
+
 						if tax_type == 'withholding_tax' and tax_id.amount > 0:
 							invoice_lines[count]['WithholdingTaxesTotal'] = (
 								invoice_line._get_invoice_lines_taxes(
 									tax_id,
 									tax_id.amount,
 									invoice_lines[count]['WithholdingTaxesTotal']))
-						if tax_type == 'withholding_tax' and tax_id.amount < 0:
+						elif tax_type == 'withholding_tax' and tax_id.amount < 0:
 							#TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN.
 							#Solo la parte positiva que indicaria una autoretencion, Si la DIAN
 							#pide que se envie la parte negativa, seria quitar o comentar este if

@@ -61,7 +61,6 @@
 	<cbc:UUID schemeID="{{ProfileExecutionID}}" schemeName="CUDE-SHA384">{{UUID}}</cbc:UUID>
 	<cbc:IssueDate>{{IssueDate}}</cbc:IssueDate>
 	<cbc:IssueTime>{{IssueTime}}</cbc:IssueTime>
-	<cbc:DueDate>{{DueDate}}</cbc:DueDate>
 	<cbc:CreditNoteTypeCode>{{CreditNoteTypeCode}}</cbc:CreditNoteTypeCode>
 <!--TODO 1.0: Que nota colocar?-->
 	<cbc:Note>{{Note}}</cbc:Note>
