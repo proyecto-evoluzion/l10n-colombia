@@ -18,7 +18,7 @@ msgstr ""
 #. module: l10n_co_account_e_invoicing
 #: model:mail.template,subject:l10n_co_account_e_invoicing.email_template_for_einvoice
 msgid "${object.company_id.name} generated the e-invoice ${object.number}"
-msgstr "{object.company_id.name} generó la factura electrónica ${object.number}"
+msgstr "${object.company_id.name} generó la factura electrónica ${object.number}"
 
 #. module: l10n_co_account_e_invoicing
 #: code:addons/l10n_co_account_e_invoicing/models/res_partner.py:76
