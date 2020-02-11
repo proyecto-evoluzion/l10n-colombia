@@ -32,7 +32,7 @@ To use this module, you need to:
 Credits
 =======
 
-Original Authors
+Authors
 ----------------
 
 * Jairo Llopis <jairo.llopis@tecnativa.com>.
