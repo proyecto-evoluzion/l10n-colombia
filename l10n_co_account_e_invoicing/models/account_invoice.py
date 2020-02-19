@@ -401,7 +401,7 @@ class AccountInvoice(models.Model):
 			invoice_lines[count] = {}
 			invoice_lines[count]['unitCode'] = invoice_line.uom_id.product_uom_code_id.code
 			invoice_lines[count]['Quantity'] = '{:.2f}'.format(invoice_line.quantity)
-			invoice_lines[count]['PriceAmount'] = '{:.2f}'.format(reference_price)
+			invoice_lines[count]['PricingReferencePriceAmount'] = '{:.2f}'.format(reference_price)
 			invoice_lines[count]['LineExtensionAmount'] = '{:.2f}'.format(invoice_line.price_subtotal)
 			invoice_lines[count]['MultiplierFactorNumeric'] = '{:.2f}'.format(invoice_line.discount)
 			invoice_lines[count]['AllowanceChargeAmount'] = '{:.2f}'.format(disc_amount)
