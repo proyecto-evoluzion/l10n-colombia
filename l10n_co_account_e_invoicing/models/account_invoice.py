@@ -371,6 +371,8 @@ class AccountInvoice(models.Model):
 
 			disc_amount = 0
 			total_wo_disc = 0
+			percentage = 100
+			margin_percentage = invoice_line.product_id.margin_percentage
 			brand_name = False
 			model_name = False
 
@@ -383,11 +385,13 @@ class AccountInvoice(models.Model):
 			if not invoice_line.product_id or not invoice_line.product_id.default_code:
 				raise UserError(msg2 % invoice_line.name)
 
-			if invoice_line.product_id.margin_percentage > 0:
-				reference_price = invoice_line.product_id.margin_percentage
+			if invoice_line.product_id.reference_price > 0:
+				reference_price = invoice_line.product_id.reference_price
+			elif 0 < margin_percentage < 100:
+				percentage = (percentage - margin_percentage) / 100
+				reference_price = invoice_line.product_id.standard_price / percentage
 			else:
-				reference_price = invoice_line.product_id.margin_percentage * \
-					invoice_line.product_id.standard_price
+				reference_price = 0
 
 			if invoice_line.price_subtotal <= 0 and reference_price <= 0:
 				raise UserError(msg3 % invoice_line.product_id.default_code)
