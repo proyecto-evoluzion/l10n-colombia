@@ -2,8 +2,8 @@
 # Copyright 2015 Grupo ESOC Ingeniería de Servicios, S.L.U. - Jairo Llopis
 # Copyright 2015 Antiun Ingenieria S.L. - Antonio Espinosa
 # Copyright 2017 Tecnativa - Pedro M. Baeza
-# Copyright 2018 EXA Auto Parts S.A.S Guillermo Montoya <Github@guillermm>
-# Copyright 2018 EXA Auto Parts S.A.S Joan Marín <Github@JoanMarin>
+# Copyright 2018 Guillermo Montoya <Github@guillermm>
+# Copyright 2018 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
@@ -31,7 +31,7 @@ class ResPartner(models.Model):
             if firstname:
                 names.append(firstname)
             if othernames:
-                names.append(othernames)                 
+                names.append(othernames)
             if lastname:
                 names.append(lastname)
             if lastname2:
@@ -46,7 +46,8 @@ class ResPartner(models.Model):
             if firstname:
                 names.append(firstname)
             if othernames:
-                names.append(othernames)       
+                names.append(othernames)
+
         return u" ".join(names)
 
     @api.depends("firstname", "othernames", "lastname", "lastname2")
@@ -54,7 +55,10 @@ class ResPartner(models.Model):
         """Write the 'name' according to splitted data."""
         for partner in self:
             partner.name = self._get_computed_name(
-                partner.firstname, partner.othernames, partner.lastname, partner.lastname2)
+                partner.firstname,
+                partner.othernames,
+                partner.lastname,
+                partner.lastname2)
 
     @api.model
     def _names_order_default(self):
@@ -82,14 +86,13 @@ class ResPartner(models.Model):
             'firstname': False,
             'othernames': False,
             'lastname': name or False,
-            'lastname2': False,
-        }
+            'lastname2': False}
 
         if not is_company and name:
             order = self._get_names_order()
             result = super(ResPartner, self)._get_inverse_name(name, is_company)
             parts = []
-            
+
             if order == 'first_last':
                 if result['lastname2']:
                     parts = result['lastname2'].split(" ", 1)

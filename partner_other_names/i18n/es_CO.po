@@ -16,8 +16,8 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: partner_other_names
-#: model:ir.model.fields,field_description:partner_other_names.field_res_partner_othernames
-#: model:ir.model.fields,field_description:partner_other_names.field_res_users_othernames
+#: model:ir.model.fields,field_description:partner_other_names.field_res_partner__othernames
+#: model:ir.model.fields,field_description:partner_other_names.field_res_users__othernames
 msgid "Other Names"
 msgstr "Otros Nombres"
 
