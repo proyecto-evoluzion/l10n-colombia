@@ -8,6 +8,7 @@ sys.setdefaultencoding('utf8')
 from StringIO import StringIO
 from datetime import datetime
 from base64 import b64encode, b64decode
+from validators import url
 from zipfile import ZipFile
 import global_functions
 from pytz import timezone
@@ -446,6 +447,9 @@ class AccountInvoiceDianDocument(models.Model):
                 self._get_debit_note_values(),
                 'DebitNote')
 
+        if not url(self.company_id.signature_policy_url):
+            return False
+
         xml_with_signature = global_functions.get_xml_with_signature(
             xml_without_signature,
             self.company_id.signature_policy_url,
@@ -472,8 +476,13 @@ class AccountInvoiceDianDocument(models.Model):
         if not self.xml_filename or not self.zipped_filename:
             self._set_filenames()
 
-        self.write({'xml_file': b64encode(self._get_xml_file())})
-        self.write({'zipped_file': b64encode(self._get_zipped_file())})
+        xml_file = self._get_xml_file()
+
+        if xml_file:
+            self.write({'xml_file': b64encode(xml_file)})
+            self.write({'zipped_file': b64encode(self._get_zipped_file())})
+        else:
+            return xml_file
 
         return True
 
@@ -772,8 +781,10 @@ class AccountInvoiceDianDocument(models.Model):
         return self._get_GetStatus(False)
 
     def action_process(self):
-        self.action_set_files()
-        self.action_send_zipped_file()
+        if self.action_set_files():
+            self.action_send_zipped_file()
+        else:
+            self.send_failure_email()
 
         return True
 
