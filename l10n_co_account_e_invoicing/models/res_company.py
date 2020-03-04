@@ -45,6 +45,8 @@ class ResCompany(models.Model):
     einvoicing_partner_no_email = fields.Char(
         string='Failed Emails, To:', 
         help='Enter the email where the invoice will be sent when the customer does not have an email.')
+    einvoicing_receives_all_emails = fields.Char(
+        string='Email that receives all emails')
     report_template = fields.Many2one(
         string='Report Template',
         comodel_name='ir.actions.report.xml')

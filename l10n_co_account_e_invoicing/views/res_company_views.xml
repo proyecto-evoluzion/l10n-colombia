@@ -46,6 +46,7 @@
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="einvoicing_partner_no_email"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
+                            <field name="einvoicing_receives_all_emails"/>
                             <field name="signature_policy_url"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="signature_policy_description"
