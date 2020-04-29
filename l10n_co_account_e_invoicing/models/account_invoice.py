@@ -375,7 +375,6 @@ class AccountInvoice(models.Model):
 
             disc_amount = 0
             total_wo_disc = 0
-            percentage = 100
             brand_name = False
             model_name = False
 
@@ -487,6 +486,7 @@ class AccountInvoice(models.Model):
 
     def set_invoice_lines_price_reference(self):
         for invoice_line in self.invoice_line_ids:
+            percentage = 100
             margin_percentage = invoice_line.product_id.margin_percentage
 
             if invoice_line.product_id.reference_price > 0:
