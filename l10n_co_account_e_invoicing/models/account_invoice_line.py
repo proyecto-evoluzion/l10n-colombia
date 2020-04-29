@@ -3,10 +3,20 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models
+import odoo.addons.decimal_precision as dp
 
 
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
+
+    cost_price = fields.Float(
+        string='Cost Price',
+        digits=dp.get_precision('Product Price'),
+        default=0)
+    reference_price = fields.Float(
+        string='Reference Price',
+        digits=dp.get_precision('Product Price'),
+        default=0)
 
     def _get_invoice_lines_taxes(self, tax, tax_amount, invoice_line_taxes_total):
         tax_code = tax.tax_group_id.tax_group_type_id.code
