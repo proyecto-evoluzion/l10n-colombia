@@ -448,7 +448,7 @@ class AccountInvoiceDianDocument(models.Model):
                 'DebitNote')
 
         try:
-            response = urlopen(self.company_id.signature_policy_url, timeout=1)
+            response = urlopen(self.company_id.signature_policy_url, timeout=2)
 
             if response.getcode() != 200:
                 return False

@@ -61,7 +61,7 @@ class ResCompany(models.Model):
         msg = _('Invalid URL.')
 
         try:
-            response = urlopen(self.signature_policy_url, timeout=1)
+            response = urlopen(self.signature_policy_url, timeout=2)
 
             if response.getcode() != 200:
                 raise ValidationError(msg)
