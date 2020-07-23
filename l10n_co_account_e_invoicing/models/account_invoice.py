@@ -2,7 +2,6 @@
 # Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from global_functions import get_pkcs12
 from datetime import datetime
 from odoo import api, models, fields, SUPERUSER_ID, _
 from odoo.exceptions import UserError
@@ -150,7 +149,7 @@ class AccountInvoice(models.Model):
                         'zipped_filename': zipped_filename,
                         'ar_xml_filename': ar_xml_filename})
                     set_files = dian_document.action_set_files()
-                     
+
                     if invoice.send_invoice_to_dian == '0':
                         if set_files:
                             if invoice.invoice_type_code in ('01', '02'):
@@ -236,7 +235,7 @@ class AccountInvoice(models.Model):
                     if dian_document.state == 'sent':
                         dian_document_state_sent = True
 
-                if  ((not dian_document_state_done and dian_document_state_cancel)
+                if ((not dian_document_state_done and dian_document_state_cancel)
                         or dian_document_state_draft
                         or dian_document_state_sent):
                     raise UserError(msg2)
@@ -249,7 +248,7 @@ class AccountInvoice(models.Model):
         date = self._get_currency_rate_date() or fields.Date.context_today(self)
 
         if self.currency_id != company_currency:
-            currency =self.currency_id.with_context(date=date)
+            currency = self.currency_id.with_context(date=date)
             rate = currency.compute(rate, company_currency)
 
         return {
@@ -263,10 +262,10 @@ class AccountInvoice(models.Model):
                  "contact with your administrator.")
         msg2 = _("Your withholding tax: '%s', has amount equal to zero (0), the withholding taxes " +
                  "must have amount different to zero (0), contact with your administrator.")
-        msg3 = _("Your tax: '%s', has negative amount or an amount equal to zero (0), the taxes " + 
+        msg3 = _("Your tax: '%s', has negative amount or an amount equal to zero (0), the taxes " +
                  "must have an amount greater than zero (0), contact with your administrator.")
         taxes = {}
-        withholding_taxes= {}
+        withholding_taxes = {}
 
         for tax in self.tax_line_ids:
             if tax.tax_id.tax_group_id.is_einvoicing:
@@ -281,7 +280,7 @@ class AccountInvoice(models.Model):
 
                 if tax_type == 'withholding_tax' and tax.tax_id.amount == 0:
                     raise UserError(msg2 % tax.name)
-    
+
                 if tax_type == 'tax' and tax.tax_id.amount <= 0:
                     raise UserError(msg3 % tax.name)
 
@@ -304,9 +303,9 @@ class AccountInvoice(models.Model):
                     withholding_taxes[tax_code]['taxes'][tax_percent]['base'] += tax.base
                     withholding_taxes[tax_code]['taxes'][tax_percent]['amount'] += tax_amount * (-1)
                 elif tax_type == 'withholding_tax' and tax.tax_id.amount < 0:
-                    #TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN
-                    #Solo las positivas que indicarian una autorretencion, Si la DIAN
-                    #pide que se envien las retenciones, seria quitar o comentar este if
+                    # TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN
+                    # Solo las positivas que indicarian una autorretencion, Si la DIAN
+                    # pide que se envien las retenciones, seria quitar o comentar este if
                     pass
                 else:
                     if tax_code not in taxes:
@@ -363,7 +362,7 @@ class AccountInvoice(models.Model):
                  "contact with your administrator.")
         msg5 = _("Your withholding tax: '%s', has amount equal to zero (0), the withholding taxes " +
                  "must have amount different to zero (0), contact with your administrator.")
-        msg6 = _("Your tax: '%s', has negative amount or an amount equal to zero (0), the taxes " + 
+        msg6 = _("Your tax: '%s', has negative amount or an amount equal to zero (0), the taxes " +
                  "must have an amount greater than zero (0), contact with your administrator.")
 
         invoice_lines = {}
@@ -434,16 +433,16 @@ class AccountInvoice(models.Model):
                                     tax_id.amount,
                                     invoice_lines[count]['WithholdingTaxesTotal']))
                         elif tax_type == 'withholding_tax' and tax_id.amount < 0:
-                            #TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN.
-                            #Solo la parte positiva que indicaria una autoretencion, Si la DIAN
-                            #pide que se envie la parte negativa, seria quitar o comentar este if
+                            # TODO 3.0 Las retenciones se recomienda no enviarlas a la DIAN.
+                            # Solo la parte positiva que indicaria una autoretencion, Si la DIAN
+                            # pide que se envie la parte negativa, seria quitar o comentar este if
                             pass
                         else:
                             invoice_lines[count]['TaxesTotal'] = (
                                 invoice_line._get_invoice_lines_taxes(
                                     tax_id,
                                     tax_id.amount,
-                                    invoice_lines[count]['TaxesTotal']))			
+                                    invoice_lines[count]['TaxesTotal']))
 
             if '01' not in invoice_lines[count]['TaxesTotal']:
                 invoice_lines[count]['TaxesTotal']['01'] = {}
