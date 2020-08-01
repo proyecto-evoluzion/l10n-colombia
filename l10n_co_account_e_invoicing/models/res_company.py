@@ -2,11 +2,11 @@
 # Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import global_functions
 from datetime import datetime
 from urllib2 import urlopen
 from requests import post, exceptions
 from lxml import etree
+import global_functions
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 
@@ -15,6 +15,12 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     einvoicing_enabled = fields.Boolean(string='E-Invoicing Enabled')
+    automatic_delivery_datetime = fields.Boolean(string='Automatic Delivery Datetime?')
+    additional_hours_delivery_datetime = fields.Float(
+        string='Additional Hours',
+        help='Additional hours to invoice date for delivery date',
+        digits=(12, 4),
+        default=False)
     send_invoice_to_dian = fields.Selection(
         [('0', 'Immediately'),
          ('1', 'After 1 Day'),
@@ -43,7 +49,7 @@ class ResCompany(models.Model):
         string='E-Invoice Email, From:',
         help="Enter the e-invoice sender's email.")
     einvoicing_partner_no_email = fields.Char(
-        string='Failed Emails, To:', 
+        string='Failed Emails, To:',
         help='Enter the email where the invoice will be sent when the customer does not have an email.')
     einvoicing_receives_all_emails = fields.Char(
         string='Email that receives all emails')
@@ -141,7 +147,7 @@ class ResCompany(models.Model):
             count = 0
             dian_documents = self.env['account.invoice.dian.document'].search(
                 [('state', 'in', ('draft', 'sent')), ('company_id', '=', company.id)],
-                order = 'zipped_filename asc')
+                order='zipped_filename asc')
 
             for dian_document in dian_documents:
                 today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
