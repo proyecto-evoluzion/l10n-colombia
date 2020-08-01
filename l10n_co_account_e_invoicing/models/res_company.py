@@ -15,6 +15,12 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     einvoicing_enabled = fields.Boolean(string='E-Invoicing Enabled')
+    automatic_delivery_datetime = fields.Boolean(string='Automatic Delivery Datetime?')
+    additional_hours_delivery_datetime = fields.Float(
+        string='Additional Hours',
+        help='Additional hours to invoice date for delivery date',
+        digits=(12, 4),
+        default=False)
     send_invoice_to_dian = fields.Selection(
         [('0', 'Immediately'),
          ('1', 'After 1 Day'),

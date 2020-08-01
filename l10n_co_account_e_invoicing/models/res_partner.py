@@ -84,9 +84,6 @@ class ResPartner(models.Model):
         name = self.name
         zip_code = False
         identification_document = self.identification_document
-        first_name = False
-        family_name = False
-        middle_name = False
         telephone = False
 
         if not self.person_type:
@@ -107,14 +104,15 @@ class ResPartner(models.Model):
             if document_type_code == '31' and not self.check_digit:
                 raise UserError(msg5 % self.name)
 
-            # Punto 13.2.1. del anexo técnico version 1.8
+            # Punto 6.2.1. Documento de identificación (Tipo de Identificador Fiscal):
+            # cbc:CompanyID.@schemeName; sts:ProviderID.@schemeName del anexo técnico version 1.7
             if document_type_code not in ('11', '12', '13', '21', '22', '31', '41', '42', '50', '91'):
                 if self.person_type == '1':
                     raise UserError(msg6 % self.name)
                 else:
-                    name = 'usuario final'
+                    name = 'consumidor final'
                     document_type_code = '13'
-                    identification_document = '2222222222'
+                    identification_document = '222222222222'
         else:
             raise UserError(msg6 % self.name)
 
@@ -127,13 +125,13 @@ class ResPartner(models.Model):
 
         if self.property_account_position_id:
             if (not self.property_account_position_id.tax_level_code_ids
-                    or not self.property_account_position_id.tax_scheme_id
+                    or not self.property_account_position_id.tax_group_type_id
                     or not self.property_account_position_id.listname):
                 raise UserError(msg9 % self.name)
 
             tax_level_codes = ''
-            tax_scheme_code = self.property_account_position_id.tax_scheme_id.code
-            tax_scheme_name = self.property_account_position_id.tax_scheme_id.name
+            tax_scheme_code = self.property_account_position_id.tax_group_type_id.code
+            tax_scheme_name = self.property_account_position_id.tax_group_type_id.name
         else:
             raise UserError(msg10 % self.name)
 
@@ -151,19 +149,6 @@ class ResPartner(models.Model):
             else:
                 tax_level_codes += ';' + tax_level_code_id.code
 
-        if self.firstname:
-            first_name = self.firstname
-            middle_name = self.othernames
-        else:
-            first_name = self.othernames
-
-        if self.lastname and self.lastname2:
-            family_name = self.lastname + self.lastname2
-        elif self.lastname:
-            family_name = self.lastname
-        elif self.lastname2:
-            family_name = self.lastname2
-
         if self.phone and self.mobile:
             telephone = self.phone + " / " + self.mobile
         elif self.lastname:
@@ -171,13 +156,10 @@ class ResPartner(models.Model):
         elif self.lastname2:
             telephone = self.mobile
 
-        if identification_document == '2222222222':
-            tax_level_codes = 'ZZ'
+        if identification_document == '222222222222':
+            tax_level_codes = 'R-99-PN'
             tax_scheme_code = 'ZY'
             tax_scheme_name = 'No causa'
-            first_name = 'usuario'
-            family_name = 'final'
-            middle_name = False
 
             if self.property_account_position_id.listname != '49':
                 raise UserError(msg8 % self.name)
@@ -202,9 +184,6 @@ class ResPartner(models.Model):
             'CorporateRegistrationSchemeName': self.coc_registration_number,
             'CountryIdentificationCode': self.country_id.code,
             'CountryName': self.country_id.name,
-            'FirstName': first_name,
-            'FamilyName': family_name,
-            'MiddleName': middle_name,
             'Telephone': telephone,
             'Telefax': self.fax,
             'ElectronicMail': self.einvoicing_email}

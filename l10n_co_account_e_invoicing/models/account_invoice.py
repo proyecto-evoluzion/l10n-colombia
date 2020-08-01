@@ -2,7 +2,8 @@
 # Copyright 2019 Joan Marín <Github@JoanMarin>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from pytz import timezone
 from odoo import api, models, fields, SUPERUSER_ID, _
 from odoo.exceptions import UserError
 
@@ -86,6 +87,9 @@ class AccountInvoice(models.Model):
         string="Warn About Inactive Certificate?",
         compute="_get_warn_certificate",
         store=False)
+    delivery_datetime = fields.Datetime(
+        string='Delivery Datetime',
+        default=False)
     operation_type = fields.Selection(
         [('10', 'Standard *'),
          ('20', 'Credit note that references an e-invoice'),
@@ -95,9 +99,9 @@ class AccountInvoice(models.Model):
         string='Operation Type',
         default=_default_operation_type)
     invoice_type_code = fields.Selection(
-        [('01', 'Sales Invoice'),
-         ('03', 'Biller Contingency Invoice'),
-         ('04', 'DIAN Contingency Invoice')],
+        [('01', 'E-invoice of sale'),
+         ('03', 'E-document of transmission - type 03'),
+         ('04', 'E-invoice of sale - type 04')],
         string='Invoice Type',
         default=_default_invoice_type_code)
     send_invoice_to_dian = fields.Selection(
@@ -125,39 +129,67 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def invoice_validate(self):
+        msg = _("The 'delivery date' must be equal or greater per maximum 10 days to "
+                "the 'invoice date'.")
         res = super(AccountInvoice, self).invoice_validate()
 
         for invoice in self:
-            if invoice.company_id.einvoicing_enabled:
-                if invoice.type in ("out_invoice", "out_refund"):
-                    invoice.set_invoice_lines_price_reference()
-                    xml_filename = False
-                    zipped_filename = False
-                    ar_xml_filename = False
+            if (invoice.company_id.einvoicing_enabled
+                    and invoice.type in ("out_invoice", "out_refund")):
+                if (invoice.company_id.automatic_delivery_datetime
+                        and invoice.company_id.additional_hours_delivery_datetime
+                        and not invoice.delivery_datetime):
+                    # TODO 2.0: Mejorar
+                    invoice_datetime = datetime.strptime(
+                        invoice.date_invoice + ' 13:00:00',
+                        '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone('UTC'))
+                    hours_added = timedelta(
+                        hours=invoice.company_id.additional_hours_delivery_datetime)
+                    invoice.delivery_datetime = invoice_datetime + hours_added
 
-                    for dian_document in invoice.dian_document_ids:
-                        xml_filename = dian_document.xml_filename
-                        zipped_filename = dian_document.zipped_filename
-                        ar_xml_filename = dian_document.ar_xml_filename
-                        break
+                if not invoice.delivery_datetime:
+                    raise UserError(msg)
 
-                    dian_document_obj = self.env['account.invoice.dian.document']
-                    dian_document = dian_document_obj.create({
-                        'invoice_id': invoice.id,
-                        'company_id': invoice.company_id.id,
-                        'xml_filename': xml_filename,
-                        'zipped_filename': zipped_filename,
-                        'ar_xml_filename': ar_xml_filename})
-                    set_files = dian_document.action_set_files()
+                date_invoice = datetime.strptime(invoice.date_invoice, '%Y-%m-%d')
+                delivery_datetime = datetime.strptime(
+                    invoice.delivery_datetime,
+                    '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone('UTC'))
+                delivery_date = delivery_datetime.astimezone(
+                    timezone('America/Bogota')).strftime('%Y-%m-%d')
+                delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
+                days = (delivery_date - date_invoice).days
 
-                    if invoice.send_invoice_to_dian == '0':
-                        if set_files:
-                            if invoice.invoice_type_code in ('01', '02'):
-                                dian_document.action_send_zipped_file()
-                            elif invoice.invoice_type_code == '04':
-                                dian_document.action_send_mail()
-                        else:
-                            dian_document.send_failure_email()
+                if days < 0 or days > 10:
+                    raise UserError(msg)
+
+                invoice.set_invoice_lines_price_reference()
+                xml_filename = False
+                zipped_filename = False
+                ar_xml_filename = False
+
+                for dian_document in invoice.dian_document_ids:
+                    xml_filename = dian_document.xml_filename
+                    zipped_filename = dian_document.zipped_filename
+                    ar_xml_filename = dian_document.ar_xml_filename
+                    break
+
+                dian_document_obj = self.env['account.invoice.dian.document']
+                dian_document = dian_document_obj.create({
+                    'invoice_id': invoice.id,
+                    'company_id': invoice.company_id.id,
+                    'xml_filename': xml_filename,
+                    'zipped_filename': zipped_filename,
+                    'ar_xml_filename': ar_xml_filename})
+                set_files = dian_document.action_set_files()
+
+                if invoice.send_invoice_to_dian == '0':
+                    if set_files:
+                        if invoice.invoice_type_code in ('01', '02'):
+                            dian_document.action_send_zipped_file()
+                        elif invoice.invoice_type_code == '04':
+                            dian_document.action_send_mail()
+                    else:
+                        dian_document.send_failure_email()
 
         return res
 

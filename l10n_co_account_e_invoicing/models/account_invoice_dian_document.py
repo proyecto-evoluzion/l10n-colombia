@@ -213,6 +213,7 @@ class AccountInvoiceDianDocument(models.Model):
             ID)
         TipoAmbie = self.company_id.profile_execution_id
         customer = self.invoice_id.partner_id
+        delivery = self.invoice_id.partner_shipping_id
         NitAdq = customer.identification_document
         document_type_code = False
 
@@ -221,7 +222,7 @@ class AccountInvoiceDianDocument(models.Model):
 
         if document_type_code not in ('11', '12', '13', '21', '22', '31', '41', '42', '50', '91'):
             if customer.person_type == '2':
-                NitAdq = '2222222222'
+                NitAdq = '222222222222'
             else:
                 raise UserError(msg3 % customer.name)
 
@@ -230,10 +231,15 @@ class AccountInvoiceDianDocument(models.Model):
         else:
             QRCodeURL = DIAN['catalogo-hab']
 
-        create_date = datetime.strptime(self.invoice_id.create_date, '%Y-%m-%d %H:%M:%S')
-        create_date = create_date.replace(tzinfo=timezone('UTC'))
         IssueDate = self.invoice_id.date_invoice
-        IssueTime = create_date.astimezone(
+        # TODO 2.0: Mejorar
+        IssueTime = '08:00:00-05:00'
+        delivery_datetime = datetime.strptime(
+            self.invoice_id.delivery_datetime,
+            '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone('UTC'))
+        ActualDeliveryDate = delivery_datetime.astimezone(
+            timezone('America/Bogota')).strftime('%Y-%m-%d')
+        ActualDeliveryTime = delivery_datetime.astimezone(
             timezone('America/Bogota')).strftime('%H:%M:%S-05:00')
         ValFac = self.invoice_id.amount_untaxed
         einvoicing_taxes = self.invoice_id._get_einvoicing_taxes()
@@ -296,7 +302,9 @@ class AccountInvoiceDianDocument(models.Model):
             'IndustryClassificationCode': supplier.isic_id.code,
             'AccountingSupplierParty': supplier._get_accounting_partner_party_values(),
             'AccountingCustomerParty': customer._get_accounting_partner_party_values(),
-            'Delivery': customer._get_delivery_values(),
+            'ActualDeliveryDate': ActualDeliveryDate,
+            'ActualDeliveryTime': ActualDeliveryTime,
+            'Delivery': delivery._get_delivery_values(),
             'DeliveryTerms': {'LossRiskResponsibilityCode': False, 'LossRisk': False},
             'PaymentMeansID': self.invoice_id.payment_mean_id.code,
             'PaymentMeansCode': self.invoice_id.payment_mean_code_id.code,
@@ -343,18 +351,17 @@ class AccountInvoiceDianDocument(models.Model):
 
         xml_values = self._get_xml_values(ClTec)
         xml_values['InvoiceControl'] = active_dian_resolution
-        # Tipos de operacion
-        # Punto 14.1.5.1. del anexo tecnico version 1.8
+        # Punto 6.1.5.1. Documento Invoice – Factura electrónica del anexo tecnico version 1.7
         # 10 Estandar *
         # 09 AIU
         # 11 Mandatos
         xml_values['CustomizationID'] = self.invoice_id.operation_type
-        # Tipos de factura
-        # Punto 14.1.3 del anexo tecnico version 1.8
-        # 01 Factura de Venta
-        # 02 Factura de Exportación
-        # 03 Factura por Contingencia Facturador
-        # 04 Factura por Contingencia DIAN
+        # Punto 6.1.3. Tipo de Documento: cbc:InvoiceTypeCode y cbc:CreditnoteTypeCode
+        # del anexo tecnico version 1.7
+        # 01 Factura electrónica de venta
+        # 02 Factura electrónica de venta - exportación
+        # 03 Documento electrónico de transmisión - tipo 03
+        # 04 Factura electrónica de Venta - tipo 04
         xml_values['InvoiceTypeCode'] = self.invoice_id.invoice_type_code
         xml_values['InvoiceLines'] = self.invoice_id._get_invoice_lines()
 
@@ -368,7 +375,7 @@ class AccountInvoiceDianDocument(models.Model):
 
         xml_values = self._get_xml_values(False)
         billing_reference = self.invoice_id._get_billing_reference()
-        # Punto 14.1.5.2. del anexo tecnico version 1.8
+        # Punto 6.1.5.2. Documento CreditNote – Nota Crédito del anexo tecnico version 1.7
         # 20 Nota Crédito que referencia una factura electrónica.
         # 22 Nota Crédito sin referencia a facturas*.
         # 23 Nota Crédito para facturación electrónica V1 (Decreto 2242).
@@ -384,7 +391,8 @@ class AccountInvoiceDianDocument(models.Model):
                 'IssueDate': False,
                 'CustomizationID': False}
         # TODO 2.0: Exclusivo en referencias a documentos (elementos DocumentReference)
-        # Punto 14.1.3 del anexo tecnico version 1.8
+        # Punto 6.1.3. Tipo de Documento: cbc:InvoiceTypeCode y cbc:CreditnoteTypeCode
+        # del anexo tecnico version 1.7
         # 91 Nota Crédito
         xml_values['CreditNoteTypeCode'] = '91'
         xml_values['BillingReference'] = billing_reference
@@ -403,9 +411,9 @@ class AccountInvoiceDianDocument(models.Model):
 
         xml_values = self._get_xml_values(False)
         billing_reference = self.invoice_id._get_billing_reference()
-        # Punto 14.1.5.3. del anexo tecnico version 1.8
+        # Punto 6.1.5.3. Documento DebitNote – Nota Débito del anexo tecnico version 1.7
         # 30 Nota Débito que referencia una factura electrónica.
-        # 32 Nota Débito sin referencia a facturas *.
+        # 32 Nota Débito sin referencia a facturas*.
         # 33 Nota Débito para facturación electrónica V1 (Decreto 2242).
         if billing_reference:
             xml_values['CustomizationID'] = '30'
@@ -418,8 +426,9 @@ class AccountInvoiceDianDocument(models.Model):
                 'UUID': False,
                 'IssueDate': False,
                 'CustomizationID': False}
-        # Exclusivo en referencias a documentos (elementos DocumentReference)
-        # Punto 14.1.3 del anexo tecnico version 1.8
+        # TODO 2.0: Exclusivo en referencias a documentos (elementos DocumentReference)
+        # Punto 6.1.3. Tipo de Documento: cbc:InvoiceTypeCode y cbc:CreditnoteTypeCode
+        # del anexo tecnico version 1.7
         # 92 Nota Débito
         # TODO 2.0: DebitNoteTypeCode no existe en DebitNote
         # xml_values['DebitNoteTypeCode'] = '92'
@@ -685,10 +694,10 @@ class AccountInvoiceDianDocument(models.Model):
 
         msg1 = _("Unknown Error,\nStatus Code: %s,\nReason: %s,\n\nContact with your administrator "
                  "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
-                 "and change the Invoice Type to 'Biller Contingency Invoice'.")
+                 "and change the Invoice Type to 'E-document of transmission - type 03'.")
         msg2 = _("Unknown Error: %s\n\nContact with your administrator "
                  "or you can choose a journal with a Contingency Checkbook E-Invoicing sequence "
-                 "and change the Invoice Type to 'Biller Contingency Invoice'.")
+                 "and change the Invoice Type to 'E-document of transmission - type 03'.")
         b = "http://schemas.datacontract.org/2004/07/UploadDocumentResponse"
         wsdl = DIAN['wsdl-hab']
 
