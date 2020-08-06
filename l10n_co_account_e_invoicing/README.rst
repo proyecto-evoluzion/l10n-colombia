@@ -6,7 +6,8 @@
 Colombian Account E-Invoicing
 =============================
 
-NOTA PREVIA: El módulo product_manufacturer que es dependencia de este módulo, lo encontrará [aquí](https://github.com/OCA/product-attribute/tree/10.0/product_manufacturer)
+NOTA PREVIA: El módulo product_manufacturer que es dependencia de este módulo, lo encontrará `aquí
+<https://github.com/OCA/product-attribute/tree/10.0/product_manufacturer>`_.
 
 Configuacion:
 
