@@ -7,6 +7,7 @@ from os import path
 from uuid import uuid4
 from base64 import b64encode, b64decode
 from io import StringIO
+from io import BytesIO
 from datetime import datetime, timedelta
 from OpenSSL import crypto
 from lxml import etree
@@ -22,11 +23,15 @@ from odoo.exceptions import ValidationError
 
 def get_software_security_code(IdSoftware, Pin, NroDocumentos):
     uncoded_value = (IdSoftware + ' + ' + Pin + ' + ' + NroDocumentos)
-    software_security_code = hashlib.sha384(IdSoftware + Pin + NroDocumentos)
+    #rferrer:
+    # software_security_code = hashlib.sha384(IdSoftware + Pin + NroDocumentos)
+    software_security_code = hashlib.sha384(str(uncoded_value).encode('utf-8')).hexdigest()
 
     return {
         'SoftwareSecurityCodeUncoded': uncoded_value,
-        'SoftwareSecurityCode': software_security_code.hexdigest()}
+        #rferrer:
+        # 'SoftwareSecurityCode': software_security_code.hexdigest()}
+        'SoftwareSecurityCode': software_security_code}
 
 
 def get_cufe_cude(
@@ -58,14 +63,18 @@ def get_cufe_cude(
                      ValImp3 + ' + ' + ValTot + ' + ' + NitOFE + ' + ' +
                      NumAdq + ' + ' + (ClTec if ClTec else SoftwarePIN) +
                      ' + ' + TipoAmbie)
-    CUFE_CUDE = hashlib.sha384(
-        NumFac + FecFac + HorFac + ValFac + CodImp1 + ValImp1 + CodImp2 +
-        ValImp2 + CodImp3 + ValImp3 + ValTot + NitOFE + NumAdq +
-        (ClTec if ClTec else SoftwarePIN) + TipoAmbie)
+    #rfeere:
+    # CUFE_CUDE = hashlib.sha384(
+    #     NumFac + FecFac + HorFac + ValFac + CodImp1 + ValImp1 + CodImp2 +
+    #     ValImp2 + CodImp3 + ValImp3 + ValTot + NitOFE + NumAdq +
+    #     (ClTec if ClTec else SoftwarePIN) + TipoAmbie)
+    CUFE_CUDE = hashlib.sha384(str(uncoded_value).encode('utf-8')).hexdigest()
 
     return {
         'CUFE/CUDEUncoded': uncoded_value,
-        'CUFE/CUDE': CUFE_CUDE.hexdigest()}
+        #referrer:
+        # 'CUFE/CUDE': CUFE_CUDE.hexdigest()}
+        'CUFE/CUDE': CUFE_CUDE}
 
 
 # https://stackoverflow.com/questions/38432809/dynamic-xml-template-generation-using-get-template-jinja2
@@ -255,7 +264,8 @@ def get_qr_code(data):
     qr.add_data(data)
     qr.make(fit=True)
     img = qr.make_image()
-    temp = StringIO()
+    # temp = StringIO()
+    temp = BytesIO()
     img.save(temp, format="PNG")
     qr_img = b64encode(temp.getvalue())
 

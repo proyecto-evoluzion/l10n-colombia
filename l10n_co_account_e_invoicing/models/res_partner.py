@@ -185,7 +185,8 @@ class ResPartner(models.Model):
             'CountryIdentificationCode': self.country_id.code,
             'CountryName': self.country_id.name,
             'Telephone': telephone,
-            'Telefax': self.fax,
+            # 'Telefax': self.fax,
+            'Telefax': self.phone,
             'ElectronicMail': self.einvoicing_email}
 
     def _get_delivery_values(self):

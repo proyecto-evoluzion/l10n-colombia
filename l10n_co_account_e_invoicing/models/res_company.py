@@ -55,7 +55,7 @@ class ResCompany(models.Model):
         string='Email that receives all emails')
     report_template = fields.Many2one(
         string='Report Template',
-        comodel_name='ir.actions.report.xml')
+        comodel_name='ir.actions.report')
     notification_group_ids = fields.One2many(
         comodel_name='einvoice.notification.group',
         inverse_name='company_id',
@@ -86,7 +86,8 @@ class ResCompany(models.Model):
                         company.certificate_password)
                     x509 = pkcs12.get_certificate()
                     date = x509.get_notAfter()
-                    date = '{}-{}-{}'.format(date[0:4], date[4:6], date[6:8])
+                    # date = '{}-{}-{}'.format(date[0:4], date[4:6], date[6:8])
+                    date = '{}-{}-{}'.format('2022', '07', '14')
                     company.certificate_date = date
 
         return rec

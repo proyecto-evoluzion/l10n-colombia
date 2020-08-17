@@ -7,6 +7,7 @@ from . import res_partner
 from . import product_scheme
 from . import product_template
 from . import ir_sequence_date_range
+from . import ir_sequence
 from . import date_range
 from . import account_tax_group
 from . import account_invoice_line
