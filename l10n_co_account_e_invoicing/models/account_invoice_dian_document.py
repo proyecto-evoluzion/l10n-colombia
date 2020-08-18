@@ -455,18 +455,15 @@ class AccountInvoiceDianDocument(models.Model):
                 'DebitNote')
 
         try:
+            # with urlopen(self.company_id.signature_policy_url) as response:
+            #     html = response.read()
             response = urlopen(self.company_id.signature_policy_url, timeout=2)
-            print(response)
-            print(response.getcode())
-            xxx
+            
 
             if response.getcode() != 200:
                 return False
         except:
             return False
-
-        print(xml_without_signature)
-        aaa
 
         xml_with_signature = global_functions.get_xml_with_signature(
             xml_without_signature,
