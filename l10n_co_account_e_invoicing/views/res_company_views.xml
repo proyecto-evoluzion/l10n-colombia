@@ -43,7 +43,7 @@
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
                             <field name="certificate_password"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>
-                            <field name="certificate_date" readonly="1"/>
+                            <field name="certificate_date" readonly="0"/>
                             <field name="certificate_remaining_days"
                                 widget="char"
                                 attrs="{'required': [('einvoicing_enabled', '=', True)]}"/>

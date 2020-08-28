@@ -74,21 +74,21 @@ class ResCompany(models.Model):
         except:
             raise ValidationError(msg)
 
-    @api.multi
-    def write(self, vals):
-        rec = super(ResCompany, self).write(vals)
+    # @api.multi
+    # def write(self, vals):
+    #     rec = super(ResCompany, self).write(vals)
 
-        for company in self:
-            if company.einvoicing_enabled:
-                if not vals.get('certificate_date'):
-                    pkcs12 = global_functions.get_pkcs12(
-                        company.certificate_file,
-                        company.certificate_password)
-                    x509 = pkcs12.get_certificate()
-                    date = x509.get_notAfter()
-                    # date = '{}-{}-{}'.format(date[0:4], date[4:6], date[6:8])
-                    date = '{}-{}-{}'.format('2022', '07', '14')
-                    company.certificate_date = date
+    #     for company in self:
+    #         if company.einvoicing_enabled:
+    #             if not vals.get('certificate_date'):
+    #                 pkcs12 = global_functions.get_pkcs12(
+    #                     company.certificate_file,
+    #                     company.certificate_password)
+    #                 x509 = pkcs12.get_certificate()
+    #                 date = x509.get_notAfter()
+    #                 # date = '{}-{}-{}'.format(date[0:4], date[4:6], date[6:8])
+    #                 date = '{}-{}-{}'.format('2022', '07', '14')
+    #                 company.certificate_date = date
 
         return rec
 

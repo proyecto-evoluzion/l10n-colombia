@@ -455,7 +455,7 @@ class AccountInvoiceDianDocument(models.Model):
                 'DebitNote')
 
         try:
-            # with urlopen(self.company_id.signature_policy_url) as response:
+            # with urlopen('https://facturaelectronica.dian.gov.co/politicadefirma/v2/politicadefirmav2.pdf') as response:
             #     html = response.read()
             response = urlopen(self.company_id.signature_policy_url, timeout=2)
             

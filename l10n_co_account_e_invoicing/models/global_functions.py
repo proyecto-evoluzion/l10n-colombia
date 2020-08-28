@@ -172,7 +172,7 @@ def get_xml_with_signature(
         element.attrib['Id'] = signature_id + "-sigvalue"
 
     # https://www.decalage.info/en/python/lxml-c14n
-    output = StringIO()
+    output = BytesIO()
     root.getroottree().write_c14n(output)  # exclusive=1, with_comments=0
     root = output.getvalue()
 
