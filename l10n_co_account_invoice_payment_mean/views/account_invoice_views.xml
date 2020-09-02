@@ -8,10 +8,11 @@
                 <xpath expr="//field[@name='payment_term_id']" position="after">
                     <field name="payment_mean_id"
                         options="{'no_create': True}"
-                        attrs="{'required': [('date_invoice', '!=', False)]}"/>
+                        attrs="{'required': [('date_invoice', '!=', False)],'readonly': [('state', 'not in', ['draft','open'])]}"/>
                     <field name="payment_mean_code_id"
                         options="{'no_create': True}"
-                        required="1"/>
+                        required="1"
+                        attrs="{'readonly': [('state', 'not in', ['draft','open'])]}"/>
                 </xpath>
             </field>
         </record>
